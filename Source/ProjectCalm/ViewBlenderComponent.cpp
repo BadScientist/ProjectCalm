@@ -65,22 +65,27 @@ void UViewBlenderComponent::ResetViewOffset()
 	CharacterEyes->ClearAdditiveOffset();
 }
 
+void UViewBlenderComponent::SetScalarBlendParam(float Alpha)
+{
+	if (BlendParameters == nullptr) {return;}
+	BlendParameters->SetScalarParameterValue(BLEND_ALPHA_PARAM, Alpha);
+}
+
 void UViewBlenderComponent::StartBlend(float TargetAlpha, USceneCaptureComponent2D* SceneCaptureComponent)
 {
 	TargetSceneCaptureComponent = SceneCaptureComponent;
+	TargetSceneCaptureComponent->bCaptureEveryFrame = true;
 	StartBlend(TargetAlpha);
 }
 
 void UViewBlenderComponent::StartBlend(float TargetAlpha)
 {	
-	if (BlendParameters == nullptr) {return;}
-
 	TargetBlendAlpha = TargetAlpha;
 	BlendStartTime = GetWorld()->GetTimeSeconds();
 
 	if (!TargetAlpha)
 	{
-		BlendParameters->SetScalarParameterValue(BLEND_ALPHA_PARAM, 1.0f);
+		SetScalarBlendParam(1.0f);
 		ResetViewOffset();
 	}
 
@@ -89,23 +94,25 @@ void UViewBlenderComponent::StartBlend(float TargetAlpha)
 
 void UViewBlenderComponent::UpdateCurrentBlendAlpha()
 {
-	if (BlendParameters == nullptr) {return;}
-
 	float CurrentTime = GetWorld()->GetTimeSeconds();
 	float NewBlendAlpha = FMath::Clamp(FMath::Square(CurrentTime - BlendStartTime) / FMath::Square(ViewBlendTime), 0.0f, 1.0f);
 	
 	if (!TargetBlendAlpha) {NewBlendAlpha = 1 - NewBlendAlpha;}  // For blending OUT postprocess material
 	CurrentBlendAlpha = NewBlendAlpha;
 
-	BlendParameters->SetScalarParameterValue(BLEND_ALPHA_PARAM, CurrentBlendAlpha);
+	SetScalarBlendParam(CurrentBlendAlpha);
 }
 
 void UViewBlenderComponent::EndBlend()
 {
 	// AFTER blending postprocess material IN, move view to SceneCaptureComponent location
-	if (TargetBlendAlpha && TargetSceneCaptureComponent != nullptr) {SetViewOffset(TargetSceneCaptureComponent->GetComponentTransform());}
+	if (TargetBlendAlpha && TargetSceneCaptureComponent != nullptr)
+	{
+		SetViewOffset(TargetSceneCaptureComponent->GetComponentTransform());
+		TargetSceneCaptureComponent->bCaptureEveryFrame = false;
+	}
 
-	if (BlendParameters != nullptr) {BlendParameters->SetScalarParameterValue(BLEND_ALPHA_PARAM, 0.0f);}
+	SetScalarBlendParam(0.0f);
 	
 	bBlending = false;
 }

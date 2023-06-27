@@ -27,6 +27,7 @@ private:
 	UMaterialParameterCollection* BlendParametersAsset;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ViewBlender, meta = (AllowPrivateAccess = "true"))
 	float ViewBlendTime = 0.0f;
+
 	UMaterialParameterCollectionInstance* BlendParameters;
 	UCameraComponent* CharacterEyes;
 	USceneCaptureComponent2D* TargetSceneCaptureComponent;
@@ -45,6 +46,7 @@ private:
 
 	void SetViewOffset(FTransform NewTransform);
 	void ResetViewOffset();
+	void SetScalarBlendParam(float Alpha);
 	
 	void StartBlend(float TargetAlpha, USceneCaptureComponent2D* SceneCaptureComponent);
 	void StartBlend(float TargetAlpha);
