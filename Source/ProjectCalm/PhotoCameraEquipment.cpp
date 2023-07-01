@@ -5,14 +5,13 @@
 #include "CameraFlash.h"
 #include "CameraLens.h"
 #include "PlayerCharacter.h"
+#include "InfoFlagNameDefinitions.h"
 
 #include "Camera/CameraComponent.h"
 #include "InputActionValue.h"
 #include "Blueprint/UserWidget.h"
 #include "Kismet/GameplayStatics.h"
 
-#define FLAG_RAISED_START TEXT("StartRaised")
-#define FLAG_RAISED_END TEXT("EndRaised")
 
 // Sets default values
 APhotoCameraEquipment::APhotoCameraEquipment()
@@ -25,75 +24,87 @@ APhotoCameraEquipment::APhotoCameraEquipment()
     if (!ensure(CameraHUDBPClass.Class != nullptr)) {return;}
     CameraHUDClass = CameraHUDBPClass.Class;
 
-	EquipmentFlags.Add(FEquipmentFlag(FLAG_RAISED_START, false));
-	EquipmentFlags.Add(FEquipmentFlag(FLAG_RAISED_END, false));
-
 	PrimaryActionCooldown = 0.5f;
-}
-
-// Called when the game starts or when spawned
-void APhotoCameraEquipment::BeginPlay()
-{
-	Super::BeginPlay();
-	//
-}
-
-void APhotoCameraEquipment::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-	//
 }
 
 void APhotoCameraEquipment::Equip(AActor* OwningActor, FName SocketName)
 {
 	Super::Equip(OwningActor, SocketName);
-	SetPlayerHasCamera(true);
-}
 
-void APhotoCameraEquipment::SetPlayerHasCamera(bool bValue)
-{
-	if (APlayerCharacter* OwningCharacter = GetPlayerCharacter())
-	{
-		OwningCharacter->SetHasCamera(bValue);
-	}
+	SetPlayerFlag(FLAG_PLAYER_HAS_CAMERA, true);
 }
 
 void APhotoCameraEquipment::RaiseCamera()
 {
+	UE_LOG(LogTemp, Warning, TEXT("PhotoCamera: RaiseCamera"));
+
 	PauseTimers();
 
 	APlayerCharacter* OwningCharacter = GetPlayerCharacter();
 	if (OwningCharacter != nullptr && RaiseAnimation != nullptr)
 	{
-		float AnimationTimeRemaining = GetWorldTimerManager().GetTimerRemaining(AnimationTimerHandle);
-		if (AnimationTimeRemaining >= 0) {RaiseAnimation->BlendIn = AnimationTimeRemaining;}
-		else {RaiseAnimation->BlendIn = DefaultAnimationBlendTime;}
+		if (!GetPlayerFlag(FLAG_CAMERA_RAISE_ANIMATION_END))
+		{
+			float AnimationTimeRemaining = GetWorldTimerManager().GetTimerRemaining(AnimationTimerHandle);
+			if (AnimationTimeRemaining >= 0) {RaiseAnimation->BlendIn = AnimationTimeRemaining;}
+			else {RaiseAnimation->BlendIn = DefaultAnimationBlendTime;}
 
-		GetWorldTimerManager().SetTimer(AnimationTimerHandle, this, &APhotoCameraEquipment::ActivateRaisedCameraMode, OwningCharacter->PlayAnimMontage(RaiseAnimation, 1.0f));
-		SetFlag(FLAG_RAISED_START, true);
+			float CallbackTime = OwningCharacter->PlayAnimMontage(RaiseAnimation, 1.0f) - 0.25f;  // Early callback prevents animation blending issues
+			GetWorldTimerManager().SetTimer(AnimationTimerHandle, this, &APhotoCameraEquipment::EnterCameraView, CallbackTime);
+			SetPlayerFlag(FLAG_CAMERA_RAISE_ANIMATION_START, true);
+		}
+		else {EnterCameraView();}
 	}
+}
+
+void APhotoCameraEquipment::EnterCameraView()
+{
+	UE_LOG(LogTemp, Warning, TEXT("PhotoCamera: EnterCameraView"));
+	SetPlayerFlag(FLAG_CAMERA_RAISE_ANIMATION_END, true);
+	
+	float BlendTime = BlendViewToPhotoCamera();	
+	GetWorldTimerManager().SetTimer(BlendViewTimerHandle, this, &APhotoCameraEquipment::ActivateRaisedCameraMode, BlendTime);
+	
+	SetPlayerFlag(FLAG_CAMERA_BLENDING, true);
 }
 
 void APhotoCameraEquipment::ActivateRaisedCameraMode()
 {
-	DisplayCameraHUD();
+	UE_LOG(LogTemp, Warning, TEXT("PhotoCamera: ActivateRaisedCameraMode"));
+	SetPlayerFlag(FLAG_CAMERA_BLENDING, false);
 	
-	float BlendTime = BlendViewToPhotoCamera();	
-	GetWorldTimerManager().SetTimer(BlendViewTimerHandle, BlendTime, false);
+	DisplayCameraHUD(true);
 	
-	SetFlag(FLAG_RAISED_END, true);
-}
-
-void APhotoCameraEquipment::LowerCamera()
-{
-	PauseTimers();
-	
-	float BlendTime = BlendViewToPlayerCharacter();
-	GetWorldTimerManager().SetTimer(BlendViewTimerHandle, this, &APhotoCameraEquipment::DeactivateRaisedCameraMode, BlendTime);
+	SetPlayerFlag(FLAG_CAMERA_VIEW_ACTIVE, true);
 }
 
 void APhotoCameraEquipment::DeactivateRaisedCameraMode()
 {
+	UE_LOG(LogTemp, Warning, TEXT("PhotoCamera: DeactivateRaisedCameraMode"));
+	PauseTimers();
+	
+	DisplayCameraHUD(false);
+	
+	ExitCameraView();
+}
+
+void APhotoCameraEquipment::ExitCameraView()
+{
+	UE_LOG(LogTemp, Warning, TEXT("PhotoCamera: ExitCameraView"));
+	if (GetPlayerFlag(FLAG_CAMERA_VIEW_ACTIVE))
+	{
+		float BlendTime = BlendViewToPlayerCharacter();
+		GetWorldTimerManager().SetTimer(BlendViewTimerHandle, this, &APhotoCameraEquipment::LowerCamera, BlendTime);
+		SetPlayerFlag(FLAG_CAMERA_VIEW_ACTIVE, false);
+	}
+	else {LowerCamera();}
+}
+
+void APhotoCameraEquipment::LowerCamera()
+{
+	UE_LOG(LogTemp, Warning, TEXT("PhotoCamera: LowerCamera"));
+	if (!GetPlayerFlag(FLAG_CAMERA_RAISE_ANIMATION_START)) {return;}
+
 	APlayerCharacter* OwningCharacter = GetPlayerCharacter();
 	if (OwningCharacter != nullptr && LowerAnimation != nullptr)
 	{
@@ -101,12 +112,15 @@ void APhotoCameraEquipment::DeactivateRaisedCameraMode()
 		if (AnimationTimeRemaining >= 0) {LowerAnimation->BlendIn = AnimationTimeRemaining;}
 		else {LowerAnimation->BlendIn = DefaultAnimationBlendTime;}
 
-		GetWorldTimerManager().SetTimer(AnimationTimerHandle, OwningCharacter->PlayAnimMontage(LowerAnimation, 1.0f), false);
-		SetFlag(FLAG_RAISED_END, false);
+		GetWorldTimerManager().SetTimer(AnimationTimerHandle, this, &APhotoCameraEquipment::EnterDefaultState, OwningCharacter->PlayAnimMontage(LowerAnimation, 1.0f));
+		SetPlayerFlag(FLAG_CAMERA_RAISE_ANIMATION_END, false);
 	}
-	
-	if (CameraHUD != nullptr && CameraHUD->IsInViewport()) {CameraHUD->RemoveFromParent();}
-	SetFlag(FLAG_RAISED_START, false);
+}
+
+void APhotoCameraEquipment::EnterDefaultState()
+{
+	UE_LOG(LogTemp, Warning, TEXT("PhotoCamera: EnterDefaultState"));
+	SetPlayerFlag(FLAG_CAMERA_RAISE_ANIMATION_START, false);
 }
 
 bool APhotoCameraEquipment::IsAnimationRunning()
@@ -116,7 +130,7 @@ bool APhotoCameraEquipment::IsAnimationRunning()
 
 void APhotoCameraEquipment::PrimaryAction(const FInputActionValue& Value)
 {	
-	if (!GetFlagByName(FLAG_RAISED_END)) {return;}
+	if (!GetPlayerFlag(FLAG_CAMERA_VIEW_ACTIVE)) {return;}
 	if (Value.Get<bool>() && !bPrimaryActionOnCooldown)
 	{
 		SetPrimaryActionOnCooldown();
@@ -136,11 +150,13 @@ void APhotoCameraEquipment::SecondaryAction(const FInputActionValue& Value)
 
 	if (bValue)
 	{
+		UE_LOG(LogTemp, Error, TEXT("-----RMB DOWN-----"));
 		RaiseCamera();
 	}
 	else
 	{
-		LowerCamera();
+		UE_LOG(LogTemp, Error, TEXT("-----RMB UP-----"));
+		DeactivateRaisedCameraMode();
 	}
 }
 
@@ -153,8 +169,7 @@ float APhotoCameraEquipment::BlendViewToPhotoCamera()
 
 	if (APlayerCharacter* PlayerCharacter = GetPlayerCharacter())
 	{
-		PlayerCharacter->BlendViewToSceneCaptureComponent(LensCaptureComp);
-		return PlayerCharacter->GetViewBlenderBlendTime();
+		return PlayerCharacter->BlendViewToSceneCaptureComponent(LensCaptureComp);
 	}
 
 	return 0.0f;
@@ -164,8 +179,7 @@ float APhotoCameraEquipment::BlendViewToPlayerCharacter()
 {
 	if (APlayerCharacter* PlayerCharacter = GetPlayerCharacter())
 	{
-		PlayerCharacter->ResetCameraLocation();
-		return PlayerCharacter->GetViewBlenderBlendTime();
+		return PlayerCharacter->ResetCameraLocation();
 	}
 
 	return 0.0f;
@@ -177,9 +191,16 @@ void APhotoCameraEquipment::PauseTimers()
 	GetWorldTimerManager().PauseTimer(AnimationTimerHandle);
 }
 
-void APhotoCameraEquipment::DisplayCameraHUD()
+void APhotoCameraEquipment::DisplayCameraHUD(bool bDisplay)
 {
-	UGameInstance* GameInstance = GetGameInstance();
-	CameraHUD = CreateWidget<UUserWidget>(GameInstance, CameraHUDClass, TEXT("CameraHUD"));
-	if (CameraHUD != nullptr && !CameraHUD->IsInViewport()) {CameraHUD->AddToViewport();}
+	if (bDisplay)
+	{
+		UGameInstance* GameInstance = GetGameInstance();
+		CameraHUD = CreateWidget<UUserWidget>(GameInstance, CameraHUDClass, TEXT("CameraHUD"));
+		if (CameraHUD != nullptr && !CameraHUD->IsInViewport()) {CameraHUD->AddToViewport();}
+	}
+	else
+	{
+		if (CameraHUD != nullptr && CameraHUD->IsInViewport()) {CameraHUD->RemoveFromParent();}
+	}
 }

@@ -5,11 +5,13 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
+
 #include "PlayerCharacter.generated.h"
 
 class UCameraComponent;
 class USceneCaptureComponent2D;
 class UViewBlenderComponent;
+class UFlagManagerComponent;
 class UEnhancedInputLocalPlayerSubsystem;
 class UInputAction;
 class UInputMappingContext;
@@ -28,6 +30,8 @@ private:
 	UCameraComponent* FirstPersonCamera;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	UViewBlenderComponent* ViewBlenderComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Flags, meta = (AllowPrivateAccess = "true"))
+	UFlagManagerComponent* FlagManagerComponent;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputMappingContext* DefaultMappingContext;	
@@ -37,9 +41,6 @@ private:
 	UInputAction* MoveAction;	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* JumpAction;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Equipment, meta = (AllowPrivateAccess = "true"))
-	bool bHasCamera = false;
 
 	APlayerController* PlayerController;
 	UEnhancedInputLocalPlayerSubsystem* Subsystem;
@@ -63,15 +64,15 @@ protected:
 
 public:
 	UCameraComponent* GetCameraComponent() {return FirstPersonCamera;};
-	float GetViewBlenderBlendTime();
-	void BlendViewToSceneCaptureComponent(USceneCaptureComponent2D* SceneCaptureComponent);
-	void ResetCameraLocation();
+	float BlendViewToSceneCaptureComponent(USceneCaptureComponent2D* SceneCaptureComponent);
+	float ResetCameraLocation();
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	void SetHasCamera(bool bValue) {bHasCamera = bValue;};
 
 	UFUNCTION(BlueprintCallable)
-	bool GetEquippedItemFlag(FName FlagName);
+	bool GetInfoFlag(FName FlagName);
+	UFUNCTION(BlueprintCallable)
+	void SetInfoFlag(FName FlagName, bool Value);
 
 };

@@ -16,22 +16,7 @@ class UInputMappingContext;
 class IEquipmentInterface;
 class APlayerCharacter;
 struct FInputActionValue;
-
-USTRUCT()
-struct FEquipmentFlag
-{
-	GENERATED_BODY();
-
-	FEquipmentFlag(){};
-	FEquipmentFlag(FName NewFlagName, bool InitialValue)
-	{
-		FlagName = NewFlagName;
-		Value = InitialValue;
-	};
-
-	FName FlagName;
-	bool Value;
-};
+struct FInfoFlag;
 
 UCLASS()
 class PROJECTCALM_API AEquipment : public AActor, public IEquipmentInterface
@@ -52,17 +37,12 @@ public:
 	// Sets default values for this actor's properties
 	AEquipment();
 
-	virtual bool GetFlagByName(FName SearchName) override;
-	virtual void SetFlag(FName SearchName, bool Value) override;
 
 protected:
 	virtual void Equip(AActor* OwningActor, FName SocketName) override;
 	
 	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
 	UStaticMeshComponent* EquipmentMesh;
-	
-	UPROPERTY(EditAnywhere, Category = Equipment)
-	TArray<FEquipmentFlag> EquipmentFlags;
 
 	UPROPERTY(EditDefaultsOnly, Category = Input, meta = (ClampMin = "0.0", UIMin = "0.0"))
 	float PrimaryActionCooldown = 0.1f;
@@ -84,6 +64,8 @@ protected:
 	UEnhancedInputComponent* GetEnhancedInputComponent();
 	UEnhancedInputLocalPlayerSubsystem* GetEnhancedInputLocalPlayerSubsystem();
 	virtual void SetupPlayerControls();
+	bool GetPlayerFlag(FName FlagName);
+	void SetPlayerFlag(FName FlagName, bool Value);
 
 public:
 	virtual void PrimaryAction(const FInputActionValue& Value) {};

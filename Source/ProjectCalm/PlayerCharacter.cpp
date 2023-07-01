@@ -4,6 +4,7 @@
 #include "PlayerCharacter.h"
 #include "EquipmentInterface.h"
 #include "ViewBlenderComponent.h"
+#include "FlagManagerComponent.h"
 #include "PhotoCameraEquipment.h"
 #include "CameraFlash.h"
 #include "CameraLens.h"
@@ -24,17 +25,11 @@ APlayerCharacter::APlayerCharacter()
 
 	//Setup first person camera
 	FirstPersonCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FirstPersonCamera"));
-	if (FirstPersonCamera != nullptr)
-	{
-		FirstPersonCamera->SetupAttachment(GetCapsuleComponent());
-		FirstPersonCamera->SetRelativeLocation(FVector(-20.0f, 0.0f, 65.0f));
-		FirstPersonCamera->bUsePawnControlRotation = true;
-		
-		ViewBlenderComponent = CreateDefaultSubobject<UViewBlenderComponent>(TEXT("ViewBlenderComponent"));
-		if (ViewBlenderComponent != nullptr) {ViewBlenderComponent->SetCharacterEyes(FirstPersonCamera);}
-	}
-
-
+	if (FirstPersonCamera == nullptr) {return;}
+	
+	FirstPersonCamera->SetupAttachment(GetCapsuleComponent());
+	FirstPersonCamera->SetRelativeLocation(FVector(-20.0f, 0.0f, 65.0f));
+	FirstPersonCamera->bUsePawnControlRotation = true;
 	
 	// Setup player mesh
 	USkeletalMeshComponent* CharacterMesh = GetMesh();
@@ -46,8 +41,15 @@ APlayerCharacter::APlayerCharacter()
 		CharacterMesh->CastShadow = false;
 		CharacterMesh->SetRelativeRotation(FRotator(0.0f, 270.0f, 0.0f));
 		CharacterMesh->SetRelativeLocation(FVector(15.0f, 0.0f, -160.0f));
-	}	
+	}
+	
+	// Setup Actor Components
+	ViewBlenderComponent = CreateDefaultSubobject<UViewBlenderComponent>(TEXT("ViewBlenderComponent"));
+	if (ViewBlenderComponent != nullptr) {ViewBlenderComponent->SetCharacterEyes(FirstPersonCamera);}	
+	
+	FlagManagerComponent = CreateDefaultSubobject<UFlagManagerComponent>(TEXT("FlagManagerComponent"));
 
+	// Temporarily add camera with lens and flash to player on startup
 	// TODO: Add Menu System for adding equipment
     ConstructorHelpers::FClassFinder<APhotoCameraEquipment> CameraBPClass(TEXT("/Game/ProjectCalm/Blueprints/BP_PhotoCameraEquipment_Basic"));
     if (!ensure(CameraBPClass.Class != nullptr)) {return;}
@@ -78,6 +80,7 @@ void APlayerCharacter::BeginPlay()
 		}
 	}
 
+	// Temporarily add camera with lens and flash to player on startup
 	// TODO: Add Menu System for adding equipment
 	APhotoCameraEquipment* PhotoCamera = GetWorld()->SpawnActor<APhotoCameraEquipment>(PhotoCameraClass);
 	if (PhotoCamera != nullptr)
@@ -120,9 +123,18 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 }
 
-bool APlayerCharacter::GetEquippedItemFlag(FName FlagName)
+bool APlayerCharacter::GetInfoFlag(FName FlagName)
 {
-	return EquippedItem->GetFlagByName(FlagName);
+	if (FlagManagerComponent == nullptr) {return false;}
+	return FlagManagerComponent->GetFlagByName(FlagName);
+}
+
+void APlayerCharacter::SetInfoFlag(FName FlagName, bool Value)
+{	
+	if (FlagManagerComponent == nullptr) {return;}
+	FlagManagerComponent->SetFlag(FlagName, Value);
+	
+	UE_LOG(LogTemp, Display, TEXT("All Flags: %s"), *(FlagManagerComponent->GetAllFlagsString()));
 }
 
 void APlayerCharacter::Move(const FInputActionValue& Value)  // Automatically applied. Do not call in Tick.
@@ -143,19 +155,14 @@ void APlayerCharacter::Look(const FInputActionValue& Value)  // Automatically ap
 	AddControllerPitchInput(Direction.Y);
 }
 
-float APlayerCharacter::GetViewBlenderBlendTime()
+float APlayerCharacter::BlendViewToSceneCaptureComponent(USceneCaptureComponent2D *SceneCaptureComponent)
 {
 	if (ViewBlenderComponent == nullptr) {return 0.0f;}
-	return ViewBlenderComponent->GetViewBlendTime();
+	return ViewBlenderComponent->BlendToNewView(SceneCaptureComponent);
 }
 
-void APlayerCharacter::BlendViewToSceneCaptureComponent(USceneCaptureComponent2D *SceneCaptureComponent)
+float APlayerCharacter::ResetCameraLocation()
 {
-	ViewBlenderComponent->BlendToNewView(SceneCaptureComponent);
-}
-
-void APlayerCharacter::ResetCameraLocation()
-{
-	if (ViewBlenderComponent == nullptr) {return;}
-	ViewBlenderComponent->BlendToDefaultView();
+	if (ViewBlenderComponent == nullptr) {return 0.0f;}
+	return ViewBlenderComponent->BlendToDefaultView();
 }

@@ -19,6 +19,4 @@ class PROJECTCALM_API IEquipmentInterface
 
 public:
 	virtual void Equip(AActor* OwningActor, FName SocketName) = 0;
-	virtual bool GetFlagByName(FName FlagName) = 0;
-	virtual void SetFlag(FName FlagName, bool Value) = 0;
 };

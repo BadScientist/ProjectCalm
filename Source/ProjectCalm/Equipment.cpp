@@ -17,32 +17,6 @@ AEquipment::AEquipment()
 	RootComponent = EquipmentMesh;
 }
 
-bool AEquipment::GetFlagByName(FName SearchName)
-{
-	if (EquipmentFlags.IsEmpty()) {return false;}
-
-	for (FEquipmentFlag Flag : EquipmentFlags)
-	{
-		if (Flag.FlagName == SearchName) {return Flag.Value;}
-	}
-
-	return false;
-}
-
-void AEquipment::SetFlag(FName SearchName, bool NewValue)
-{
-	if (EquipmentFlags.IsEmpty()) {return;}
-
-	for (int32 i = 0; i < EquipmentFlags.Num(); i++)
-	{		
-		if (EquipmentFlags[i].FlagName == SearchName) 
-		{
-			EquipmentFlags[i].Value = NewValue;
-			return;
-		}
-	}
-}
-
 void AEquipment::Equip(AActor* OwningActor, FName SocketName)
 {
 	if (OwningActor == nullptr) {return;}
@@ -69,7 +43,20 @@ void AEquipment::Equip(AActor* OwningActor, FName SocketName)
 
 APlayerCharacter* AEquipment::GetPlayerCharacter()
 {
-	return Cast<APlayerCharacter>(GetOwner());
+	if (AActor* OwningActor = GetOwner())
+	{
+		if (APlayerCharacter* OwningCharacter = Cast<APlayerCharacter>(OwningActor))
+		{
+			return OwningCharacter;
+		}
+		else if (AEquipment* OwningEquipment = Cast<AEquipment>(OwningActor))
+		{
+			return OwningEquipment->GetPlayerCharacter();
+		}
+	}
+
+	UE_LOG(LogTemp, Error, TEXT("%s: NO OWNING CHARACTER"), *GetActorNameOrLabel());
+	return nullptr;
 }
 
 APlayerController* AEquipment::GetPlayerController()
@@ -130,5 +117,19 @@ void AEquipment::SetupPlayerControls()
 			EnhancedInputComponent->BindAction(EquipmentSecondaryAction, ETriggerEvent::Started, this, &AEquipment::SecondaryAction);
 			EnhancedInputComponent->BindAction(EquipmentSecondaryAction, ETriggerEvent::Completed, this, &AEquipment::SecondaryAction);
 		}
+	}
+}
+
+bool AEquipment::GetPlayerFlag(FName FlagName)
+{
+	if (APlayerCharacter* OwningCharacter = GetPlayerCharacter()) {return OwningCharacter->GetInfoFlag(FlagName);}
+    return false;
+}
+
+void AEquipment::SetPlayerFlag(FName FlagName, bool Value)
+{
+	if (APlayerCharacter* OwningCharacter = GetPlayerCharacter()) 
+	{
+		OwningCharacter->SetInfoFlag(FlagName, Value);
 	}
 }

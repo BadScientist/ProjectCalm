@@ -30,39 +30,79 @@ void UViewBlenderComponent::BeginPlay()
 void UViewBlenderComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	if (!bBlending) {return;}
 
-	UpdateCurrentBlendAlpha();
+	// if (GEngine)
+	// {
+	// 	GEngine->AddOnScreenDebugMessage(-1, 0.002, FColor::Red, FString::Printf(TEXT("%f"), GetScalarBlendParam()));
+	// }
+
+	SetEyePOV();
+
+	UpdateCurrentBlendAlpha(DeltaTime);
 
 	if (FMath::IsNearlyZero(TargetBlendAlpha - CurrentBlendAlpha)) {EndBlend();}
 
 }
 
-void UViewBlenderComponent::BlendToNewView(USceneCaptureComponent2D* SceneCaptureComponent)
+void UViewBlenderComponent::SetCharacterEyes(UCameraComponent *CameraComp)
 {
-	if (CharacterEyes != nullptr) {SceneCaptureComponent->FOVAngle = CharacterEyes->FieldOfView;}
-	StartBlend(1.0f, SceneCaptureComponent);
+	CharacterEyes = CameraComp;
+	DefaultEyesFOV = CameraComp->FieldOfView;
 }
 
-void UViewBlenderComponent::BlendToDefaultView()
+float UViewBlenderComponent::BlendToNewView(USceneCaptureComponent2D *SceneCaptureComponent)
 {
-	StartBlend(0.0f);
+	return StartBlend(1.0f, SceneCaptureComponent);
 }
 
-void UViewBlenderComponent::SetViewOffset(FTransform NewTransform)
+float UViewBlenderComponent::BlendToDefaultView()
 {
-	if (CharacterEyes == nullptr) {return;}
+	return StartBlend(0.0f);
+}
 
+void UViewBlenderComponent::SetEyePOV()
+{
+	// AFTER blending post process mat IN, set view to match SceneCaptureComponent
+	if (!bBlending && bDefaultView && TargetBlendAlpha) {SetViewToSceneCapture(TargetSceneCaptureComponent);}
+
+	// BEFORE blending post process mat OUT, reset view to default
+	if (bBlending && !bDefaultView && !TargetBlendAlpha) {ResetView();}
+}
+
+void UViewBlenderComponent::SetViewToSceneCapture(USceneCaptureComponent2D* SceneCaptureComponent)
+{
+	UE_LOG(LogTemp, Warning, TEXT("ViewBlender: Setting View to SceneCapture."));
+	if (CharacterEyes == nullptr || SceneCaptureComponent == nullptr) {return;}
+	
+	FTransform NewTransform = TargetSceneCaptureComponent->GetComponentTransform();
 	FTransform EyesTransform = CharacterEyes->GetComponentTransform();
-	FTransform TransformOffset = NewTransform.GetRelativeTransform(EyesTransform);
+	FTransform TransformOffset = NewTransform.GetRelativeTransform(EyesTransform);	
 	CharacterEyes->AddAdditiveOffset(TransformOffset, 0);
+
+	CharacterEyes->FieldOfView = SceneCaptureComponent->FOVAngle;
+	
+	TargetSceneCaptureComponent->bCaptureEveryFrame = false;
+	
+	bDefaultView = false;
 }
 
-void UViewBlenderComponent::ResetViewOffset()
+void UViewBlenderComponent::ResetView()
 {
+	UE_LOG(LogTemp, Warning, TEXT("ViewBlender: Resetting View."));
 	if (CharacterEyes == nullptr) {return;}
 
 	CharacterEyes->ClearAdditiveOffset();
+	CharacterEyes->FieldOfView = DefaultEyesFOV;
+	bDefaultView = true;
+}
+
+float UViewBlenderComponent::GetScalarBlendParam()
+{
+	if (BlendParameters == nullptr) {return 0.0f;}
+	float ParamValue;
+    BlendParameters->GetScalarParameterValue(BLEND_ALPHA_PARAM, ParamValue);
+
+	return ParamValue;
 }
 
 void UViewBlenderComponent::SetScalarBlendParam(float Alpha)
@@ -71,31 +111,35 @@ void UViewBlenderComponent::SetScalarBlendParam(float Alpha)
 	BlendParameters->SetScalarParameterValue(BLEND_ALPHA_PARAM, Alpha);
 }
 
-void UViewBlenderComponent::StartBlend(float TargetAlpha, USceneCaptureComponent2D* SceneCaptureComponent)
+float UViewBlenderComponent::StartBlend(float TargetAlpha, USceneCaptureComponent2D* SceneCaptureComponent)
 {
 	TargetSceneCaptureComponent = SceneCaptureComponent;
-	TargetSceneCaptureComponent->bCaptureEveryFrame = true;
-	StartBlend(TargetAlpha);
+	return StartBlend(TargetAlpha);
 }
 
-void UViewBlenderComponent::StartBlend(float TargetAlpha)
-{	
+float UViewBlenderComponent::StartBlend(float TargetAlpha)
+{
 	TargetBlendAlpha = TargetAlpha;
-	BlendStartTime = GetWorld()->GetTimeSeconds();
+	ViewBlendTime = DefaultBlendTime - ViewBlendTime;
 
-	if (!TargetAlpha)
+	if (TargetSceneCaptureComponent != nullptr)
 	{
-		SetScalarBlendParam(1.0f);
-		ResetViewOffset();
+		TargetSceneCaptureComponent->CaptureScene();
+		TargetSceneCaptureComponent->bCaptureEveryFrame = true;
 	}
 
+	if (!TargetAlpha) {SetScalarBlendParam(1.0f);}
 	bBlending = true;
+
+	return ViewBlendTime;
 }
 
-void UViewBlenderComponent::UpdateCurrentBlendAlpha()
+void UViewBlenderComponent::UpdateCurrentBlendAlpha(float DeltaTime)
 {
-	float CurrentTime = GetWorld()->GetTimeSeconds();
-	float NewBlendAlpha = FMath::Clamp(FMath::Square(CurrentTime - BlendStartTime) / FMath::Square(ViewBlendTime), 0.0f, 1.0f);
+	if (!bBlending) {return;}
+
+	ViewBlendTime -= DeltaTime;
+	float NewBlendAlpha = FMath::Clamp(FMath::Square(DefaultBlendTime - ViewBlendTime) / FMath::Square(DefaultBlendTime), 0.0f, 1.0f);
 	
 	if (!TargetBlendAlpha) {NewBlendAlpha = 1 - NewBlendAlpha;}  // For blending OUT postprocess material
 	CurrentBlendAlpha = NewBlendAlpha;
@@ -105,14 +149,9 @@ void UViewBlenderComponent::UpdateCurrentBlendAlpha()
 
 void UViewBlenderComponent::EndBlend()
 {
-	// AFTER blending postprocess material IN, move view to SceneCaptureComponent location
-	if (TargetBlendAlpha && TargetSceneCaptureComponent != nullptr)
-	{
-		SetViewOffset(TargetSceneCaptureComponent->GetComponentTransform());
-		TargetSceneCaptureComponent->bCaptureEveryFrame = false;
-	}
+	if (!bBlending) {return;}
 
-	SetScalarBlendParam(0.0f);
-	
+	ViewBlendTime = 0.0f;
+	SetScalarBlendParam(0.0f);	
 	bBlending = false;
 }

@@ -2,6 +2,7 @@
 
 
 #include "CameraLens.h"
+#include "InfoFlagNameDefinitions.h"
 
 #include "Camera/CameraComponent.h"
 #include "Components/SceneCaptureComponent2D.h"
@@ -23,14 +24,18 @@ void ACameraLens::BeginPlay()
     Super::BeginPlay();
     
     TargetFOV = MaxFOV;
+    SceneCaptureComponent->FOVAngle = TargetFOV;
 }
 
 void ACameraLens::Tick(float DeltaSeconds)
 {
-    if (UCameraComponent* CameraComponent = GetPlayerCamera())
+    // Only alter FOV when camera is fully raised
+    if (GetPlayerFlag(FLAG_CAMERA_VIEW_ACTIVE))
     {
-        CameraComponent->SetFieldOfView(TargetFOV);
+        if (UCameraComponent* CameraComponent = GetPlayerCamera()) {CameraComponent->SetFieldOfView(TargetFOV);}
+        SceneCaptureComponent->FOVAngle = TargetFOV;
     }
+    
 }
 
 void ACameraLens::SetupPlayerControls()
@@ -40,7 +45,7 @@ void ACameraLens::SetupPlayerControls()
 	if (LensZoomAction != nullptr)
 	{
 		if (UEnhancedInputComponent* EnhancedInputComponent = GetEnhancedInputComponent())
-		{		
+		{
 			EnhancedInputComponent->BindAction(LensZoomAction, ETriggerEvent::Triggered, this, &ACameraLens::ZoomAction);
 		}
 	}
@@ -48,6 +53,9 @@ void ACameraLens::SetupPlayerControls()
 
 void ACameraLens::ZoomAction(const FInputActionValue& Value)
 {
-    TargetFOV += Value.Get<float>() * GetWorld()->GetDeltaSeconds() * ZoomRate;
+    // Only alter FOV when camera is fully raised
+    if (!GetPlayerFlag(FLAG_CAMERA_VIEW_ACTIVE)) {return;}
+
+    TargetFOV -= Value.Get<float>() * GetWorld()->GetDeltaSeconds() * ZoomRate;
     TargetFOV = FMath::Clamp(TargetFOV, MinFOV, MaxFOV);
 }

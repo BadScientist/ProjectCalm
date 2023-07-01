@@ -6,7 +6,6 @@
 #include "GameFramework/Actor.h"
 
 #include "Equipment.h"
-#include "AttachPoint.h"
 #include "PhotoCameraEquipment.generated.h"
 
 class UInputMappingContext;
@@ -40,17 +39,16 @@ public:
 protected:
 	ACameraFlash* AttachedCameraFlash = nullptr;
 	ACameraLens* AttachedCameraLens = nullptr;
-
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-	virtual void Tick(float DeltaTime) override;
+	
 	virtual void Equip(AActor* OwningActor, FName SocketName) override;
-	void SetPlayerHasCamera(bool bValue);
 
 	void RaiseCamera();
+	void EnterCameraView();
 	void ActivateRaisedCameraMode();
-	void LowerCamera();
 	void DeactivateRaisedCameraMode();
+	void ExitCameraView();
+	void LowerCamera();
+	void EnterDefaultState();
 
 	bool IsAnimationRunning();
 
@@ -64,6 +62,6 @@ private:
 	float BlendViewToPhotoCamera();
 	float BlendViewToPlayerCharacter();
 	void PauseTimers();
-	void DisplayCameraHUD();
+	void DisplayCameraHUD(bool bDisplay);
 
 };
