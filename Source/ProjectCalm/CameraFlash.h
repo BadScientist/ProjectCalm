@@ -35,8 +35,7 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-	void PlayCameraFlash();
-	float GetFlashDuration() {return FlashDuration;};
+	float PlayCameraFlash();
 
 private:
 	void DeactivateFlash();

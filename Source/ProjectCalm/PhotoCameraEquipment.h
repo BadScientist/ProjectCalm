@@ -8,6 +8,8 @@
 #include "Equipment.h"
 #include "PhotoCameraEquipment.generated.h"
 
+class UImage;
+class UTextureRenderTarget2D;
 class UInputMappingContext;
 class UEnhancedInputLocalPlayerSubsystem;
 class ACameraFlash;
@@ -19,18 +21,24 @@ class PROJECTCALM_API APhotoCameraEquipment : public AEquipment
 {
 	GENERATED_BODY()
 
-private:
-	TSubclassOf<class UUserWidget> CameraHUDClass;
-	UUserWidget* CameraHUD;
-	
+private:	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Animation, meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* RaiseAnimation;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Animation, meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* LowerAnimation;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = PhotoCamera, meta = (AllowPrivateAccess = "true"))
+	TArray<UTextureRenderTarget2D*> Photos;
+
+	TSubclassOf<class UUserWidget> CameraHUDClass;
+	UUserWidget* CameraHUD;
+	UImage* LastPhotoImage;
 
 	float DefaultAnimationBlendTime = 0.0f;
 	FTimerHandle AnimationTimerHandle;	
 	FTimerHandle BlendViewTimerHandle;
+	FTimerHandle PhotoDelayTimerHandle;
+	
+	int32 MaxPhotos = 12;
 	
 public:	
 	// Sets default values for this actor's properties
@@ -50,6 +58,9 @@ protected:
 	void LowerCamera();
 	void EnterDefaultState();
 
+	float ActivateCameraFlash();
+	void TakePhoto();
+
 	bool IsAnimationRunning();
 
 public:
@@ -58,10 +69,14 @@ public:
 	void SetAttachedCameraFlash(ACameraFlash* CameraFlash) {AttachedCameraFlash = CameraFlash;};
 	void SetAttachedCameraLens(ACameraLens* CameraLens) {AttachedCameraLens = CameraLens;};
 
+	UFUNCTION(BlueprintCallable)
+	UTextureRenderTarget2D* GetLastPhoto();
+
 private:
 	float BlendViewToPhotoCamera();
 	float BlendViewToPlayerCharacter();
 	void PauseTimers();
 	void DisplayCameraHUD(bool bDisplay);
+	void DisplayLastPhoto();
 
 };

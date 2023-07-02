@@ -7,6 +7,8 @@
 #include "Camera/CameraComponent.h"
 #include "Components/SceneCaptureComponent2D.h"
 #include "Materials/MaterialParameterCollectionInstance.h"
+#include "Engine/TextureRenderTarget2D.h"
+#include "GameFramework/GameUserSettings.h"
 
 #define BLEND_ALPHA_PARAM TEXT("BlendAlpha")
 
@@ -30,11 +32,6 @@ void UViewBlenderComponent::BeginPlay()
 void UViewBlenderComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	// if (GEngine)
-	// {
-	// 	GEngine->AddOnScreenDebugMessage(-1, 0.002, FColor::Red, FString::Printf(TEXT("%f"), GetScalarBlendParam()));
-	// }
 
 	SetEyePOV();
 
@@ -72,16 +69,23 @@ void UViewBlenderComponent::SetEyePOV()
 void UViewBlenderComponent::SetViewToSceneCapture(USceneCaptureComponent2D* SceneCaptureComponent)
 {
 	UE_LOG(LogTemp, Warning, TEXT("ViewBlender: Setting View to SceneCapture."));
-	if (CharacterEyes == nullptr || SceneCaptureComponent == nullptr) {return;}
+	if (CharacterEyes == nullptr) 
+	{
+		UE_LOG(LogTemp, Error, TEXT("ViewBlender: NO CHARACTER EYE CAMERA"));
+		return;
+	}
+	if (SceneCaptureComponent == nullptr)
+	{
+		UE_LOG(LogTemp, Error, TEXT("ViewBlender: NO SCENECAPTURECOMPONENT"));
+		return;
+	}
 	
-	FTransform NewTransform = TargetSceneCaptureComponent->GetComponentTransform();
+	FTransform NewTransform = SceneCaptureComponent->GetComponentTransform();
 	FTransform EyesTransform = CharacterEyes->GetComponentTransform();
 	FTransform TransformOffset = NewTransform.GetRelativeTransform(EyesTransform);	
 	CharacterEyes->AddAdditiveOffset(TransformOffset, 0);
 
 	CharacterEyes->FieldOfView = SceneCaptureComponent->FOVAngle;
-	
-	TargetSceneCaptureComponent->bCaptureEveryFrame = false;
 	
 	bDefaultView = false;
 }
@@ -114,6 +118,14 @@ void UViewBlenderComponent::SetScalarBlendParam(float Alpha)
 float UViewBlenderComponent::StartBlend(float TargetAlpha, USceneCaptureComponent2D* SceneCaptureComponent)
 {
 	TargetSceneCaptureComponent = SceneCaptureComponent;
+
+	if (TargetSceneCaptureComponent != nullptr && GEngine != nullptr)
+	{
+		FIntPoint ScreenResolution = GEngine->GetGameUserSettings()->GetScreenResolution();
+		TargetSceneCaptureComponent->TextureTarget->InitAutoFormat(FMath::Min(ScreenResolution.X, 1280), FMath::Min(ScreenResolution.Y, 720));
+		TargetSceneCaptureComponent->TextureTarget->UpdateResourceImmediate();
+	}
+
 	return StartBlend(TargetAlpha);
 }
 
@@ -150,6 +162,13 @@ void UViewBlenderComponent::UpdateCurrentBlendAlpha(float DeltaTime)
 void UViewBlenderComponent::EndBlend()
 {
 	if (!bBlending) {return;}
+
+	if (TargetSceneCaptureComponent != nullptr && GEngine != nullptr)
+	{	
+		TargetSceneCaptureComponent->bCaptureEveryFrame = false;
+		FIntPoint ScreenResolution = GEngine->GetGameUserSettings()->GetScreenResolution();
+		TargetSceneCaptureComponent->TextureTarget->InitAutoFormat(ScreenResolution.X, ScreenResolution.Y);
+	}
 
 	ViewBlendTime = 0.0f;
 	SetScalarBlendParam(0.0f);	

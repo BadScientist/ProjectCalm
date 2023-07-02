@@ -20,12 +20,14 @@ void ACameraFlash::BeginPlay()
     if (SpotLight != nullptr) {SpotLight->SetVisibility(false);}
 }
 
-void ACameraFlash::PlayCameraFlash()
+float ACameraFlash::PlayCameraFlash()
 {
-    if (SpotLight == nullptr) {return;}
+    if (SpotLight == nullptr) {return 0.0f;}
 
     SpotLight->SetVisibility(true);
     GetWorldTimerManager().SetTimer(FlashTimerHandle, this, &ACameraFlash::DeactivateFlash, FlashDuration);
+
+    return FlashDuration;
 }
 
 void ACameraFlash::DeactivateFlash()

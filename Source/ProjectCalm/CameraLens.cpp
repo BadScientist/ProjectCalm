@@ -7,6 +7,9 @@
 #include "Camera/CameraComponent.h"
 #include "Components/SceneCaptureComponent2D.h"
 #include "EnhancedInputComponent.h"
+#include "GameFramework/GameUserSettings.h"
+#include "Engine/TextureRenderTarget2D.h"
+#include "Kismet/KismetRenderingLibrary.h"
 
 
 ACameraLens::ACameraLens()
@@ -24,7 +27,18 @@ void ACameraLens::BeginPlay()
     Super::BeginPlay();
     
     TargetFOV = MaxFOV;
+
+    if (SceneCaptureComponent == nullptr) {return;}
     SceneCaptureComponent->FOVAngle = TargetFOV;
+
+    // Set TextureTarget size based on Screen Resolution    
+    FIntPoint ScreenResolution = FIntPoint(1280, 720);
+    if (GEngine) {ScreenResolution = GEngine->GetGameUserSettings()->GetScreenResolution();}    
+    if (SceneCaptureComponent->TextureTarget != nullptr)
+    {
+        SceneCaptureComponent->TextureTarget->InitAutoFormat(ScreenResolution.X, ScreenResolution.Y);
+        SceneCaptureComponent->TextureTarget->UpdateResourceImmediate();
+    }
 }
 
 void ACameraLens::Tick(float DeltaSeconds)
@@ -36,6 +50,21 @@ void ACameraLens::Tick(float DeltaSeconds)
         SceneCaptureComponent->FOVAngle = TargetFOV;
     }
     
+}
+
+UTextureRenderTarget2D* ACameraLens::CopyRenderTarget(UTextureRenderTarget2D *InRenderTarget)
+{
+    UTextureRenderTarget2D* Result = UKismetRenderingLibrary::CreateRenderTarget2D(
+        this,
+        InRenderTarget->SizeX,
+        InRenderTarget->SizeY,
+        InRenderTarget->RenderTargetFormat,
+        InRenderTarget->ClearColor,
+        InRenderTarget->bAutoGenerateMips);
+    Result->TargetGamma = InRenderTarget->TargetGamma;
+    Result->NeverStream = InRenderTarget->NeverStream;
+
+    return Result;
 }
 
 void ACameraLens::SetupPlayerControls()
@@ -58,4 +87,17 @@ void ACameraLens::ZoomAction(const FInputActionValue& Value)
 
     TargetFOV -= Value.Get<float>() * GetWorld()->GetDeltaSeconds() * ZoomRate;
     TargetFOV = FMath::Clamp(TargetFOV, MinFOV, MaxFOV);
+}
+
+UTextureRenderTarget2D* ACameraLens::CapturePhoto()
+{
+    if (SceneCaptureComponent == nullptr || SceneCaptureComponent->TextureTarget == nullptr) {return nullptr;}
+    UTextureRenderTarget2D* DefaultRenderTarget = SceneCaptureComponent->TextureTarget;
+    UTextureRenderTarget2D* TempRenderTarget = CopyRenderTarget(DefaultRenderTarget);
+
+    SceneCaptureComponent->TextureTarget = TempRenderTarget;
+    SceneCaptureComponent->CaptureScene();
+    SceneCaptureComponent->TextureTarget = DefaultRenderTarget;
+
+    return TempRenderTarget;
 }

@@ -7,6 +7,9 @@
 #include "PlayerCharacter.h"
 #include "InfoFlagNameDefinitions.h"
 
+#include "Components/Image.h"
+#include "Engine/TextureRenderTarget2D.h"
+#include "Blueprint/WidgetTree.h"
 #include "Camera/CameraComponent.h"
 #include "InputActionValue.h"
 #include "Blueprint/UserWidget.h"
@@ -36,7 +39,6 @@ void APhotoCameraEquipment::Equip(AActor* OwningActor, FName SocketName)
 
 void APhotoCameraEquipment::RaiseCamera()
 {
-	UE_LOG(LogTemp, Warning, TEXT("PhotoCamera: RaiseCamera"));
 
 	PauseTimers();
 
@@ -59,7 +61,6 @@ void APhotoCameraEquipment::RaiseCamera()
 
 void APhotoCameraEquipment::EnterCameraView()
 {
-	UE_LOG(LogTemp, Warning, TEXT("PhotoCamera: EnterCameraView"));
 	SetPlayerFlag(FLAG_CAMERA_RAISE_ANIMATION_END, true);
 	
 	float BlendTime = BlendViewToPhotoCamera();	
@@ -70,7 +71,6 @@ void APhotoCameraEquipment::EnterCameraView()
 
 void APhotoCameraEquipment::ActivateRaisedCameraMode()
 {
-	UE_LOG(LogTemp, Warning, TEXT("PhotoCamera: ActivateRaisedCameraMode"));
 	SetPlayerFlag(FLAG_CAMERA_BLENDING, false);
 	
 	DisplayCameraHUD(true);
@@ -80,7 +80,6 @@ void APhotoCameraEquipment::ActivateRaisedCameraMode()
 
 void APhotoCameraEquipment::DeactivateRaisedCameraMode()
 {
-	UE_LOG(LogTemp, Warning, TEXT("PhotoCamera: DeactivateRaisedCameraMode"));
 	PauseTimers();
 	
 	DisplayCameraHUD(false);
@@ -90,7 +89,6 @@ void APhotoCameraEquipment::DeactivateRaisedCameraMode()
 
 void APhotoCameraEquipment::ExitCameraView()
 {
-	UE_LOG(LogTemp, Warning, TEXT("PhotoCamera: ExitCameraView"));
 	if (GetPlayerFlag(FLAG_CAMERA_VIEW_ACTIVE))
 	{
 		float BlendTime = BlendViewToPlayerCharacter();
@@ -123,6 +121,24 @@ void APhotoCameraEquipment::EnterDefaultState()
 	SetPlayerFlag(FLAG_CAMERA_RAISE_ANIMATION_START, false);
 }
 
+float APhotoCameraEquipment::ActivateCameraFlash()
+{
+    if (AttachedCameraFlash != nullptr) {return AttachedCameraFlash->PlayCameraFlash();}
+
+	return 0.0f;
+}
+
+void APhotoCameraEquipment::TakePhoto()
+{
+	if (AttachedCameraLens == nullptr) {return;}
+	if (Photos.Num() >= MaxPhotos) {return;}  // TODO: Notify player
+	
+	UTextureRenderTarget2D* Photo = AttachedCameraLens->CapturePhoto();
+	if (Photo != nullptr) {Photos.Add(Photo);}
+
+	DisplayLastPhoto();
+}
+
 bool APhotoCameraEquipment::IsAnimationRunning()
 {
 	return GetWorldTimerManager().GetTimerRemaining(AnimationTimerHandle) > 0;
@@ -134,13 +150,11 @@ void APhotoCameraEquipment::PrimaryAction(const FInputActionValue& Value)
 	if (Value.Get<bool>() && !bPrimaryActionOnCooldown)
 	{
 		SetPrimaryActionOnCooldown();
-		GEngine->AddOnScreenDebugMessage(0, 1, FColor::Green, "SNAP");
-		if (AttachedCameraFlash != nullptr)
-		{
-			float WaitTime = AttachedCameraFlash->GetFlashDuration() + PrimaryActionCooldown;
-    		GetWorldTimerManager().SetTimer(PrimaryActionCooldownTimerHandle, this, &APhotoCameraEquipment::ClearPrimaryActionOnCooldown, WaitTime);
-			AttachedCameraFlash->PlayCameraFlash();
-		}
+		
+		float FlashDuration = ActivateCameraFlash();
+
+		GetWorldTimerManager().SetTimer(PhotoDelayTimerHandle, this, &APhotoCameraEquipment::TakePhoto, FlashDuration/2);
+		GetWorldTimerManager().SetTimer(PrimaryActionCooldownTimerHandle, this, &APhotoCameraEquipment::ClearPrimaryActionOnCooldown, FlashDuration + PrimaryActionCooldown);
 	}
 }
 
@@ -158,6 +172,12 @@ void APhotoCameraEquipment::SecondaryAction(const FInputActionValue& Value)
 		UE_LOG(LogTemp, Error, TEXT("-----RMB UP-----"));
 		DeactivateRaisedCameraMode();
 	}
+}
+
+UTextureRenderTarget2D *APhotoCameraEquipment::GetLastPhoto()
+{
+	if (Photos.IsEmpty()) {return nullptr;}
+	return Photos[Photos.Num() - 1];
 }
 
 float APhotoCameraEquipment::BlendViewToPhotoCamera()
@@ -197,10 +217,29 @@ void APhotoCameraEquipment::DisplayCameraHUD(bool bDisplay)
 	{
 		UGameInstance* GameInstance = GetGameInstance();
 		CameraHUD = CreateWidget<UUserWidget>(GameInstance, CameraHUDClass, TEXT("CameraHUD"));
-		if (CameraHUD != nullptr && !CameraHUD->IsInViewport()) {CameraHUD->AddToViewport();}
+		if (CameraHUD != nullptr && !CameraHUD->IsInViewport())
+		{
+			CameraHUD->AddToViewport();
+			LastPhotoImage = CameraHUD->WidgetTree->FindWidget<UImage>(TEXT("LastPhotoImage"));
+			DisplayLastPhoto();
+		}
 	}
 	else
 	{
 		if (CameraHUD != nullptr && CameraHUD->IsInViewport()) {CameraHUD->RemoveFromParent();}
 	}
+}
+
+void APhotoCameraEquipment::DisplayLastPhoto()
+{
+	UTextureRenderTarget2D* Photo = GetLastPhoto();
+
+	if (LastPhotoImage == nullptr) {return;}
+	UMaterialInstanceDynamic* PhotoRenderMat = LastPhotoImage->GetDynamicMaterial();
+
+	if (PhotoRenderMat == nullptr || Photo == nullptr) {return;}	
+	PhotoRenderMat->SetTextureParameterValue(TEXT("PhotoRender"), Photo);
+
+	LastPhotoImage->SetDesiredSizeOverride(FVector2D(Photo->SizeX/10, Photo->SizeY/10));
+	LastPhotoImage->SetVisibility(ESlateVisibility::Visible);
 }

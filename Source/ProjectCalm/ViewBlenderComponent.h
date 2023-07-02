@@ -9,6 +9,7 @@
 class APlayerCharacter;
 class UCameraComponent;
 class USceneCaptureComponent2D;
+class UTextureRenderTarget2D;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PROJECTCALM_API UViewBlenderComponent : public UActorComponent

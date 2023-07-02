@@ -18,8 +18,10 @@ class PROJECTCALM_API ACameraLens : public AEquipment
 	GENERATED_BODY()
 
 private:
-	UPROPERTY(Category = Camera, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = CameraLens, meta = (AllowPrivateAccess = "true"))
 	USceneCaptureComponent2D* SceneCaptureComponent;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = CameraLens, meta = (AllowPrivateAccess = "true"))
+	TObjectPtr <UTextureRenderTarget2D> TextureTargetAsset;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* LensZoomAction;
 
@@ -32,13 +34,14 @@ protected:
 
 private:	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = CameraLens, meta = (AllowPrivateAccess = "true"))
-	float ZoomRate = 5;  // FOV degrees/sec
+	float ZoomRate = 25;  // FOV degrees/sec
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = CameraLens, meta = (AllowPrivateAccess = "true"))
 	float MaxFOV = 75;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = CameraLens, meta = (AllowPrivateAccess = "true"))
 	float MinFOV = 60;
-
 	float TargetFOV;
+
+	UTextureRenderTarget2D* CopyRenderTarget(UTextureRenderTarget2D* InRenderTarget);
 	
 protected:
 	virtual void SetupPlayerControls() override;
@@ -47,4 +50,5 @@ public:
 	void ZoomAction(const FInputActionValue& Value);
 	float GetTargetFOV() {return TargetFOV;};
 	USceneCaptureComponent2D* GetSceneCaptureComponent() {return SceneCaptureComponent;}
+	UTextureRenderTarget2D* CapturePhoto();
 };
