@@ -71,8 +71,8 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	UFUNCTION(BlueprintCallable)
-	bool GetInfoFlag(FName FlagName);
+	bool GetFlag(FName FlagName);
 	UFUNCTION(BlueprintCallable)
-	void SetInfoFlag(FName FlagName, bool Value);
+	void SetFlag(FName FlagName, bool Value);
 
 };

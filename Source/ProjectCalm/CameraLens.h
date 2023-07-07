@@ -8,6 +8,9 @@
 
 class UInputAction;
 class USceneCaptureComponent2D;
+class UPhotoDataCollectorComponent;
+struct FConvexVolume;
+struct FPhotoData;
 
 /**
  * 
@@ -25,11 +28,14 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* LensZoomAction;
 
+	UPhotoDataCollectorComponent* PhotoDataCollector;
+	UCameraComponent* PlayerCameraComponent;
+
 public:
 	ACameraLens();
 
 protected:
-	virtual void BeginPlay() override;
+	virtual void Equip(AActor* OwningActor, FName SocketName) override;
 	virtual void Tick(float DeltaSeconds) override;
 
 private:	
@@ -43,6 +49,11 @@ private:
 
 	UTextureRenderTarget2D* CopyRenderTarget(UTextureRenderTarget2D* InRenderTarget);
 	
+	ULocalPlayer* GetLocalPlayer();
+	TObjectPtr<UGameViewportClient> GetViewportClient(ULocalPlayer* LocalPlayer);
+	FViewport* GetViewport(TObjectPtr<UGameViewportClient> ViewportClient);
+	FConvexVolume GetViewFrustum();
+	
 protected:
 	virtual void SetupPlayerControls() override;
 
@@ -50,5 +61,5 @@ public:
 	void ZoomAction(const FInputActionValue& Value);
 	float GetTargetFOV() {return TargetFOV;};
 	USceneCaptureComponent2D* GetSceneCaptureComponent() {return SceneCaptureComponent;}
-	UTextureRenderTarget2D* CapturePhoto();
+	FPhotoData CapturePhoto();
 };

@@ -39,7 +39,7 @@ protected:
 	TArray<FInfoFlag> InfoFlags;
 
 public:
-	bool GetFlagByName(FName SearchName);
+	bool GetFlag(FName SearchName);
 	void SetFlag(FName SearchName, bool Value);
 
 	FString GetAllFlagsString();

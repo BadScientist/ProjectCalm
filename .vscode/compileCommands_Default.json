@@ -80,6 +80,14 @@
 		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
 	},
 	{
+		"file": "C:\\Users\\Valued Customer\\repos\\unreal\\ProjectCalm\\Source\\ProjectCalm\\InfoFlagNameDefinitions.h",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\HostX64\\x64\\cl.exe",
+			"@C:\\Users\\Valued Customer\\repos\\unreal\\ProjectCalm\\.vscode\\compileCommands_Default\\ProjectCalm.256.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
 		"file": "C:\\Users\\Valued Customer\\repos\\unreal\\ProjectCalm\\Source\\ProjectCalm\\PhotoCameraComponent.cpp",
 		"arguments": [
 			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\HostX64\\x64\\cl.exe",
@@ -105,6 +113,62 @@
 	},
 	{
 		"file": "C:\\Users\\Valued Customer\\repos\\unreal\\ProjectCalm\\Source\\ProjectCalm\\PhotoCameraEquipment.h",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\HostX64\\x64\\cl.exe",
+			"@C:\\Users\\Valued Customer\\repos\\unreal\\ProjectCalm\\.vscode\\compileCommands_Default\\ProjectCalm.256.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\Valued Customer\\repos\\unreal\\ProjectCalm\\Source\\ProjectCalm\\PhotoData.h",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\HostX64\\x64\\cl.exe",
+			"@C:\\Users\\Valued Customer\\repos\\unreal\\ProjectCalm\\.vscode\\compileCommands_Default\\ProjectCalm.256.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\Valued Customer\\repos\\unreal\\ProjectCalm\\Source\\ProjectCalm\\PhotoDataCollectorComponent.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\HostX64\\x64\\cl.exe",
+			"@C:\\Users\\Valued Customer\\repos\\unreal\\ProjectCalm\\.vscode\\compileCommands_Default\\ProjectCalm.256.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\Valued Customer\\repos\\unreal\\ProjectCalm\\Source\\ProjectCalm\\PhotoDataCollectorComponent.h",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\HostX64\\x64\\cl.exe",
+			"@C:\\Users\\Valued Customer\\repos\\unreal\\ProjectCalm\\.vscode\\compileCommands_Default\\ProjectCalm.256.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\Valued Customer\\repos\\unreal\\ProjectCalm\\Source\\ProjectCalm\\PhotoSubjectComponent.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\HostX64\\x64\\cl.exe",
+			"@C:\\Users\\Valued Customer\\repos\\unreal\\ProjectCalm\\.vscode\\compileCommands_Default\\ProjectCalm.256.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\Valued Customer\\repos\\unreal\\ProjectCalm\\Source\\ProjectCalm\\PhotoSubjectComponent.h",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\HostX64\\x64\\cl.exe",
+			"@C:\\Users\\Valued Customer\\repos\\unreal\\ProjectCalm\\.vscode\\compileCommands_Default\\ProjectCalm.256.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\Valued Customer\\repos\\unreal\\ProjectCalm\\Source\\ProjectCalm\\PhotoSubjectData.h",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\HostX64\\x64\\cl.exe",
+			"@C:\\Users\\Valued Customer\\repos\\unreal\\ProjectCalm\\.vscode\\compileCommands_Default\\ProjectCalm.256.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\Valued Customer\\repos\\unreal\\ProjectCalm\\Source\\ProjectCalm\\PhotoSubjectPointOfInterest.h",
 		"arguments": [
 			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\HostX64\\x64\\cl.exe",
 			"@C:\\Users\\Valued Customer\\repos\\unreal\\ProjectCalm\\.vscode\\compileCommands_Default\\ProjectCalm.256.rsp"
@@ -241,6 +305,14 @@
 	},
 	{
 		"file": "C:\\Users\\Valued Customer\\repos\\unreal\\ProjectCalm\\Source\\ProjectCalm\\ViewBlenderComponent.h",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\HostX64\\x64\\cl.exe",
+			"@C:\\Users\\Valued Customer\\repos\\unreal\\ProjectCalm\\.vscode\\compileCommands_Default\\ProjectCalm.256.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\Valued Customer\\repos\\unreal\\ProjectCalm\\Source\\ProjectCalm\\WidgetVector.h",
 		"arguments": [
 			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\HostX64\\x64\\cl.exe",
 			"@C:\\Users\\Valued Customer\\repos\\unreal\\ProjectCalm\\.vscode\\compileCommands_Default\\ProjectCalm.256.rsp"

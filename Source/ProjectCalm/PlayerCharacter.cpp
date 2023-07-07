@@ -123,13 +123,13 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 }
 
-bool APlayerCharacter::GetInfoFlag(FName FlagName)
+bool APlayerCharacter::GetFlag(FName FlagName)
 {
 	if (FlagManagerComponent == nullptr) {return false;}
-	return FlagManagerComponent->GetFlagByName(FlagName);
+	return FlagManagerComponent->GetFlag(FlagName);
 }
 
-void APlayerCharacter::SetInfoFlag(FName FlagName, bool Value)
+void APlayerCharacter::SetFlag(FName FlagName, bool Value)
 {	
 	if (FlagManagerComponent == nullptr) {return;}
 	FlagManagerComponent->SetFlag(FlagName, Value);

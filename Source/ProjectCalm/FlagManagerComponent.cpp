@@ -13,7 +13,7 @@ UFlagManagerComponent::UFlagManagerComponent()
 	// ...
 }
 
-bool UFlagManagerComponent::GetFlagByName(FName SearchName)
+bool UFlagManagerComponent::GetFlag(FName SearchName)
 {
 	if (InfoFlags.IsEmpty()) {return false;}
 

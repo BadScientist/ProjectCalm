@@ -122,7 +122,7 @@ void AEquipment::SetupPlayerControls()
 
 bool AEquipment::GetPlayerFlag(FName FlagName)
 {
-	if (APlayerCharacter* OwningCharacter = GetPlayerCharacter()) {return OwningCharacter->GetInfoFlag(FlagName);}
+	if (APlayerCharacter* OwningCharacter = GetPlayerCharacter()) {return OwningCharacter->GetFlag(FlagName);}
     return false;
 }
 
@@ -130,6 +130,6 @@ void AEquipment::SetPlayerFlag(FName FlagName, bool Value)
 {
 	if (APlayerCharacter* OwningCharacter = GetPlayerCharacter()) 
 	{
-		OwningCharacter->SetInfoFlag(FlagName, Value);
+		OwningCharacter->SetFlag(FlagName, Value);
 	}
 }

@@ -5,12 +5,14 @@
 #include "CameraFlash.h"
 #include "CameraLens.h"
 #include "PlayerCharacter.h"
+#include "PhotoData.h"
+#include "PhotoSubjectData.h"
+#include "PhotoSubjectPointOfInterest.h"
 #include "InfoFlagNameDefinitions.h"
 
 #include "Components/Image.h"
 #include "Engine/TextureRenderTarget2D.h"
 #include "Blueprint/WidgetTree.h"
-#include "Camera/CameraComponent.h"
 #include "InputActionValue.h"
 #include "Blueprint/UserWidget.h"
 #include "Kismet/GameplayStatics.h"
@@ -22,7 +24,6 @@ APhotoCameraEquipment::APhotoCameraEquipment()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 
-	// TODO: Create Camera class and move this there.
     ConstructorHelpers::FClassFinder<UUserWidget> CameraHUDBPClass(TEXT("/Game/ProjectCalm/Blueprints/UI/WBP_CameraHUD"));
     if (!ensure(CameraHUDBPClass.Class != nullptr)) {return;}
     CameraHUDClass = CameraHUDBPClass.Class;
@@ -133,8 +134,8 @@ void APhotoCameraEquipment::TakePhoto()
 	if (AttachedCameraLens == nullptr) {return;}
 	if (Photos.Num() >= MaxPhotos) {return;}  // TODO: Notify player
 	
-	UTextureRenderTarget2D* Photo = AttachedCameraLens->CapturePhoto();
-	if (Photo != nullptr) {Photos.Add(Photo);}
+	FPhotoData NewPhoto = AttachedCameraLens->CapturePhoto();
+	Photos.Add(NewPhoto);
 
 	DisplayLastPhoto();
 }
@@ -174,9 +175,9 @@ void APhotoCameraEquipment::SecondaryAction(const FInputActionValue& Value)
 	}
 }
 
-UTextureRenderTarget2D *APhotoCameraEquipment::GetLastPhoto()
+FPhotoData APhotoCameraEquipment::GetLastPhoto()
 {
-	if (Photos.IsEmpty()) {return nullptr;}
+	if (Photos.IsEmpty()) {return FPhotoData();}
 	return Photos[Photos.Num() - 1];
 }
 
@@ -220,7 +221,7 @@ void APhotoCameraEquipment::DisplayCameraHUD(bool bDisplay)
 		if (CameraHUD != nullptr && !CameraHUD->IsInViewport())
 		{
 			CameraHUD->AddToViewport();
-			LastPhotoImage = CameraHUD->WidgetTree->FindWidget<UImage>(TEXT("LastPhotoImage"));
+			LastPhotoImageWidget = CameraHUD->WidgetTree->FindWidget<UImage>(TEXT("LastPhotoImage"));
 			DisplayLastPhoto();
 		}
 	}
@@ -232,14 +233,36 @@ void APhotoCameraEquipment::DisplayCameraHUD(bool bDisplay)
 
 void APhotoCameraEquipment::DisplayLastPhoto()
 {
-	UTextureRenderTarget2D* Photo = GetLastPhoto();
+	FPhotoData LastPhoto = GetLastPhoto();
+	UTextureRenderTarget2D* PhotoImage = LastPhoto.Image;
 
-	if (LastPhotoImage == nullptr) {return;}
-	UMaterialInstanceDynamic* PhotoRenderMat = LastPhotoImage->GetDynamicMaterial();
+	if (LastPhotoImageWidget == nullptr) {return;}
+	UMaterialInstanceDynamic* PhotoRenderMat = LastPhotoImageWidget->GetDynamicMaterial();
 
-	if (PhotoRenderMat == nullptr || Photo == nullptr) {return;}	
-	PhotoRenderMat->SetTextureParameterValue(TEXT("PhotoRender"), Photo);
+	if (PhotoRenderMat == nullptr || PhotoImage == nullptr) {return;}	
+	PhotoRenderMat->SetTextureParameterValue(TEXT("PhotoRender"), PhotoImage);
 
-	LastPhotoImage->SetDesiredSizeOverride(FVector2D(Photo->SizeX/10, Photo->SizeY/10));
-	LastPhotoImage->SetVisibility(ESlateVisibility::Visible);
+	FVector2D DisplaySize = FVector2D(PhotoImage->SizeX/10, PhotoImage->SizeY/10);
+	LastPhotoImageWidget->SetDesiredSizeOverride(DisplaySize);
+	LastPhotoImageWidget->SetVisibility(ESlateVisibility::Visible);
+
+	LogPhotoData(LastPhoto);
+}
+
+void APhotoCameraEquipment::LogPhotoData(FPhotoData Photo)
+{
+	FString PhotoString = FString::Printf(TEXT("Photo taken at %s:\nSubjects: "), *(Photo.TimeTaken.ToString()));
+	float Score = 0;
+	for (FPhotoSubjectData Subject : Photo.Subjects)
+	{
+		PhotoString.Append(Subject.Name.ToString());
+		PhotoString.Append(FString(" | "));
+		
+		for (FPhotoSubjectPointOfInterest PointOfInterest : Subject.PointsOfInterest)
+		{
+			if (PointOfInterest.IsVisible()) {Score += PointOfInterest.ScoreValue;}
+		}
+	}
+	PhotoString.Append(FString::Printf(TEXT("\nTotal Score: %f"), Score));
+	UE_LOG(LogTemp, Warning, TEXT("%s"), *PhotoString);
 }

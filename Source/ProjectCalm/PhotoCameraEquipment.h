@@ -15,6 +15,7 @@ class UEnhancedInputLocalPlayerSubsystem;
 class ACameraFlash;
 class ACameraLens;
 struct FInputActionValue;
+struct FPhotoData;
 
 UCLASS()
 class PROJECTCALM_API APhotoCameraEquipment : public AEquipment
@@ -27,11 +28,10 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Animation, meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* LowerAnimation;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = PhotoCamera, meta = (AllowPrivateAccess = "true"))
-	TArray<UTextureRenderTarget2D*> Photos;
-
+	TArray<FPhotoData> Photos;
 	TSubclassOf<class UUserWidget> CameraHUDClass;
 	UUserWidget* CameraHUD;
-	UImage* LastPhotoImage;
+	UImage* LastPhotoImageWidget;
 
 	float DefaultAnimationBlendTime = 0.0f;
 	FTimerHandle AnimationTimerHandle;	
@@ -69,8 +69,7 @@ public:
 	void SetAttachedCameraFlash(ACameraFlash* CameraFlash) {AttachedCameraFlash = CameraFlash;};
 	void SetAttachedCameraLens(ACameraLens* CameraLens) {AttachedCameraLens = CameraLens;};
 
-	UFUNCTION(BlueprintCallable)
-	UTextureRenderTarget2D* GetLastPhoto();
+	FPhotoData GetLastPhoto();
 
 private:
 	float BlendViewToPhotoCamera();
@@ -78,5 +77,6 @@ private:
 	void PauseTimers();
 	void DisplayCameraHUD(bool bDisplay);
 	void DisplayLastPhoto();
+	void LogPhotoData(FPhotoData Photo);
 
 };
