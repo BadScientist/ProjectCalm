@@ -16,9 +16,10 @@ class UEnhancedInputLocalPlayerSubsystem;
 class UInputAction;
 class UInputMappingContext;
 class IEquipmentInterface;
-class APhotoCameraEquipment;
-class ACameraFlash;
-class ACameraLens;
+class USpawnerComponent;
+class APhotoCameraEquipment;  // TODO: Add Menu System for adding equipment
+class ACameraFlash;  // TODO: Add Menu System for adding equipment
+class ACameraLens;  // TODO: Add Menu System for adding equipment
 
 UCLASS(config = game)
 class PROJECTCALM_API APlayerCharacter : public ACharacter
@@ -32,6 +33,8 @@ private:
 	UViewBlenderComponent* ViewBlenderComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Flags, meta = (AllowPrivateAccess = "true"))
 	UFlagManagerComponent* FlagManagerComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Flags, meta = (AllowPrivateAccess = "true"))
+	USpawnerComponent* SpawnerComponent;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputMappingContext* DefaultMappingContext;	

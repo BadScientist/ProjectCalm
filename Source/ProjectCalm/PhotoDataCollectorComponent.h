@@ -7,6 +7,7 @@
 #include "PhotoDataCollectorComponent.generated.h"
 
 class UCameraComponent;
+class USpawnerComponent;
 struct FPhotoData;
 struct FConvexVolume;
 
@@ -23,6 +24,9 @@ public:
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
+
+private:
+    USpawnerComponent* Spawner;
 
 public:
 	FPhotoData CollectPhotoData(FConvexVolume ViewFrustum, FVector ViewLocation);

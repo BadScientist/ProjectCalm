@@ -2,9 +2,12 @@
 
 
 #include "PhotoDataCollectorComponent.h"
-#include "PhotoSubjectComponent.h"
+#include "PhotoSubjectDataComponent.h"
 #include "PhotoData.h"
+#include "SpawnerComponent.h"
 
+#include "Kismet/GameplayStatics.h"
+#include "GameFramework/Character.h"
 #include "ConvexVolume.h"
 
 
@@ -24,7 +27,11 @@ void UPhotoDataCollectorComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// ...
+    ACharacter* PlayerCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+	if (PlayerCharacter == nullptr) {return;}
+
+	TSubclassOf<USpawnerComponent> SpawnerClass = USpawnerComponent::StaticClass();
+	Spawner = Cast<USpawnerComponent>(PlayerCharacter->GetComponentByClass(SpawnerClass));
 	
 }
 
@@ -33,15 +40,15 @@ FPhotoData UPhotoDataCollectorComponent::CollectPhotoData(FConvexVolume ViewFrus
 	FPhotoData Data;
 	Data.TimeTaken = FDateTime::Now();
 	
-	TArray<AActor*> AllActors;
-	if (ULevel* Level = GetWorld()->GetCurrentLevel()) {AllActors = Level->Actors;}
-	for (AActor* Actor : AllActors)
+	TArray<AActor*> PhotoSubjects;
+	if (Spawner != nullptr) {PhotoSubjects = Spawner->GetAllPhotoSubjects();}
+	for (AActor* Actor : PhotoSubjects)
 	{
 		if (Actor == nullptr) {continue;}
-		if (UPhotoSubjectComponent* PhotoSubjectComponent = Actor->FindComponentByClass<UPhotoSubjectComponent>())
+		if (UPhotoSubjectDataComponent* PhotoSubjectDataComponent = Actor->FindComponentByClass<UPhotoSubjectDataComponent>())
 		{
 			FPhotoSubjectData SubjectData;
-			bool Visible = PhotoSubjectComponent->GeneratePhotoSubjectData(ViewFrustum, ViewLocation, SubjectData);
+			bool Visible = PhotoSubjectDataComponent->GeneratePhotoSubjectData(ViewFrustum, ViewLocation, SubjectData);
 			if (Visible) {Data.Subjects.Add(SubjectData);}
 		}
 	}

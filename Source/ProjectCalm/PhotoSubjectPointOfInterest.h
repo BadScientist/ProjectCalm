@@ -10,17 +10,13 @@ struct FPhotoSubjectPointOfInterest
 	GENERATED_BODY()
 
 	FPhotoSubjectPointOfInterest(){};
-	FPhotoSubjectPointOfInterest(FName POIName, FVector POIRelativeLocation, float POIScoreValue)
-    {
-        Name = POIName;
-        RelativeLocation = POIRelativeLocation;
-        ScoreValue = POIScoreValue;
-    };
+	FPhotoSubjectPointOfInterest(FName POIName, FVector POIRelativeLocation, float POIScoreValue) : 
+        Name(POIName), RelativeLocation(POIRelativeLocation), ScoreValue(POIScoreValue){};
     
     UPROPERTY(EditAnywhere)
     FName Name;
-    UPROPERTY(EditAnywhere, Meta = (MakeEditWidget = true))
-    FWidgetVector RelativeLocation = FWidgetVector::Zero();
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (MakeEditWidget = true))
+    FVector RelativeLocation = FVector::ZeroVector;
     UPROPERTY(EditAnywhere)
     float ScoreValue = 1.0f;
     UPROPERTY(EditAnywhere)

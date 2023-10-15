@@ -8,6 +8,7 @@
 #include "PhotoCameraEquipment.h"
 #include "CameraFlash.h"
 #include "CameraLens.h"
+#include "SpawnerComponent.h"
 
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -48,6 +49,9 @@ APlayerCharacter::APlayerCharacter()
 	if (ViewBlenderComponent != nullptr) {ViewBlenderComponent->SetCharacterEyes(FirstPersonCamera);}	
 	
 	FlagManagerComponent = CreateDefaultSubobject<UFlagManagerComponent>(TEXT("FlagManagerComponent"));
+
+	SpawnerComponent = CreateDefaultSubobject<USpawnerComponent>(TEXT("SpawnerComponent"));
+	if (SpawnerComponent != nullptr) {SpawnerComponent->SetupAttachment(RootComponent);}
 
 	// Temporarily add camera with lens and flash to player on startup
 	// TODO: Add Menu System for adding equipment

@@ -1,57 +1,55 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "PhotoSubjectComponent.h"
-#include "PhotoSubjectData.h"
-#include "PhotoSubjectPointOfInterest.h"
 
-// Sets default values for this component's properties
+#include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "GameFramework/Character.h"
+
+
+#define MAX_TRACE_LENGTH 3000
+#define DESPAWN_DISTANCE 10000
+
+
 UPhotoSubjectComponent::UPhotoSubjectComponent()
 {
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
-	PrimaryComponentTick.bCanEverTick = false;
-
-	// ...
 }
 
-
-// Called when the game starts
-void UPhotoSubjectComponent::BeginPlay()
+bool UPhotoSubjectComponent::Spawn()
 {
-	Super::BeginPlay();
+    UE_LOG(LogTemp, Warning, TEXT("PhotoSubjectComponent:: Finding ground"));
+    FVector TraceStart = GetOwner()->GetActorLocation();
+    FVector TraceEnd = FVector(TraceStart.X, TraceStart.Y, TraceStart.Z - MAX_TRACE_LENGTH);
+    FHitResult OutHit;
 
-	// ...
-	
+    bool Hit = GetWorld()->LineTraceSingleByChannel(OutHit, TraceStart, TraceEnd, ECollisionChannel::ECC_WorldStatic);
+    if (Hit)
+    {
+        GetOwner()->SetActorLocation(OutHit.Location);
+        return true;
+    }
+
+    UE_LOG(LogTemp, Warning, TEXT("PhotoSubjectComponent:: Failed to find point on ground"));
+    return false;
 }
 
-bool UPhotoSubjectComponent::GeneratePhotoSubjectData(FConvexVolume ViewFrustum, FVector CameraLocation, FPhotoSubjectData &OutSubjectData)
+bool UPhotoSubjectComponent::Despawn(FVector PlayerLocation, FVector PlayerForwardVector)
 {
-	bool Result = false;
-	OutSubjectData.Name = SubjectName;
-	if (AActor* Owner = GetOwner()) {OutSubjectData.Location = Owner->GetActorLocation();}
+    FVector SubjectLocation = GetComponentLocation();
+    double DistanceToPlayer = FVector::Distance(SubjectLocation, PlayerLocation);
+    UE_LOG(LogTemp, Warning, TEXT("PhotoSubjectComponent:: Distance to player: %f"), DistanceToPlayer);
+    if (DistanceToPlayer < DESPAWN_DISTANCE) {return false;}
+    
+    // TODO: Fix hardcoded values
+    FVector Direction = UKismetMathLibrary::GetDirectionUnitVector(PlayerLocation, SubjectLocation);
+    double Angle = FMath::RadiansToDegrees(FMath::Acos(FVector::DotProduct(Direction, PlayerForwardVector)));
+    bool bInVisionCone = Angle <= 45;
+    UE_LOG(LogTemp, Warning, TEXT("PhotoSubjectComponent:: Angle from player: %f"), Angle);
+    
+    FHitResult OutHit;    
+    FVector TraceStart = PlayerLocation + Direction * 55;
+    bool Hit = GetWorld()->LineTraceSingleByChannel(OutHit, TraceStart, SubjectLocation, ECollisionChannel::ECC_Visibility);
+    bool bInLineOfSight = Hit && OutHit.GetActor() == GetOwner();
+    UE_LOG(LogTemp, Warning, TEXT("PhotoSubjectComponent:: Visible to player: %s"), bInLineOfSight ? *FString("yes") : *FString("no"));
+    if (bInVisionCone && bInLineOfSight) {return false;}
 
-	UWorld* World = GetWorld();
-	if (World == nullptr) {return Result;}
-
-	FHitResult OutHit;
-	FQuat Rotation = FQuat::Identity;
-	ECollisionChannel TraceChannel = ECollisionChannel::ECC_Visibility;
-	for (int32 i = 0; i < PointsOfInterest.Num(); i++)
-	{
-		FVector PointLocation = PointsOfInterest[i].RelativeLocation.Vector + OutSubjectData.Location;
-
-		PointsOfInterest[i].IsOnCamera = ViewFrustum.IntersectPoint(PointLocation);
-		if (!PointsOfInterest[i].IsOnCamera) {continue;}
-
-		PointsOfInterest[i].IsInLineOfSight = !(World->LineTraceSingleByChannel(OutHit, CameraLocation, PointLocation, TraceChannel));
-		
-		if (PointsOfInterest[i].IsVisible())
-		{
-			OutSubjectData.PointsOfInterest.Add(PointsOfInterest[i]);
-			Result = true;
-		}
-	}
-
-    return Result;
+    return GetOwner()->Destroy();
 }

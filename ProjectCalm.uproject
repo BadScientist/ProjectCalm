@@ -12,6 +12,14 @@
 				"Engine",
 				"CoreUObject"
 			]
+		},
+		{
+			"Name": "ProjectCalmEditor",
+			"Type": "Editor",
+			"LoadingPhase": "PostEngineInit",
+			"AdditionalDependencies": [
+				"Engine"
+			]
 		}
 	],
 	"Plugins": [

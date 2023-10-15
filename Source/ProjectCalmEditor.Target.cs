@@ -10,6 +10,6 @@ public class ProjectCalmEditorTarget : TargetRules
 		Type = TargetType.Editor;
 		DefaultBuildSettings = BuildSettingsVersion.V2;
 		IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_1;
-		ExtraModuleNames.Add("ProjectCalm");
+		ExtraModuleNames.AddRange(new string[] {"ProjectCalm", "ProjectCalmEditor"});
 	}
 }

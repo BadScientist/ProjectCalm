@@ -1,35 +1,22 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Components/ActorComponent.h"
+#include "Components/BoxComponent.h"
+
 #include "PhotoSubjectComponent.generated.h"
 
-struct FPhotoSubjectPointOfInterest;
-struct FPhotoSubjectData;
-struct FConvexVolume;
-
+class UPhotoSubjectDataComponent;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class PROJECTCALM_API UPhotoSubjectComponent : public USceneComponent
+class PROJECTCALM_API UPhotoSubjectComponent : public UBoxComponent
 {
 	GENERATED_BODY()
 
-public:	
-	// Sets default values for this component's properties
-	UPhotoSubjectComponent();
-
-protected:
-	// Called when the game starts
-	virtual void BeginPlay() override;
-
-private:
-	UPROPERTY(EditAnywhere)
-	FName SubjectName;
-	UPROPERTY(EditAnywhere, Meta = (MakeEditWidget = true))
-	TArray<FPhotoSubjectPointOfInterest> PointsOfInterest;
+public:
+    UPhotoSubjectComponent();
 
 public:
-	bool GeneratePhotoSubjectData(FConvexVolume ViewFrustum, FVector CameraLocation, FPhotoSubjectData &OutSubjectData);
+    bool Spawn();
+    bool Despawn(FVector PlayerLocation, FVector PlayerForwardVector);
+
 };
