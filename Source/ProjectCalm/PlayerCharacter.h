@@ -73,8 +73,8 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	UFUNCTION(BlueprintCallable)
-	bool GetFlag(FName FlagName);
+	UFUNCTION(BlueprintPure)
+	bool GetFlag(FName FlagName) const;
 	UFUNCTION(BlueprintCallable)
 	void SetFlag(FName FlagName, bool Value);
 

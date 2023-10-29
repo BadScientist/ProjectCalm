@@ -73,7 +73,7 @@ public:
 
     bool Contains2D(FVector TestLocation);
     bool SpawnPhotoSubject(FVector SpawnLocation);
-    int32 CleanupSpawns(FVector PlayerLocation, FVector PlayerForwardVector);
+    int32 CleanupSpawns(AActor* Player);
 
 
 #if WITH_EDITORONLY_DATA

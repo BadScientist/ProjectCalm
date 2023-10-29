@@ -1,4 +1,5 @@
 #include "PhotoSubjectComponent.h"
+#include "PhotoSubjectAIController.h"
 
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -15,12 +16,13 @@ UPhotoSubjectComponent::UPhotoSubjectComponent()
 
 bool UPhotoSubjectComponent::Spawn()
 {
-    UE_LOG(LogTemp, Warning, TEXT("PhotoSubjectComponent:: Finding ground"));
     FVector TraceStart = GetOwner()->GetActorLocation();
     FVector TraceEnd = FVector(TraceStart.X, TraceStart.Y, TraceStart.Z - MAX_TRACE_LENGTH);
     FHitResult OutHit;
+    FCollisionQueryParams Params;
+    Params.AddIgnoredActor(GetOwner());
 
-    bool Hit = GetWorld()->LineTraceSingleByChannel(OutHit, TraceStart, TraceEnd, ECollisionChannel::ECC_WorldStatic);
+    bool Hit = GetWorld()->LineTraceSingleByChannel(OutHit, TraceStart, TraceEnd, ECollisionChannel::ECC_WorldStatic, Params);
     if (Hit)
     {
         GetOwner()->SetActorLocation(OutHit.Location);
@@ -31,24 +33,25 @@ bool UPhotoSubjectComponent::Spawn()
     return false;
 }
 
-bool UPhotoSubjectComponent::Despawn(FVector PlayerLocation, FVector PlayerForwardVector)
+bool UPhotoSubjectComponent::Despawn(AActor* Player)
 {
     FVector SubjectLocation = GetComponentLocation();
-    double DistanceToPlayer = FVector::Distance(SubjectLocation, PlayerLocation);
-    UE_LOG(LogTemp, Warning, TEXT("PhotoSubjectComponent:: Distance to player: %f"), DistanceToPlayer);
+    double DistanceToPlayer = FVector::Distance(SubjectLocation, Player->GetActorLocation());
     if (DistanceToPlayer < DESPAWN_DISTANCE) {return false;}
     
     // TODO: Fix hardcoded values
-    FVector Direction = UKismetMathLibrary::GetDirectionUnitVector(PlayerLocation, SubjectLocation);
-    double Angle = FMath::RadiansToDegrees(FMath::Acos(FVector::DotProduct(Direction, PlayerForwardVector)));
+    FVector Direction = UKismetMathLibrary::GetDirectionUnitVector(Player->GetActorLocation(), SubjectLocation);
+    double Angle = FMath::RadiansToDegrees(FMath::Acos(FVector::DotProduct(Direction, Player->GetActorForwardVector())));
     bool bInVisionCone = Angle <= 45;
-    UE_LOG(LogTemp, Warning, TEXT("PhotoSubjectComponent:: Angle from player: %f"), Angle);
     
-    FHitResult OutHit;    
-    FVector TraceStart = PlayerLocation + Direction * 55;
-    bool Hit = GetWorld()->LineTraceSingleByChannel(OutHit, TraceStart, SubjectLocation, ECollisionChannel::ECC_Visibility);
+    FHitResult OutHit;
+    FCollisionQueryParams Params;
+    TArray<AActor*> AttachedActors;
+    Player->GetAttachedActors(AttachedActors, true, true);
+    Params.AddIgnoredActor(Player);
+    Params.AddIgnoredActors(AttachedActors);
+    bool Hit = GetWorld()->LineTraceSingleByChannel(OutHit, Player->GetActorLocation(), SubjectLocation, ECollisionChannel::ECC_Visibility);
     bool bInLineOfSight = Hit && OutHit.GetActor() == GetOwner();
-    UE_LOG(LogTemp, Warning, TEXT("PhotoSubjectComponent:: Visible to player: %s"), bInLineOfSight ? *FString("yes") : *FString("no"));
     if (bInVisionCone && bInLineOfSight) {return false;}
 
     return GetOwner()->Destroy();

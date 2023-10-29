@@ -22,15 +22,11 @@ void APhotoSubjectSpawnRegion::Initialize()
     {
         if (SpawnableSubjects[i].SubjectClass == nullptr)
         {
-            UE_LOG(LogTemp, Warning, TEXT("SpawnRegion:: SubjectClass == Nullptr for SpawnableSubjects[%i]"), i);
+            UE_LOG(LogTemp, Warning, TEXT("SpawnRegion:: SubjectClass == Nullptr for SpawnableSubjects[%i]. Removing item from array."), i);
             SpawnableSubjects.RemoveAt(i);
             --i;
         }
-        else
-        {
-            UE_LOG(LogTemp, Warning, TEXT("SpawnRegion:: SubjectClass != Nullptr for SpawnableSubjects[%i]"), i);
-            TotalWeight += SpawnableSubjects[i].Weight;
-        }
+        else {TotalWeight += SpawnableSubjects[i].Weight;}
     }
 
     bInitialized = true;
@@ -48,7 +44,6 @@ int32 APhotoSubjectSpawnRegion::PickSubject()
     for (int32 i = 0; i < SpawnableSubjects.Num(); i++)
     {
         float NextWeight = CurrentWeight + SpawnableSubjects[i].Weight;
-        UE_LOG(LogTemp, Display, TEXT("SpawnRegion:: W: %f | S: %f | T: %f"), CurrentWeight, Selector, TotalWeight);
         if (CurrentWeight < Selector && Selector <= NextWeight)
         {
             if (SpawnableSubjects[i].ActiveSpawns < SpawnableSubjects[i].Max) {return i;}
@@ -112,17 +107,17 @@ bool APhotoSubjectSpawnRegion::SpawnPhotoSubject(FVector SpawnLocation)
     return !SpawnedSubject->Destroy();
 }
 
-int32 APhotoSubjectSpawnRegion::CleanupSpawns(FVector PlayerLocation, FVector PlayerForwardVector)
+int32 APhotoSubjectSpawnRegion::CleanupSpawns(AActor* Player)
 {
     int32 DespawnedActorCount{0};
+    if (Player == nullptr) {return DespawnedActorCount;}
 
     for (int32 i = 0; i < SpawnedSubjects.Num(); i++)
     {
         UPhotoSubjectComponent* SubjectComp = SpawnedSubjects[i]->FindComponentByClass<UPhotoSubjectComponent>();
         if (SubjectComp == nullptr) {continue;}
 
-        UE_LOG(LogTemp, Warning, TEXT("SpawnRegion:: Attempting to despawn subject %i"), i);
-        if (SubjectComp->Despawn(PlayerLocation, PlayerForwardVector)) 
+        if (SubjectComp->Despawn(Player)) 
         {
             for (int32 j = 0; j < SpawnableSubjects.Num(); j++)
             {

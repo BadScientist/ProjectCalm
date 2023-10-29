@@ -17,6 +17,6 @@ public:
 
 public:
     bool Spawn();
-    bool Despawn(FVector PlayerLocation, FVector PlayerForwardVector);
+    bool Despawn(AActor* Player);
 
 };

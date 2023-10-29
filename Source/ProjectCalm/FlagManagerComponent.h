@@ -22,7 +22,7 @@ struct FInfoFlag
 	UPROPERTY(EditAnywhere)
 	FName FlagName;
 	UPROPERTY(EditAnywhere)
-	bool Value;
+	bool Value {false};
 };
 
 

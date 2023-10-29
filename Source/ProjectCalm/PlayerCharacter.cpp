@@ -55,15 +55,15 @@ APlayerCharacter::APlayerCharacter()
 
 	// Temporarily add camera with lens and flash to player on startup
 	// TODO: Add Menu System for adding equipment
-    ConstructorHelpers::FClassFinder<APhotoCameraEquipment> CameraBPClass(TEXT("/Game/ProjectCalm/Blueprints/BP_PhotoCameraEquipment_Basic"));
+    ConstructorHelpers::FClassFinder<APhotoCameraEquipment> CameraBPClass(TEXT("/Game/ProjectCalm/Blueprints/Equipment/BP_PhotoCameraEquipment_Basic"));
     if (!ensure(CameraBPClass.Class != nullptr)) {return;}
     PhotoCameraClass = CameraBPClass.Class;
 	
-    ConstructorHelpers::FClassFinder<ACameraLens> CameraLensBPClass(TEXT("/Game/ProjectCalm/Blueprints/BP_CameraLensBasic"));
+    ConstructorHelpers::FClassFinder<ACameraLens> CameraLensBPClass(TEXT("/Game/ProjectCalm/Blueprints/Equipment/BP_CameraLensBasic"));
     if (!ensure(CameraLensBPClass.Class != nullptr)) {return;}
     CameraLensClass = CameraLensBPClass.Class;
 	
-    ConstructorHelpers::FClassFinder<ACameraFlash> CameraFlashBPClass(TEXT("/Game/ProjectCalm/Blueprints/BP_CameraFlash"));
+    ConstructorHelpers::FClassFinder<ACameraFlash> CameraFlashBPClass(TEXT("/Game/ProjectCalm/Blueprints/Equipment/BP_CameraFlash"));
     if (!ensure(CameraFlashBPClass.Class != nullptr)) {return;}
     CameraFlashClass = CameraFlashBPClass.Class;
 }
@@ -127,7 +127,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 }
 
-bool APlayerCharacter::GetFlag(FName FlagName)
+bool APlayerCharacter::GetFlag(FName FlagName) const
 {
 	if (FlagManagerComponent == nullptr) {return false;}
 	return FlagManagerComponent->GetFlag(FlagName);

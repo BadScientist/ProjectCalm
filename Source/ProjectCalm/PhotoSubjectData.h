@@ -20,7 +20,7 @@ struct FPhotoSubjectData
     UPROPERTY(EditAnywhere)
     FName Name;
     UPROPERTY(EditAnywhere)
-    FVector Location;
+    FVector Location {FVector::ZeroVector};
     UPROPERTY(EditAnywhere)
     TArray<FPhotoSubjectPointOfInterest> PointsOfInterest;
 };
