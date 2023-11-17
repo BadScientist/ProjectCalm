@@ -5,5 +5,6 @@ enum EAlertLevel
 {
     CALM UMETA(DisplayName = "Calm"),
     ALERT UMETA(DisplayName = "Alert"),
-    ALARMED UMETA(DisplayName = "Alarmed")
+    ALARMED UMETA(DisplayName = "Alarmed"),
+    AGGRO UMETA(DisplayName = "Aggro")
 };

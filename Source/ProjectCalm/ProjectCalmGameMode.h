@@ -6,6 +6,8 @@
 #include "GameFramework/GameModeBase.h"
 #include "ProjectCalmGameMode.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnMakeNoiseDelegate, AActor*, ResponsibleActor, float, NoiseLevel);
+
 UCLASS(minimalapi)
 class AProjectCalmGameMode : public AGameModeBase
 {
@@ -13,6 +15,8 @@ class AProjectCalmGameMode : public AGameModeBase
 
 public:
 	AProjectCalmGameMode();
+
+	FOnMakeNoiseDelegate OnMakeNoise;
 };
 
 

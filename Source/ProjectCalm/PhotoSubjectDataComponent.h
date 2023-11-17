@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 
+#include "PhotoSubjectName.h"
 #include "PhotoSubjectDataComponent.generated.h"
 
 struct FPhotoSubjectPointOfInterest;
@@ -27,11 +28,11 @@ protected:
 
 private:
 	UPROPERTY(EditAnywhere)
-	FName SubjectName;
+	TEnumAsByte<ESubjectName> SubjectName;
 	UPROPERTY(EditAnywhere)
 	TArray<FPhotoSubjectPointOfInterest> PointsOfInterest;
 
 public:
-	FName GetSubjectName() {return SubjectName;}
+	ESubjectName GetSubjectName() {return SubjectName;}
 	bool GeneratePhotoSubjectData(FConvexVolume ViewFrustum, FVector CameraLocation, FPhotoSubjectData &OutSubjectData);
 };

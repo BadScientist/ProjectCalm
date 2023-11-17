@@ -1,6 +1,7 @@
 #pragma once
 
 #include "PhotoSubjectPointOfInterest.h"
+#include "PhotoSubjectName.h"
 #include "PhotoSubjectData.generated.h"
 
 
@@ -10,7 +11,7 @@ struct FPhotoSubjectData
 	GENERATED_BODY()
 
 	FPhotoSubjectData(){};
-	FPhotoSubjectData(FName SubjectName, FVector SubjectLocation, TArray<FPhotoSubjectPointOfInterest> SubjectPOIs)
+	FPhotoSubjectData(ESubjectName SubjectName, FVector SubjectLocation, TArray<FPhotoSubjectPointOfInterest> SubjectPOIs)
     {
         Name = SubjectName;
         Location = SubjectLocation;
@@ -18,7 +19,7 @@ struct FPhotoSubjectData
     };
     
     UPROPERTY(EditAnywhere)
-    FName Name;
+    TEnumAsByte<ESubjectName> Name;
     UPROPERTY(EditAnywhere)
     FVector Location {FVector::ZeroVector};
     UPROPERTY(EditAnywhere)

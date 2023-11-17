@@ -2,6 +2,8 @@
 
 
 #include "PhotoSubjectAIController.h"
+#include "PhotoSubjectDataComponent.h"
+#include "PlayerCharacter.h"
 
 #include "Kismet/GameplayStatics.h"
 #include "BehaviorTree/BlackboardComponent.h"
@@ -22,30 +24,81 @@ void APhotoSubjectAIController::BeginPlay()
     Super::BeginPlay();
 
     if (BehaviorTree != nullptr) {RunBehaviorTree(BehaviorTree);}
+}
 
-    SetAlertLevel(EAlertLevel::CALM);
-
-    APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(this, 0);
-    if (PlayerPawn != nullptr) 
+void APhotoSubjectAIController::SetAlertLevelKeyValue(const FName& KeyName, EAlertLevel InAlertLevel)
+{
+    if (KeyName == BBKEY_ALERT_LEVEL)
     {
-        GetBlackboardComponent()->SetValueAsVector(TEXT("PlayerLocation"), PlayerPawn->GetActorLocation());
+        if (InAlertLevel == AlertLevel)
+        {
+            LastBehavior = ActiveBehavior;
+            SetBehaviorKeyValue(BBKEY_ACTIVE_BEHAVIOR, EPhotoSubjectBehavior::RESTART_LAST);
+        }
+        else {AlertLevel = InAlertLevel;}
     }
+    GetBlackboardComponent()->SetValueAsEnum(KeyName, InAlertLevel);
 }
 
-void APhotoSubjectAIController::SetAlertLevel(EAlertLevel InAlertLevel)
+void APhotoSubjectAIController::SetBehaviorKeyValue(const FName& KeyName, EPhotoSubjectBehavior InBehavior)
 {
-    AlertLevel = InAlertLevel;
-    GetBlackboardComponent()->SetValueAsEnum(TEXT("AlertLevel"), InAlertLevel);
+    EPhotoSubjectBehavior NewBehavior = InBehavior;
+    if (KeyName == BBKEY_ACTIVE_BEHAVIOR)
+    {
+        if (ActiveBehavior == EPhotoSubjectBehavior::RESTART_LAST)
+        {
+            NewBehavior = LastBehavior;
+            LastBehavior = EPhotoSubjectBehavior::NONE;
+        }
+        ActiveBehavior = NewBehavior;
+    }
+    GetBlackboardComponent()->SetValueAsEnum(KeyName, NewBehavior);
 }
 
-void APhotoSubjectAIController::SetActiveBehavior(EPhotoSubjectBehavior InBehavior)
+void APhotoSubjectAIController::SetVectorKeyValue(const FName& KeyName, FVector InVector)
 {
-    ActiveBehavior = InBehavior;
-    GetBlackboardComponent()->SetValueAsEnum(TEXT("ActiveBehavior"), InBehavior);
+    if (KeyName == BBKEY_HOME_LOCATION) {HomeLocation = InVector;}
+    if (KeyName == BBKEY_TARGET_LOCATION) {TargetLocation = InVector;}
+    GetBlackboardComponent()->SetValueAsVector(KeyName, InVector);
 }
 
-void APhotoSubjectAIController::SetHomeLocation(FVector InLocation)
+void APhotoSubjectAIController::SetBoolKeyValue(const FName &KeyName, bool bInValue)
 {
-    HomeLocation = InLocation;
-    GetBlackboardComponent()->SetValueAsVector(TEXT("HomeLocation"), InLocation);
+    GetBlackboardComponent()->SetValueAsBool(KeyName, bInValue);
+}
+
+void APhotoSubjectAIController::DetermineReaction(EAlertLevel InAlertLevel, AActor* ReactionSource)
+{
+    if (AlertLevel > InAlertLevel) {return;}
+    
+    TSubclassOf<UPhotoSubjectDataComponent> DataComponentClass;
+    UPhotoSubjectDataComponent* DataComponent = Cast<UPhotoSubjectDataComponent>(ReactionSource->GetComponentByClass(DataComponentClass));
+    if (DataComponentClass != nullptr)
+    {
+        for (ESubjectName PredatorName : Predators)
+        {
+            if (DataComponent->GetSubjectName() == PredatorName)
+            {
+                SetAlertLevelKeyValue(BBKEY_ALERT_LEVEL, InAlertLevel);
+                GetBlackboardComponent()->SetValueAsObject(TEXT("ReactionTarget"), ReactionSource);
+                return;
+            }
+        }
+
+        for (ESubjectName PreyName : Prey)
+        {
+            if (DataComponent->GetSubjectName() == PreyName)
+            {
+                SetAlertLevelKeyValue(BBKEY_ALERT_LEVEL, InAlertLevel == EAlertLevel::ALARMED ? EAlertLevel::AGGRO : InAlertLevel);
+                return;
+            }
+        }
+    }
+
+    else if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(ReactionSource))
+    {
+        SetAlertLevelKeyValue(BBKEY_ALERT_LEVEL, InAlertLevel);
+        GetBlackboardComponent()->SetValueAsObject(TEXT("ReactionTarget"), ReactionSource);
+        return;
+    }
 }

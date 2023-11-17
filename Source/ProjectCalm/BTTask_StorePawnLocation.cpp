@@ -4,6 +4,7 @@
 #include "BTTask_StorePawnLocation.h"
 #include "PhotoSubjectAIController.h"
 
+
 EBTNodeResult::Type UBTTask_StorePawnLocation::ExecuteTask(UBehaviorTreeComponent &OwnerComp, uint8 *NodeMemory)
 {
     AAIController* AIController = OwnerComp.GetAIOwner();
@@ -22,7 +23,7 @@ EBTNodeResult::Type UBTTask_StorePawnLocation::ExecuteTask(UBehaviorTreeComponen
 
     if(APhotoSubjectAIController* SubjectController = Cast<APhotoSubjectAIController>(AIController))
     {
-        SubjectController->SetHomeLocation(Pawn->GetActorLocation());
+        SubjectController->SetVectorKeyValue(GetSelectedBlackboardKey(), Pawn->GetActorLocation());
         return EBTNodeResult::Succeeded;
     }
 
