@@ -64,6 +64,22 @@
 		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
 	},
 	{
+		"file": "C:\\Users\\Valued Customer\\repos\\unreal\\ProjectCalm\\Source\\ProjectCalm\\AnimNotify_FootPlant.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.36.32532\\bin\\HostX64\\x64\\cl.exe",
+			"@C:\\Users\\Valued Customer\\repos\\unreal\\ProjectCalm\\.vscode\\compileCommands_ProjectCalm\\ProjectCalm.256.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\Valued Customer\\repos\\unreal\\ProjectCalm\\Source\\ProjectCalm\\AnimNotify_FootPlant.h",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.36.32532\\bin\\HostX64\\x64\\cl.exe",
+			"@C:\\Users\\Valued Customer\\repos\\unreal\\ProjectCalm\\.vscode\\compileCommands_ProjectCalm\\ProjectCalm.256.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
 		"file": "C:\\Users\\Valued Customer\\repos\\unreal\\ProjectCalm\\Source\\ProjectCalm\\BTDecorator_RandomLoop.cpp",
 		"arguments": [
 			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.36.32532\\bin\\HostX64\\x64\\cl.exe",

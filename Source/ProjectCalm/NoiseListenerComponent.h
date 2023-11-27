@@ -27,9 +27,9 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 private:
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = Reaction)
 	float AlertNoiseThreshold {20};
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = Reaction)
 	float AlarmNoiseThreshold {30};
 
 	UFUNCTION()

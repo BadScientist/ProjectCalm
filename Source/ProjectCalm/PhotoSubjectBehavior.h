@@ -9,5 +9,7 @@ enum EPhotoSubjectBehavior
     WANDER UMETA(DisplayName = "Wander"),
     GRAZE UMETA(DisplayName = "Graze"),
     REST UMETA(DisplayName = "Rest"),
-    LOOK_AROUND UMETA(DisplayName = "Look Around")
+    SEARCH_STATIONARY UMETA(DisplayName = "Search Stationary"),
+    SEARCH_MOBILE UMETA(DisplayName = "Search Mobile"),
+    CHASE UMETA(DisplayName = "Chase")
 };

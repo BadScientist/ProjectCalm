@@ -15,7 +15,6 @@
 
 void UBTTask_LookAt::InitializeMemory(UBehaviorTreeComponent &OwnerComp, uint8 *NodeMemory, EBTMemoryInit::Type InitType) const
 {
-    UE_LOG(LogTemp, Warning, TEXT("Initializing NodeMemory"));
     Super::InitializeMemory(OwnerComp, NodeMemory, InitType);
 
     FBTLookAtTaskMemory* LookAtMemory = (FBTLookAtTaskMemory*)NodeMemory;
@@ -81,19 +80,6 @@ void UBTTask_LookAt::OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* No
 	Super::OnTaskFinished(OwnerComp, NodeMemory, TaskResult);
 }
 
-// void UBTTask_LookAt::OnGameplayTaskDeactivated(UGameplayTask &Task)
-// {
-// 	if (Task.GetTaskOwner() == this)
-//     {
-//         if (UBehaviorTreeComponent* OwnerComp = GetBTComponentForTask(Task))
-//         {
-//             SetPawnRotationSettings(*OwnerComp, LookAtTaskMemory, true);
-//         }
-//     }
-
-//     Super::OnGameplayTaskDeactivated(Task);
-// }
-
 void UBTTask_LookAt::SetPawnRotationSettings(UBehaviorTreeComponent& OwnerComp, FBTLookAtTaskMemory* NodeMemory, bool bReset, float AngleToTarget)
 {
     if (NodeMemory == nullptr) {return;}
@@ -126,9 +112,7 @@ void UBTTask_LookAt::SetPawnRotationSettings(UBehaviorTreeComponent& OwnerComp, 
         return;
     }
 
-    if (NodeMemory->RotationSpeed < 0) {
-        NodeMemory->RotationSpeed = AIMovement->RotationRate.Yaw;
-        UE_LOG(LogTemp, Warning, TEXT("STORING pawn rotation rate. Rotation Speed: %f"), AIMovement->RotationRate.Yaw);}
+    if (NodeMemory->RotationSpeed < 0) {NodeMemory->RotationSpeed = AIMovement->RotationRate.Yaw;}
 
     if (!bReset)
     {
@@ -138,20 +122,9 @@ void UBTTask_LookAt::SetPawnRotationSettings(UBehaviorTreeComponent& OwnerComp, 
             FMath::Clamp(AngleToTarget / 120, 0, 1));
 
         AIMovement->RotationRate.Yaw = NewRotationSpeed;
-        UE_LOG(LogTemp, Warning, TEXT("MODIFYING pawn settings. Rotation Speed: %f"), NewRotationSpeed);
     }
-    else
-    {
-        AIMovement->RotationRate.Yaw = NodeMemory->RotationSpeed;
-        UE_LOG(LogTemp, Warning, TEXT("RESETTING pawn settings."));
-    }
-
+    else {AIMovement->RotationRate.Yaw = NodeMemory->RotationSpeed;}
 
     AIMovement->bOrientRotationToMovement = bReset;
     AIMovement->bUseControllerDesiredRotation = !bReset;
-
-    UE_LOG(LogTemp, Warning, TEXT("OrientToMovement:%i, UseControllerYaw:%i, UseControllerRotation: %i"),
-        AIMovement->bOrientRotationToMovement,
-        AIPawn->bUseControllerRotationYaw,
-        AIMovement->bUseControllerDesiredRotation);
 }

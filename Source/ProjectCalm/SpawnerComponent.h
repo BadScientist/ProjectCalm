@@ -27,13 +27,23 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = SpawnRegions, meta = (AllowPrivateAccess = "true"))
 	int32 MaxSpawns{15};
 
+	UPROPERTY(EditAnywhere, Category = Spawning, meta = (AllowPrivateAccess = "true"))
+	float MinDirectionOffset{50.0f};
+
+	UPROPERTY(EditAnywhere, Category = Spawning, meta = (AllowPrivateAccess = "true"))
+	float SpawnLocationMinOffset{3000.0f};
+
+	UPROPERTY(EditAnywhere, Category = Spawning, meta = (AllowPrivateAccess = "true"))
+	float SpawnLocationMaxOffset{6000.0f};
+
+	UPROPERTY(EditAnywhere, Category = Spawning, meta = (AllowPrivateAccess = "true"))
+	float SpawnCooldown{1.0f};
+
+	UPROPERTY(EditAnywhere, Category = Spawning, meta = (AllowPrivateAccess = "true"))
+	float SpawnCooldownRangeFactor{0.5f};
+
 	int32 CurrentSpawns{0};
 	int32 TickCount{0};
-	float MinDirectionOffset{45.0f};
-	float SpawnLocationMinOffset{1000.0f};
-	float SpawnLocationMaxOffset{1500.0f};
-	float SpawnCooldown{5.0f};
-	float SpawnCooldownRangeFactor{0.5f};
 	FTimerHandle SpawnTimerHandle;
 
 	TArray<APhotoSubjectSpawnRegion*> SpawnRegions;

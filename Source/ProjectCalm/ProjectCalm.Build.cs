@@ -8,6 +8,16 @@ public class ProjectCalm : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "GameplayTasks", "EnhancedInput", "UMG", "NavigationSystem" });
+		PublicDependencyModuleNames.AddRange(new string[]
+		{
+			"Core",
+			"CoreUObject",
+			"Engine",
+			"InputCore",
+			"GameplayTasks",
+			"EnhancedInput",
+			"UMG",
+			"NavigationSystem",
+			"PhysicsCore" });
 	}
 }

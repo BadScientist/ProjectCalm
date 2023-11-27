@@ -67,38 +67,39 @@ void APhotoSubjectAIController::SetBoolKeyValue(const FName &KeyName, bool bInVa
     GetBlackboardComponent()->SetValueAsBool(KeyName, bInValue);
 }
 
+void APhotoSubjectAIController::SetObjectKeyValue(const FName &KeyName, UObject *InObject)
+{
+    GetBlackboardComponent()->SetValueAsObject(KeyName, InObject);
+}
+
 void APhotoSubjectAIController::DetermineReaction(EAlertLevel InAlertLevel, AActor* ReactionSource)
 {
     if (AlertLevel > InAlertLevel) {return;}
     
-    TSubclassOf<UPhotoSubjectDataComponent> DataComponentClass;
-    UPhotoSubjectDataComponent* DataComponent = Cast<UPhotoSubjectDataComponent>(ReactionSource->GetComponentByClass(DataComponentClass));
-    if (DataComponentClass != nullptr)
-    {
-        for (ESubjectName PredatorName : Predators)
-        {
-            if (DataComponent->GetSubjectName() == PredatorName)
-            {
-                SetAlertLevelKeyValue(BBKEY_ALERT_LEVEL, InAlertLevel);
-                GetBlackboardComponent()->SetValueAsObject(TEXT("ReactionTarget"), ReactionSource);
-                return;
-            }
-        }
+    UPhotoSubjectDataComponent* DataComponent = ReactionSource->FindComponentByClass<UPhotoSubjectDataComponent>();
+    EAlertLevel NewAlertLevel = InAlertLevel;
 
+    if (DataComponent != nullptr)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("AICONTROLLER::%s::ReactionSource SubjectName:%s"), *GetActorNameOrLabel(), *SubjectName::SubjectNameEnumToString(DataComponent->GetSubjectName()));
         for (ESubjectName PreyName : Prey)
         {
-            if (DataComponent->GetSubjectName() == PreyName)
+            if (DataComponent->GetSubjectName() == PreyName && NewAlertLevel == EAlertLevel::ALARMED)
             {
-                SetAlertLevelKeyValue(BBKEY_ALERT_LEVEL, InAlertLevel == EAlertLevel::ALARMED ? EAlertLevel::AGGRO : InAlertLevel);
-                return;
+                NewAlertLevel = EAlertLevel::AGGRO;
+                break;
             }
         }
     }
 
     else if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(ReactionSource))
     {
-        SetAlertLevelKeyValue(BBKEY_ALERT_LEVEL, InAlertLevel);
-        GetBlackboardComponent()->SetValueAsObject(TEXT("ReactionTarget"), ReactionSource);
-        return;
+        if (bIsHostileToPlayer && NewAlertLevel == EAlertLevel::ALARMED)
+        {
+            NewAlertLevel = EAlertLevel::AGGRO;
+        }
     }
+
+    SetAlertLevelKeyValue(BBKEY_ALERT_LEVEL, NewAlertLevel);
+    SetObjectKeyValue(BBKEY_REACTION_TARGET, ReactionSource);
 }

@@ -13,6 +13,7 @@
 #define BBKEY_TARGET_LOCATION   TEXT("TargetLocation")
 #define BBKEY_ALERT_LEVEL       TEXT("AlertLevel")
 #define BBKEY_ACTIVE_BEHAVIOR   TEXT("ActiveBehavior")
+#define BBKEY_REACTION_TARGET 	TEXT("ReactionTarget")
 
 enum ESubjectName;
 
@@ -36,6 +37,8 @@ private:
 	TArray<TEnumAsByte<ESubjectName>> Predators;
 	UPROPERTY(EditAnywhere, Category = Reactions)
 	TArray<TEnumAsByte<ESubjectName>> Prey;
+	UPROPERTY(EditAnywhere, Category = Reactions)
+	bool bIsHostileToPlayer{false};
 
 	EAlertLevel AlertLevel{EAlertLevel::CALM};
 	EPhotoSubjectBehavior ActiveBehavior{EPhotoSubjectBehavior::NONE};
@@ -55,6 +58,7 @@ public:
 	void SetBehaviorKeyValue(const FName& KeyName, EPhotoSubjectBehavior InBehavior);
 	void SetVectorKeyValue(const FName& KeyName, FVector InVector);
 	void SetBoolKeyValue(const FName& KeyName, bool bInValue);
+	void SetObjectKeyValue(const FName& KeyName, UObject* InObject);
 	
 	void DetermineReaction(EAlertLevel InAlertLevel, AActor* ReactionSource);
 

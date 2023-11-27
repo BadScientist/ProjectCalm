@@ -22,7 +22,6 @@ void APhotoSubjectSpawnRegion::Initialize()
     {
         if (SpawnableSubjects[i].SubjectClass == nullptr)
         {
-            UE_LOG(LogTemp, Warning, TEXT("SpawnRegion:: SubjectClass == Nullptr for SpawnableSubjects[%i]. Removing item from array."), i);
             SpawnableSubjects.RemoveAt(i);
             --i;
         }
@@ -34,6 +33,8 @@ void APhotoSubjectSpawnRegion::Initialize()
 
 void APhotoSubjectSpawnRegion::BeginPlay()
 {
+    Super::BeginPlay();
+
     Initialize();
 }
 
@@ -57,23 +58,28 @@ int32 APhotoSubjectSpawnRegion::PickSubject()
 
 bool APhotoSubjectSpawnRegion::Contains2D(FVector TestLocation)
 {
-    FVector RegionLocation = GetActorLocation();
-    if (RegionLocation.X - Size.X <= TestLocation.X \
-        && TestLocation.X <= RegionLocation.X + Size.X \
-        && RegionLocation.Y - Size.Y <= TestLocation.Y \
-        && TestLocation.Y <= RegionLocation.Y + Size.Y) {return true;}
+    // UE_LOG(LogTemp, Warning, TEXT("SpawnRegion:: Checking TestLocation %s"), *TestLocation.ToCompactString());
 
-    return false;
+    FVector RegionLocation = GetActorLocation();
+    FVector TestOffset = TestLocation - RegionLocation;
+    FVector AdjustedTestOffset = TestOffset.RotateAngleAxis(-1 * GetActorRotation().Yaw, FVector::UpVector);
+    FVector AdjustedTestLocation = RegionLocation + AdjustedTestOffset;
+
+    bool bIsInRegion = RegionLocation.X - (Size.X / 2) <= AdjustedTestLocation.X \
+        && AdjustedTestLocation.X <= RegionLocation.X + (Size.X / 2) \
+        && RegionLocation.Y - (Size.Y / 2) <= AdjustedTestLocation.Y \
+        && AdjustedTestLocation.Y <= RegionLocation.Y + (Size.Y / 2);
+    
+    // DrawDebugPoint(GetWorld(), TestLocation, 50, bIsInRegion ? FColor::Green : FColor::Red, true);
+    return bIsInRegion;
 }
 
 bool APhotoSubjectSpawnRegion::SpawnPhotoSubject(FVector SpawnLocation)
 {
+    // UE_LOG(LogTemp, Warning, TEXT("SpawnRegion:: Attempting to spawn at %s"), *SpawnLocation.ToCompactString());
+
     int32 SubjectIdx = PickSubject();
-    if (SubjectIdx < 0) 
-    {
-        UE_LOG(LogTemp, Warning, TEXT("SpawnRegion:: Invalid Index"));
-        return false;
-    }
+    if (SubjectIdx < 0) {return false;}
 
     // Construct BP Actor at the upper plane of the SpawnRegion
     FVector SafeSpawnLocation = FVector(SpawnLocation.X, SpawnLocation.Y, GetActorLocation().Z);
@@ -81,18 +87,10 @@ bool APhotoSubjectSpawnRegion::SpawnPhotoSubject(FVector SpawnLocation)
         SpawnableSubjects[SubjectIdx].SubjectClass.Get(),
         SafeSpawnLocation,
         FRotator(0,0,0));
-    if (SpawnedSubject == nullptr)
-    {
-        UE_LOG(LogTemp, Warning, TEXT("SpawnRegion:: Failed to spawn Subject"));
-        return false;
-    }
+    if (SpawnedSubject == nullptr) {return false;}
 
     UPhotoSubjectComponent* SubjectComp = SpawnedSubject->FindComponentByClass<UPhotoSubjectComponent>();
-    if (SubjectComp == nullptr) 
-    {
-        UE_LOG(LogTemp, Warning, TEXT("SpawnRegion:: Spawned Actor has no PhotoSubjectComponent"));
-        return !SpawnedSubject->Destroy();
-    }
+    if (SubjectComp == nullptr) {return !SpawnedSubject->Destroy();}
 
     // Move Actor to the ground
     // On success, track spawn counts

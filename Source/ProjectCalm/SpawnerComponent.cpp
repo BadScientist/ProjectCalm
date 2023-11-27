@@ -58,9 +58,11 @@ void USpawnerComponent::SpawnPhotoSubject()
 	if (SpawnRegions.IsEmpty() || CurrentSpawns >= MaxSpawns) {return;}
 	
 	FVector SpawnLocation = GetComponentLocation();
-	FVector Offset = GetForwardVector().RotateAngleAxis(FMath::RandRange(50, 310), GetUpVector());
+	FVector Offset = GetForwardVector().RotateAngleAxis(FMath::RandRange(MinDirectionOffset, 360 - MinDirectionOffset), GetUpVector());
 	Offset *= FMath::RandRange(SpawnLocationMinOffset, SpawnLocationMaxOffset);
 	SpawnLocation += Offset;
+	
+	// UE_LOG(LogTemp, Error, TEXT("SpawnerComponent:: Requesting spawn at %s."), *SpawnLocation.ToCompactString());
 
 	TArray<APhotoSubjectSpawnRegion*> ValidRegions;
 	for (APhotoSubjectSpawnRegion* SpawnRegion : SpawnRegions)
