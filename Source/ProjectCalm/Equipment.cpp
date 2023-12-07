@@ -3,10 +3,13 @@
 
 #include "Equipment.h"
 #include "PlayerCharacter.h"
+#include "Utilities/LogMacros.h"
 
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
 
+
+DEFINE_LOG_CATEGORY(LogEquipment)
 
 // Sets default values
 AEquipment::AEquipment()
@@ -19,7 +22,7 @@ AEquipment::AEquipment()
 
 void AEquipment::Equip(AActor* OwningActor, FName SocketName)
 {
-	if (OwningActor == nullptr) {return;}
+	CHECK_NULLPTR_RET(OwningActor, LogEquipment, "Equipment:: No OwningActor!");
 
 	SetOwner(OwningActor);
 
@@ -43,19 +46,19 @@ void AEquipment::Equip(AActor* OwningActor, FName SocketName)
 
 APlayerCharacter* AEquipment::GetPlayerCharacter()
 {
-	if (AActor* OwningActor = GetOwner())
+	AActor* OwningActor = GetOwner();
+	CHECK_NULLPTR_RETVAL(OwningActor, LogEquipment, "Equipment:: No Owning Character found!", nullptr);
+
+	if (APlayerCharacter* OwningCharacter = Cast<APlayerCharacter>(OwningActor))
 	{
-		if (APlayerCharacter* OwningCharacter = Cast<APlayerCharacter>(OwningActor))
-		{
-			return OwningCharacter;
-		}
-		else if (AEquipment* OwningEquipment = Cast<AEquipment>(OwningActor))
-		{
-			return OwningEquipment->GetPlayerCharacter();
-		}
+		return OwningCharacter;
+	}
+	else if (AEquipment* OwningEquipment = Cast<AEquipment>(OwningActor))
+	{
+		return OwningEquipment->GetPlayerCharacter();
 	}
 
-	UE_LOG(LogTemp, Error, TEXT("%s: NO OWNING CHARACTER"), *GetActorNameOrLabel());
+	UE_LOG(LogTemp, Error, TEXT("Equipment:: No Owning Character found!"));
 	return nullptr;
 }
 
@@ -128,8 +131,5 @@ bool AEquipment::GetPlayerFlag(FName FlagName)
 
 void AEquipment::SetPlayerFlag(FName FlagName, bool Value)
 {
-	if (APlayerCharacter* OwningCharacter = GetPlayerCharacter()) 
-	{
-		OwningCharacter->SetFlag(FlagName, Value);
-	}
+	if (APlayerCharacter* OwningCharacter = GetPlayerCharacter()) {OwningCharacter->SetFlag(FlagName, Value);}
 }

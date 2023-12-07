@@ -65,6 +65,6 @@ void UNoiseListenerComponent::ReactToNoise(AActor *SourceActor, EAlertLevel Aler
 	APhotoSubjectAIController* OwnerController = Cast<APhotoSubjectAIController>(OwnerPawn->GetController());
 	if (OwnerController == nullptr) {return;}
 
-	UE_LOG(LogTemp, Warning, TEXT("NoiseListenerComponent::%s reacting to %s."), *GetOwner()->GetActorNameOrLabel(), *SourceActor->GetActorNameOrLabel());
+	// UE_LOG(LogTemp, Warning, TEXT("NoiseListenerComponent::%s reacting to %s."), *GetOwner()->GetActorNameOrLabel(), *SourceActor->GetActorNameOrLabel());
 	OwnerController->DetermineReaction(AlertLevel, SourceActor);
 }

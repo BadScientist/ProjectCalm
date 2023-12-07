@@ -9,8 +9,10 @@
 #include "PhotoSubjectData.h"
 #include "PhotoSubjectPointOfInterest.h"
 #include "InfoFlagNameDefinitions.h"
+#include "Utilities/LogMacros.h"
 
 #include "Components/Image.h"
+#include "Components/TextBlock.h"
 #include "Engine/TextureRenderTarget2D.h"
 #include "Blueprint/WidgetTree.h"
 #include "InputActionValue.h"
@@ -18,16 +20,9 @@
 #include "Kismet/GameplayStatics.h"
 
 
-// Sets default values
 APhotoCameraEquipment::APhotoCameraEquipment()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
-
-    ConstructorHelpers::FClassFinder<UUserWidget> CameraHUDBPClass(TEXT("/Game/ProjectCalm/Blueprints/UI/WBP_CameraHUD"));
-    if (!ensure(CameraHUDBPClass.Class != nullptr)) {return;}
-    CameraHUDClass = CameraHUDBPClass.Class;
-
 	PrimaryActionCooldown = 0.5f;
 }
 
@@ -38,88 +33,176 @@ void APhotoCameraEquipment::Equip(AActor* OwningActor, FName SocketName)
 	SetPlayerFlag(FLAG_PLAYER_HAS_CAMERA, true);
 }
 
-void APhotoCameraEquipment::RaiseCamera()
+void APhotoCameraEquipment::OnSecondaryButtonDown()
 {
+	// UE_LOG(LogTemp, Warning, TEXT("PhotoCamera::OnSecondaryButtonDown()"));
+	GetWorldTimerManager().PauseTimer(BlendViewTimerHandle);
 
-	PauseTimers();
-
-	APlayerCharacter* OwningCharacter = GetPlayerCharacter();
-	if (OwningCharacter != nullptr && RaiseAnimation != nullptr)
+	switch (CameraState)
 	{
-		if (!GetPlayerFlag(FLAG_CAMERA_RAISE_ANIMATION_END))
-		{
-			float AnimationTimeRemaining = GetWorldTimerManager().GetTimerRemaining(AnimationTimerHandle);
-			if (AnimationTimeRemaining >= 0) {RaiseAnimation->BlendIn = AnimationTimeRemaining;}
-			else {RaiseAnimation->BlendIn = DefaultAnimationBlendTime;}
-
-			float CallbackTime = OwningCharacter->PlayAnimMontage(RaiseAnimation, 1.0f) - 0.25f;  // Early callback prevents animation blending issues
-			GetWorldTimerManager().SetTimer(AnimationTimerHandle, this, &APhotoCameraEquipment::EnterCameraView, CallbackTime);
-			SetPlayerFlag(FLAG_CAMERA_RAISE_ANIMATION_START, true);
-		}
-		else {EnterCameraView();}
+	case ECameraState::DEFAULT:
+		PlayRaiseLowerAnimation();
+		break;
+	case ECameraState::RAISING:
+		PlayRaiseLowerAnimation();
+		break;
+	case ECameraState::BLENDING_IN:
+		EnterCameraView();
+		break;
+	case ECameraState::READY:
+		EnterCameraView();
+		break;
+	case ECameraState::BLENDING_OUT:
+		EnterCameraView();
+		break;
+	case ECameraState::LOWERING:
+		PlayRaiseLowerAnimation();
+		break;
+	default:
+		break;
 	}
+}
+
+void APhotoCameraEquipment::PlayRaiseLowerAnimation(bool bRaise)
+{
+	// UE_LOG(LogTemp, Warning, TEXT("PhotoCamera::PlayRaiseLowerAnimation()"));
+	
+	SetCameraState(bRaise ? ECameraState::RAISING : ECameraState::LOWERING);
 }
 
 void APhotoCameraEquipment::EnterCameraView()
 {
-	SetPlayerFlag(FLAG_CAMERA_RAISE_ANIMATION_END, true);
+	// UE_LOG(LogTemp, Warning, TEXT("PhotoCamera::EnterCameraView()"));
 	
-	float BlendTime = BlendViewToPhotoCamera();	
-	GetWorldTimerManager().SetTimer(BlendViewTimerHandle, this, &APhotoCameraEquipment::ActivateRaisedCameraMode, BlendTime);
-	
-	SetPlayerFlag(FLAG_CAMERA_BLENDING, true);
+	if (CameraState != ECameraState::READY)
+	{
+		float BlendTime = BlendViewToPhotoCamera();
+		if (!FMath::IsNearlyZero(BlendTime))
+		{
+			GetWorldTimerManager().SetTimer(BlendViewTimerHandle, this, &APhotoCameraEquipment::OnBlendViewTimerElapsed, BlendTime);
+			return;
+		}
+	}
+
+	OnBlendViewTimerElapsed();
 }
 
 void APhotoCameraEquipment::ActivateRaisedCameraMode()
 {
-	SetPlayerFlag(FLAG_CAMERA_BLENDING, false);
-	
-	DisplayCameraHUD(true);
-	
-	SetPlayerFlag(FLAG_CAMERA_VIEW_ACTIVE, true);
+	// UE_LOG(LogTemp, Warning, TEXT("PhotoCamera::ActivateRaisedCameraMode()"));
+
+	DisplayCameraHUD(true);	
+	SetCameraState(ECameraState::READY);
 }
 
-void APhotoCameraEquipment::DeactivateRaisedCameraMode()
+void APhotoCameraEquipment::OnSecondaryButtonUp()
 {
-	PauseTimers();
-	
-	DisplayCameraHUD(false);
-	
-	ExitCameraView();
+	// UE_LOG(LogTemp, Warning, TEXT("PhotoCamera::OnSecondaryButtonUp()"));
+	GetWorldTimerManager().PauseTimer(BlendViewTimerHandle);
+
+	switch (CameraState)
+	{
+	case ECameraState::DEFAULT:
+		PlayRaiseLowerAnimation(false);
+		break;
+	case ECameraState::RAISING:
+		PlayRaiseLowerAnimation(false);
+		break;
+	case ECameraState::BLENDING_IN:
+		ExitCameraView();
+		break;
+	case ECameraState::READY:
+		ExitCameraView();
+		break;
+	case ECameraState::BLENDING_OUT:
+		ExitCameraView();
+		break;
+	case ECameraState::LOWERING:
+		PlayRaiseLowerAnimation(false);
+		break;
+	default:
+		break;
+	}
+}
+
+void APhotoCameraEquipment::OnAnimationEnded()
+{
+	// UE_LOG(LogTemp, Warning, TEXT("PhotoCamera::OnAnimationEnded()"));
+	switch (CameraState)
+	{
+	case ECameraState::RAISING:
+		EnterCameraView();
+		break;
+	case ECameraState::LOWERING:
+		EnterDefaultState();
+		break;	
+	default:
+		break;
+	}
+}
+
+void APhotoCameraEquipment::OnBlendViewTimerElapsed()
+{
+	// UE_LOG(LogTemp, Warning, TEXT("PhotoCamera::OnBlendViewTimerElapsed()"));
+	switch (CameraState)
+	{
+	case ECameraState::BLENDING_IN:
+		ActivateRaisedCameraMode();
+		break;
+	case ECameraState::READY:
+		ActivateRaisedCameraMode();
+		break;
+	case ECameraState::BLENDING_OUT:
+		LowerCamera();
+		break;	
+	default:
+		break;
+	}
 }
 
 void APhotoCameraEquipment::ExitCameraView()
 {
-	if (GetPlayerFlag(FLAG_CAMERA_VIEW_ACTIVE))
-	{
-		float BlendTime = BlendViewToPlayerCharacter();
-		GetWorldTimerManager().SetTimer(BlendViewTimerHandle, this, &APhotoCameraEquipment::LowerCamera, BlendTime);
-		SetPlayerFlag(FLAG_CAMERA_VIEW_ACTIVE, false);
-	}
-	else {LowerCamera();}
+	// UE_LOG(LogTemp, Warning, TEXT("PhotoCamera::ExitCameraView()"));
+	
+	DisplayCameraHUD(false);
+
+	float BlendTime = BlendViewToPlayerCharacter();
+	SetCameraState(ECameraState::BLENDING_OUT);
+	if (!FMath::IsNearlyZero(BlendTime)) {GetWorldTimerManager().SetTimer(BlendViewTimerHandle, this, &APhotoCameraEquipment::OnBlendViewTimerElapsed, BlendTime);}
+	else {OnBlendViewTimerElapsed();}
 }
 
 void APhotoCameraEquipment::LowerCamera()
 {
-	UE_LOG(LogTemp, Warning, TEXT("PhotoCamera: LowerCamera"));
-	if (!GetPlayerFlag(FLAG_CAMERA_RAISE_ANIMATION_START)) {return;}
+	// UE_LOG(LogTemp, Warning, TEXT("PhotoCamera::LowerCamera()"));
 
-	APlayerCharacter* OwningCharacter = GetPlayerCharacter();
-	if (OwningCharacter != nullptr && LowerAnimation != nullptr)
-	{
-		float AnimationTimeRemaining = GetWorldTimerManager().GetTimerRemaining(AnimationTimerHandle);
-		if (AnimationTimeRemaining >= 0) {LowerAnimation->BlendIn = AnimationTimeRemaining;}
-		else {LowerAnimation->BlendIn = DefaultAnimationBlendTime;}
-
-		GetWorldTimerManager().SetTimer(AnimationTimerHandle, this, &APhotoCameraEquipment::EnterDefaultState, OwningCharacter->PlayAnimMontage(LowerAnimation, 1.0f));
-		SetPlayerFlag(FLAG_CAMERA_RAISE_ANIMATION_END, false);
-	}
+	PlayRaiseLowerAnimation(false);
 }
 
 void APhotoCameraEquipment::EnterDefaultState()
 {
-	UE_LOG(LogTemp, Warning, TEXT("PhotoCamera: EnterDefaultState"));
-	SetPlayerFlag(FLAG_CAMERA_RAISE_ANIMATION_START, false);
+	// UE_LOG(LogTemp, Warning, TEXT("PhotoCamera::EnterDefaultState()"));
+
+	SetCameraState(ECameraState::DEFAULT);
+}
+
+void APhotoCameraEquipment::SetCameraState(ECameraState InState)
+{
+	SetPlayerFlag(FLAG_CAMERA_VIEW_ACTIVE, InState == ECameraState::READY);
+	SetPlayerFlag(FLAG_CAMERA_RAISED,
+		InState == ECameraState::RAISING ||
+		InState == ECameraState::BLENDING_IN ||
+		InState == ECameraState::READY);
+	CameraState = InState;
+
+	// FString StateString = FString(
+	// 	InState == ECameraState::DEFAULT ? "Default" :
+	// 	InState == ECameraState::RAISING ? "Raising" :
+	// 	InState == ECameraState::BLENDING_IN ? "Blending In" :
+	// 	InState == ECameraState::READY ? "Ready" :
+	// 	InState == ECameraState::BLENDING_OUT ? "Blending Out" :
+	// 	InState == ECameraState::LOWERING ? "Lowering" : "ERROR");
+	// UE_LOG(LogTemp, Warning, TEXT("PhotoCamera::CameraState:%s"), *StateString);
 }
 
 float APhotoCameraEquipment::ActivateCameraFlash()
@@ -137,17 +220,13 @@ void APhotoCameraEquipment::TakePhoto()
 	FPhotoData NewPhoto = AttachedCameraLens->CapturePhoto();
 	Photos.Add(NewPhoto);
 
-	DisplayLastPhoto();
-}
-
-bool APhotoCameraEquipment::IsAnimationRunning()
-{
-	return GetWorldTimerManager().GetTimerRemaining(AnimationTimerHandle) > 0;
+	UpdateHUDOverlay();
 }
 
 void APhotoCameraEquipment::PrimaryAction(const FInputActionValue& Value)
 {	
-	if (!GetPlayerFlag(FLAG_CAMERA_VIEW_ACTIVE)) {return;}
+	if (CameraState != ECameraState::READY) {return;}
+
 	if (Value.Get<bool>() && !bPrimaryActionOnCooldown)
 	{
 		SetPrimaryActionOnCooldown();
@@ -165,13 +244,13 @@ void APhotoCameraEquipment::SecondaryAction(const FInputActionValue& Value)
 
 	if (bValue)
 	{
-		UE_LOG(LogTemp, Error, TEXT("-----RMB DOWN-----"));
-		RaiseCamera();
+		UE_LOG(LogInput, Display, TEXT("------------------------------------------------------------RMB DOWN------------------------------------------------------------"));
+		OnSecondaryButtonDown();
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("-----RMB UP-----"));
-		DeactivateRaisedCameraMode();
+		UE_LOG(LogInput, Display, TEXT("-------------------------------------------------------------RMB UP-------------------------------------------------------------"));
+		OnSecondaryButtonUp();
 	}
 }
 
@@ -183,6 +262,7 @@ FPhotoData APhotoCameraEquipment::GetLastPhoto()
 
 float APhotoCameraEquipment::BlendViewToPhotoCamera()
 {
+	SetCameraState(ECameraState::BLENDING_IN);
 	if (AttachedCameraLens == nullptr) {return 0.0f;}
 
 	USceneCaptureComponent2D* LensCaptureComp = AttachedCameraLens->GetSceneCaptureComponent();
@@ -198,18 +278,9 @@ float APhotoCameraEquipment::BlendViewToPhotoCamera()
 
 float APhotoCameraEquipment::BlendViewToPlayerCharacter()
 {
-	if (APlayerCharacter* PlayerCharacter = GetPlayerCharacter())
-	{
-		return PlayerCharacter->ResetCameraLocation();
-	}
+	if (APlayerCharacter* PlayerCharacter = GetPlayerCharacter()) {return PlayerCharacter->ResetCameraLocation();}
 
 	return 0.0f;
-}
-
-void APhotoCameraEquipment::PauseTimers()
-{
-	GetWorldTimerManager().PauseTimer(BlendViewTimerHandle);
-	GetWorldTimerManager().PauseTimer(AnimationTimerHandle);
 }
 
 void APhotoCameraEquipment::DisplayCameraHUD(bool bDisplay)
@@ -217,31 +288,55 @@ void APhotoCameraEquipment::DisplayCameraHUD(bool bDisplay)
 	if (bDisplay)
 	{
 		UGameInstance* GameInstance = GetGameInstance();
-		CameraHUD = CreateWidget<UUserWidget>(GameInstance, CameraHUDClass, TEXT("CameraHUD"));
-		if (CameraHUD != nullptr && !CameraHUD->IsInViewport())
+		if (CameraHUD != nullptr) {CameraHUDInstance = CreateWidget<UUserWidget>(GameInstance, CameraHUD, TEXT("CameraHUD"));}
+		if (CameraHUDInstance != nullptr && !CameraHUDInstance->IsInViewport())
 		{
-			CameraHUD->AddToViewport();
-			LastPhotoImageWidget = CameraHUD->WidgetTree->FindWidget<UImage>(TEXT("LastPhotoImage"));
-			DisplayLastPhoto();
+			CameraHUDInstance->AddToViewport();
+			LastPhotoImageWidget = CameraHUDInstance->WidgetTree->FindWidget<UImage>(TEXT("LastPhotoImage"));
+			FilmTextWidget = CameraHUDInstance->WidgetTree->FindWidget<UTextBlock>(TEXT("FilmText"));
+			UpdateHUDOverlay();
 		}
 	}
 	else
 	{
-		if (CameraHUD != nullptr && CameraHUD->IsInViewport()) {CameraHUD->RemoveFromParent();}
+		if (CameraHUDInstance != nullptr && CameraHUDInstance->IsInViewport())
+		{
+			CameraHUDInstance->RemoveFromParent();
+			CameraHUDInstance = nullptr;
+		}
 	}
+}
+
+void APhotoCameraEquipment::UpdateHUDOverlay()
+{
+	if (FilmTextWidget != nullptr)
+	{
+		FString FilmString = FString::Printf(TEXT("%i/%i"), Photos.Num(), MaxPhotos);
+		FilmTextWidget->SetText(FText::FromString(FilmString));
+	}
+	DisplayLastPhoto();
 }
 
 void APhotoCameraEquipment::DisplayLastPhoto()
 {
+	if (Photos.IsEmpty()) {return;}
+
+	CHECK_NULLPTR_RET(LastPhotoImageWidget, LogEquipment, "PhotoCameraEquipment:: No LastPhotoImageWidget set!");
+
 	FPhotoData LastPhoto = GetLastPhoto();
 	UTextureRenderTarget2D* PhotoImage = LastPhoto.Image;
 
-	if (LastPhotoImageWidget == nullptr) {return;}
+	CHECK_NULLPTR_RET(PhotoImage, LogEquipment, "PhotoCameraEquipment:: LastPhoto has no image!");
+	if (!PhotoImage->IsValidLowLevel())
+	{
+		UE_LOG(LogEquipment, Error, TEXT("PhotoCameraEquipment:: PhotoImage is invalid!"));
+		return;
+	}
+
 	UMaterialInstanceDynamic* PhotoRenderMat = LastPhotoImageWidget->GetDynamicMaterial();
+	CHECK_NULLPTR_RET(PhotoRenderMat, LogEquipment, "PhotoCameraEquipment:: LastPhotoImageWidget has no DynamicMaterial!");
 
-	if (PhotoRenderMat == nullptr || PhotoImage == nullptr) {return;}	
 	PhotoRenderMat->SetTextureParameterValue(TEXT("PhotoRender"), PhotoImage);
-
 	FVector2D DisplaySize = FVector2D(PhotoImage->SizeX/10, PhotoImage->SizeY/10);
 	LastPhotoImageWidget->SetDesiredSizeOverride(DisplaySize);
 	LastPhotoImageWidget->SetVisibility(ESlateVisibility::Visible);
@@ -251,7 +346,7 @@ void APhotoCameraEquipment::DisplayLastPhoto()
 
 void APhotoCameraEquipment::LogPhotoData(FPhotoData Photo)
 {
-	FString PhotoString = FString::Printf(TEXT("Photo taken at %s:\nSubjects: "), *(Photo.TimeTaken.ToString()));
+	FString PhotoString = FString::Printf(TEXT("PHOTOCAMERA::Photo taken at %s:\nSubjects: "), *(Photo.TimeTaken.ToString()));
 	float Score = 0;
 	for (FPhotoSubjectData Subject : Photo.Subjects)
 	{
@@ -264,5 +359,5 @@ void APhotoCameraEquipment::LogPhotoData(FPhotoData Photo)
 		}
 	}
 	PhotoString.Append(FString::Printf(TEXT("\nTotal Score: %f"), Score));
-	UE_LOG(LogTemp, Warning, TEXT("%s"), *PhotoString);
+	UE_LOG(LogEquipment, Display, TEXT("%s"), *PhotoString);
 }

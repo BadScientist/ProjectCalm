@@ -27,12 +27,12 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ViewBlender, meta = (AllowPrivateAccess = "true"))
 	UMaterialParameterCollection* BlendParametersAsset;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ViewBlender, meta = (AllowPrivateAccess = "true"))
-	float DefaultBlendTime = 0.25f;
+	float DefaultBlendTime{0.25f};
 
 	UMaterialParameterCollectionInstance* BlendParameters;
 	UCameraComponent* CharacterEyes;
 	USceneCaptureComponent2D* TargetSceneCaptureComponent;
-	float ViewBlendTime = 0.0f;
+	float ViewBlendTime{0.0f};
 
 public:
 	void SetCharacterEyes(UCameraComponent* CameraComp);
@@ -40,12 +40,14 @@ public:
 	float BlendToDefaultView();
 
 private:
-	float DefaultEyesFOV = 90;
-	float TargetBlendAlpha = 0.0f;
-	float CurrentBlendAlpha = 0.0f;
-	float BlendStartTime = 0.0f;
-	bool bBlending = false;
-	bool bDefaultView = true;
+	float DefaultEyesFOV{90};
+	float TargetBlendAlpha{0.0f};
+	float CurrentBlendAlpha{0.0f};
+	float BlendStartTime{0.0f};
+	bool bBlending{false};
+	bool bDefaultView{true};
+	bool bResetViewNextFrame{false};
+	bool bSetViewToLensNextFrame{false};
 
 	void SetEyePOV();
 	void SetViewToSceneCapture(USceneCaptureComponent2D* SceneCaptureComponent);
@@ -53,9 +55,12 @@ private:
 	float GetScalarBlendParam();
 	void SetScalarBlendParam(float Alpha);
 	
-	float StartBlend(float TargetAlpha, USceneCaptureComponent2D* SceneCaptureComponent);
 	float StartBlend(float TargetAlpha);
 	void UpdateCurrentBlendAlpha(float DeltaTime);
 	void EndBlend();
+
+#if WITH_EDITORONLY_DATA
+	FString LastLog;
+#endif
 	
 };

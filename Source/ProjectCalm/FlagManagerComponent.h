@@ -33,6 +33,7 @@ class PROJECTCALM_API UFlagManagerComponent : public UActorComponent
 
 public:
 	UFlagManagerComponent();
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 protected:
 	UPROPERTY(EditAnywhere, Category = Flags)
@@ -43,5 +44,10 @@ public:
 	void SetFlag(FName SearchName, bool Value);
 
 	FString GetAllFlagsString();
+
+#if WITH_EDITORONLY_DATA
+private:
+	FString LastLog;
+#endif
 		
 };

@@ -18,6 +18,7 @@ public class ProjectCalm : ModuleRules
 			"EnhancedInput",
 			"UMG",
 			"NavigationSystem",
-			"PhysicsCore" });
+			"PhysicsCore"
+		});
 	}
 }

@@ -81,7 +81,7 @@ void APhotoSubjectAIController::DetermineReaction(EAlertLevel InAlertLevel, AAct
 
     if (DataComponent != nullptr)
     {
-        UE_LOG(LogTemp, Warning, TEXT("AICONTROLLER::%s::ReactionSource SubjectName:%s"), *GetActorNameOrLabel(), *SubjectName::SubjectNameEnumToString(DataComponent->GetSubjectName()));
+        // UE_LOG(LogTemp, Warning, TEXT("AICONTROLLER::%s::ReactionSource SubjectName:%s"), *GetActorNameOrLabel(), *SubjectName::SubjectNameEnumToString(DataComponent->GetSubjectName()));
         for (ESubjectName PreyName : Prey)
         {
             if (DataComponent->GetSubjectName() == PreyName && NewAlertLevel == EAlertLevel::ALARMED)

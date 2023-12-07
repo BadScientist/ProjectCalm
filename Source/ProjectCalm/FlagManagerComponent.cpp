@@ -13,6 +13,19 @@ UFlagManagerComponent::UFlagManagerComponent()
 	// ...
 }
 
+void UFlagManagerComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction)
+{
+#if WITH_EDITORONLY_DATA
+	FString CurrentLog = FString::Printf(TEXT("FlagManagerComponent::%s"), *GetAllFlagsString());
+
+	if (CurrentLog != LastLog)
+	{
+		UE_LOG(LogTemp, Display, TEXT("%s"), *CurrentLog);
+		LastLog = CurrentLog;
+	}
+#endif
+}
+
 bool UFlagManagerComponent::GetFlag(FName SearchName)
 {
 	if (InfoFlags.IsEmpty()) {return false;}
@@ -45,7 +58,7 @@ FString UFlagManagerComponent::GetAllFlagsString()
 
 	for (FInfoFlag Flag : InfoFlags)
 	{
-		FString FlagString = FString::Printf(TEXT("%s: %s | "), *Flag.FlagName.ToString(), Flag.Value ? TEXT("true") : TEXT("false"));
+		FString FlagString = FString::Printf(TEXT("%s=%i|"), *Flag.FlagName.ToString(), Flag.Value);
 		ResultString.Append(FlagString);
 	}
 

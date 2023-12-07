@@ -9,6 +9,7 @@
 #include "CameraFlash.h"
 #include "CameraLens.h"
 #include "SpawnerComponent.h"
+#include "Utilities/LogMacros.h"
 
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -26,10 +27,10 @@ APlayerCharacter::APlayerCharacter()
 
 	//Setup first person camera
 	FirstPersonCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FirstPersonCamera"));
-	if (FirstPersonCamera == nullptr) {return;}
+	CHECK_NULLPTR_RET(FirstPersonCamera, LogActor, "PlayerCharacter:: Failed to create camera component!");
 	
 	FirstPersonCamera->SetupAttachment(GetCapsuleComponent());
-	FirstPersonCamera->SetRelativeLocation(FVector(-20.0f, 0.0f, 65.0f));
+	FirstPersonCamera->SetRelativeLocation(FVector(-25.0f, 0.0f, 65.0f));
 	FirstPersonCamera->bUsePawnControlRotation = true;
 	
 	// Setup player mesh
@@ -54,17 +55,17 @@ APlayerCharacter::APlayerCharacter()
 	if (SpawnerComponent != nullptr) {SpawnerComponent->SetupAttachment(RootComponent);}
 
 	// Temporarily add camera with lens and flash to player on startup
-	// TODO: Add Menu System for adding equipment
+	// TODO: Add Inventory and Menu System for adding equipment
     ConstructorHelpers::FClassFinder<APhotoCameraEquipment> CameraBPClass(TEXT("/Game/ProjectCalm/Blueprints/Equipment/BP_PhotoCameraEquipment_Basic"));
-    if (!ensure(CameraBPClass.Class != nullptr)) {return;}
+	CHECK_NULLPTR_RET(CameraBPClass.Class, LogActor, "PlayerCharacter:: Failed to find PhotoCamera class!");
     PhotoCameraClass = CameraBPClass.Class;
 	
     ConstructorHelpers::FClassFinder<ACameraLens> CameraLensBPClass(TEXT("/Game/ProjectCalm/Blueprints/Equipment/BP_CameraLensBasic"));
-    if (!ensure(CameraLensBPClass.Class != nullptr)) {return;}
+	CHECK_NULLPTR_RET(CameraLensBPClass.Class, LogActor, "PlayerCharacter:: Failed to find CameraLens class!");
     CameraLensClass = CameraLensBPClass.Class;
 	
     ConstructorHelpers::FClassFinder<ACameraFlash> CameraFlashBPClass(TEXT("/Game/ProjectCalm/Blueprints/Equipment/BP_CameraFlash"));
-    if (!ensure(CameraFlashBPClass.Class != nullptr)) {return;}
+	CHECK_NULLPTR_RET(CameraFlashBPClass.Class, LogActor, "PlayerCharacter:: Failed to find CameraFlash class!");
     CameraFlashClass = CameraFlashBPClass.Class;
 }
 
@@ -129,21 +130,21 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 bool APlayerCharacter::GetFlag(FName FlagName) const
 {
-	if (FlagManagerComponent == nullptr) {return false;}
+	CHECK_NULLPTR_RETVAL(FlagManagerComponent, LogActor, "PlayerCharacter:: No FlagManagerComponent!", false);
 	return FlagManagerComponent->GetFlag(FlagName);
 }
 
 void APlayerCharacter::SetFlag(FName FlagName, bool Value)
-{	
-	if (FlagManagerComponent == nullptr) {return;}
+{
+	CHECK_NULLPTR_RET(FlagManagerComponent, LogActor, "PlayerCharacter:: No FlagManagerComponent!");
 	FlagManagerComponent->SetFlag(FlagName, Value);
 	
-	UE_LOG(LogTemp, Display, TEXT("All Flags: %s"), *(FlagManagerComponent->GetAllFlagsString()));
+	// UE_LOG(LogTemp, Display, TEXT("All Flags: %s"), *(FlagManagerComponent->GetAllFlagsString()));
 }
 
 void APlayerCharacter::Move(const FInputActionValue& Value)  // Automatically applied. Do not call in Tick.
 {
-	if (Controller == nullptr) {return;}
+	CHECK_NULLPTR_RET(Controller, LogActor, "PlayerCharacter:: No Controller!");
 
 	FVector2D Direction = Value.Get<FVector2D>();
 	AddMovementInput(GetActorForwardVector(), Direction.Y);
@@ -152,7 +153,7 @@ void APlayerCharacter::Move(const FInputActionValue& Value)  // Automatically ap
 
 void APlayerCharacter::Look(const FInputActionValue& Value)  // Automatically applied. Do not call in Tick.
 {
-	if (Controller == nullptr) {return;}
+	CHECK_NULLPTR_RET(Controller, LogActor, "PlayerCharacter:: No Controller!");
 
 	FVector2D Direction = Value.Get<FVector2D>();
 	AddControllerYawInput(Direction.X);
@@ -161,12 +162,12 @@ void APlayerCharacter::Look(const FInputActionValue& Value)  // Automatically ap
 
 float APlayerCharacter::BlendViewToSceneCaptureComponent(USceneCaptureComponent2D *SceneCaptureComponent)
 {
-	if (ViewBlenderComponent == nullptr) {return 0.0f;}
+	CHECK_NULLPTR_RETVAL(ViewBlenderComponent, LogActor, "PlayerCharacter:: No ViewBlenderComponent!", 0.0f);
 	return ViewBlenderComponent->BlendToNewView(SceneCaptureComponent);
 }
 
 float APlayerCharacter::ResetCameraLocation()
 {
-	if (ViewBlenderComponent == nullptr) {return 0.0f;}
+	CHECK_NULLPTR_RETVAL(ViewBlenderComponent, LogActor, "PlayerCharacter:: No ViewBlenderComponent!", 0.0f);
 	return ViewBlenderComponent->BlendToDefaultView();
 }

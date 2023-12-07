@@ -9,6 +9,7 @@
 #include "PhotoCameraEquipment.generated.h"
 
 class UImage;
+class UTextBlock;
 class UTextureRenderTarget2D;
 class UInputMappingContext;
 class UEnhancedInputLocalPlayerSubsystem;
@@ -16,6 +17,19 @@ class ACameraFlash;
 class ACameraLens;
 struct FInputActionValue;
 struct FPhotoData;
+
+
+UENUM()
+enum ECameraState
+{	
+    DEFAULT		=0	UMETA(DisplayName = "Default"),
+	RAISING		=1	UMETA(DisplayName = "Raising"),
+	BLENDING_IN	=2	UMETA(DisplayName = "Blending In"),
+	READY		=3	UMETA(DisplayName = "Ready"),
+	BLENDING_OUT=4	UMETA(DisplayName = "Blending Out"),
+	LOWERING	=5	UMETA(DisplayName = "Lowering")
+};
+
 
 UCLASS()
 class PROJECTCALM_API APhotoCameraEquipment : public AEquipment
@@ -28,17 +42,18 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Animation, meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* LowerAnimation;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = PhotoCamera, meta = (AllowPrivateAccess = "true"))
+	int32 MaxPhotos = 12;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = PhotoCamera, meta = (AllowPrivateAccess = "true"))
 	TArray<FPhotoData> Photos;
-	TSubclassOf<class UUserWidget> CameraHUDClass;
-	UUserWidget* CameraHUD;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = HUD, meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UUserWidget> CameraHUD;
+	UUserWidget* CameraHUDInstance;
 	UImage* LastPhotoImageWidget;
+	UTextBlock* FilmTextWidget;
 
-	float DefaultAnimationBlendTime = 0.0f;
-	FTimerHandle AnimationTimerHandle;	
 	FTimerHandle BlendViewTimerHandle;
 	FTimerHandle PhotoDelayTimerHandle;
-	
-	int32 MaxPhotos = 12;
+	TEnumAsByte<ECameraState> CameraState{ECameraState::DEFAULT};
 	
 public:	
 	// Sets default values for this actor's properties
@@ -50,32 +65,34 @@ protected:
 	
 	virtual void Equip(AActor* OwningActor, FName SocketName) override;
 
-	void RaiseCamera();
+	void OnSecondaryButtonDown();
+	void PlayRaiseLowerAnimation(bool bRaise=true);
 	void EnterCameraView();
 	void ActivateRaisedCameraMode();
-	void DeactivateRaisedCameraMode();
+	void OnSecondaryButtonUp();
+	void OnBlendViewTimerElapsed();
 	void ExitCameraView();
 	void LowerCamera();
 	void EnterDefaultState();
+	void SetCameraState(ECameraState InState);
 
 	float ActivateCameraFlash();
 	void TakePhoto();
-
-	bool IsAnimationRunning();
 
 public:
 	void PrimaryAction(const FInputActionValue& Value) override;
 	void SecondaryAction(const FInputActionValue& Value) override;
 	void SetAttachedCameraFlash(ACameraFlash* CameraFlash) {AttachedCameraFlash = CameraFlash;};
 	void SetAttachedCameraLens(ACameraLens* CameraLens) {AttachedCameraLens = CameraLens;};
+	void OnAnimationEnded();
 
 	FPhotoData GetLastPhoto();
 
 private:
 	float BlendViewToPhotoCamera();
 	float BlendViewToPlayerCharacter();
-	void PauseTimers();
 	void DisplayCameraHUD(bool bDisplay);
+	void UpdateHUDOverlay();
 	void DisplayLastPhoto();
 	void LogPhotoData(FPhotoData Photo);
 

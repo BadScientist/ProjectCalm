@@ -33,6 +33,25 @@ void UViewBlenderComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+// #if WITH_EDITORONLY_DATA
+// 	FString CurrentLog = FString::Printf(
+// 		TEXT("ViewBlenderComponent::bBlending=%i|bDefaultView=%i|TargetBlendAlpha=%f|CurrentBlendAlpha=%f|EyeFOV=%f|LensFOV=%f"),
+// 		bBlending,
+// 		bDefaultView,
+// 		TargetBlendAlpha,
+// 		CurrentBlendAlpha,
+// 		CharacterEyes != nullptr ? CharacterEyes->FieldOfView : 0.0f,
+// 		TargetSceneCaptureComponent != nullptr ? TargetSceneCaptureComponent->FOVAngle : 0.0f);
+	
+// 	if(CurrentLog != LastLog)
+// 	{
+// 		UE_LOG(LogTemp, Display, TEXT("%s"), *CurrentLog);
+// 		LastLog = CurrentLog;
+// 	}
+
+// 	if (GEngine != nullptr){GEngine->AddOnScreenDebugMessage(-1, 0.1f, FColor::Yellow, FString::Printf(TEXT("%f"), GetScalarBlendParam()));}
+// #endif
+
 	SetEyePOV();
 
 	UpdateCurrentBlendAlpha(DeltaTime);
@@ -49,26 +68,37 @@ void UViewBlenderComponent::SetCharacterEyes(UCameraComponent *CameraComp)
 
 float UViewBlenderComponent::BlendToNewView(USceneCaptureComponent2D *SceneCaptureComponent)
 {
-	return StartBlend(1.0f, SceneCaptureComponent);
+	// UE_LOG(LogTemp, Warning, TEXT("ViewBlenderComponent::BlendToNewView()"));
+	TargetSceneCaptureComponent = SceneCaptureComponent;
+
+	if (TargetSceneCaptureComponent != nullptr && GEngine != nullptr)
+	{
+		FIntPoint ScreenResolution = GEngine->GetGameUserSettings()->GetScreenResolution();
+		TargetSceneCaptureComponent->TextureTarget->InitAutoFormat(FMath::Min(ScreenResolution.X, 1280), FMath::Min(ScreenResolution.Y, 720));
+		TargetSceneCaptureComponent->TextureTarget->UpdateResourceImmediate();
+	}
+
+	return StartBlend(1.0f);
 }
 
 float UViewBlenderComponent::BlendToDefaultView()
 {
+	// UE_LOG(LogTemp, Warning, TEXT("ViewBlenderComponent::BlendToDefaultView()"));
 	return StartBlend(0.0f);
 }
 
 void UViewBlenderComponent::SetEyePOV()
 {
 	// AFTER blending post process mat IN, set view to match SceneCaptureComponent
-	if (!bBlending && bDefaultView && TargetBlendAlpha) {SetViewToSceneCapture(TargetSceneCaptureComponent);}
+	if (bSetViewToLensNextFrame) {SetViewToSceneCapture(TargetSceneCaptureComponent);}
 
 	// BEFORE blending post process mat OUT, reset view to default
-	if (bBlending && !bDefaultView && !TargetBlendAlpha) {ResetView();}
+	if (bResetViewNextFrame) {ResetView();}
 }
 
 void UViewBlenderComponent::SetViewToSceneCapture(USceneCaptureComponent2D* SceneCaptureComponent)
 {
-	UE_LOG(LogTemp, Warning, TEXT("ViewBlender: Setting View to SceneCapture."));
+	// UE_LOG(LogTemp, Warning, TEXT("ViewBlenderComponent::SetViewToSceneCapture()"));
 	if (CharacterEyes == nullptr) 
 	{
 		UE_LOG(LogTemp, Error, TEXT("ViewBlender: NO CHARACTER EYE CAMERA"));
@@ -88,16 +118,18 @@ void UViewBlenderComponent::SetViewToSceneCapture(USceneCaptureComponent2D* Scen
 	CharacterEyes->FieldOfView = SceneCaptureComponent->FOVAngle;
 	
 	bDefaultView = false;
+	bSetViewToLensNextFrame = false;
 }
 
 void UViewBlenderComponent::ResetView()
 {
-	UE_LOG(LogTemp, Warning, TEXT("ViewBlender: Resetting View."));
+	// UE_LOG(LogTemp, Warning, TEXT("ViewBlenderComponent::ResetView()"));
 	if (CharacterEyes == nullptr) {return;}
 
 	CharacterEyes->ClearAdditiveOffset();
 	CharacterEyes->FieldOfView = DefaultEyesFOV;
 	bDefaultView = true;
+	bResetViewNextFrame = false;
 }
 
 float UViewBlenderComponent::GetScalarBlendParam()
@@ -115,24 +147,11 @@ void UViewBlenderComponent::SetScalarBlendParam(float Alpha)
 	BlendParameters->SetScalarParameterValue(BLEND_ALPHA_PARAM, Alpha);
 }
 
-float UViewBlenderComponent::StartBlend(float TargetAlpha, USceneCaptureComponent2D* SceneCaptureComponent)
-{
-	TargetSceneCaptureComponent = SceneCaptureComponent;
-
-	if (TargetSceneCaptureComponent != nullptr && GEngine != nullptr)
-	{
-		FIntPoint ScreenResolution = GEngine->GetGameUserSettings()->GetScreenResolution();
-		TargetSceneCaptureComponent->TextureTarget->InitAutoFormat(FMath::Min(ScreenResolution.X, 1280), FMath::Min(ScreenResolution.Y, 720));
-		TargetSceneCaptureComponent->TextureTarget->UpdateResourceImmediate();
-	}
-
-	return StartBlend(TargetAlpha);
-}
-
 float UViewBlenderComponent::StartBlend(float TargetAlpha)
 {
+	// UE_LOG(LogTemp, Warning, TEXT("ViewBlenderComponent::StartBlend()"));
 	TargetBlendAlpha = TargetAlpha;
-	ViewBlendTime = DefaultBlendTime - ViewBlendTime;
+	ViewBlendTime = DefaultBlendTime * FMath::Abs(TargetAlpha - CurrentBlendAlpha);
 
 	if (TargetSceneCaptureComponent != nullptr)
 	{
@@ -140,7 +159,12 @@ float UViewBlenderComponent::StartBlend(float TargetAlpha)
 		TargetSceneCaptureComponent->bCaptureEveryFrame = true;
 	}
 
-	if (!TargetAlpha) {SetScalarBlendParam(1.0f);}
+	if (FMath::IsNearlyZero(TargetAlpha))
+	{
+		SetScalarBlendParam(1.0f);
+		bResetViewNextFrame = true;
+	}
+	
 	bBlending = true;
 
 	return ViewBlendTime;
@@ -149,6 +173,7 @@ float UViewBlenderComponent::StartBlend(float TargetAlpha)
 void UViewBlenderComponent::UpdateCurrentBlendAlpha(float DeltaTime)
 {
 	if (!bBlending) {return;}
+	// UE_LOG(LogTemp, Warning, TEXT("ViewBlenderComponent::UpdateCurrentBlendAlpha()"));
 
 	ViewBlendTime -= DeltaTime;
 	float NewBlendAlpha = FMath::Clamp(FMath::Square(DefaultBlendTime - ViewBlendTime) / FMath::Square(DefaultBlendTime), 0.0f, 1.0f);
@@ -162,6 +187,7 @@ void UViewBlenderComponent::UpdateCurrentBlendAlpha(float DeltaTime)
 void UViewBlenderComponent::EndBlend()
 {
 	if (!bBlending) {return;}
+	// UE_LOG(LogTemp, Warning, TEXT("ViewBlenderComponent::EndBlend()"));
 
 	if (TargetSceneCaptureComponent != nullptr && GEngine != nullptr)
 	{	
@@ -171,6 +197,7 @@ void UViewBlenderComponent::EndBlend()
 	}
 
 	ViewBlendTime = 0.0f;
-	SetScalarBlendParam(0.0f);	
+	if (!FMath::IsNearlyZero(TargetBlendAlpha)){bSetViewToLensNextFrame = true;}
+	SetScalarBlendParam(0.0f);
 	bBlending = false;
 }

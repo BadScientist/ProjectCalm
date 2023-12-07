@@ -13,7 +13,12 @@ struct FPhotoData
 
 	FPhotoData(){};
     
+    UPROPERTY(VisibleAnywhere)
     FDateTime TimeTaken;
-    UTextureRenderTarget2D* Image = nullptr;
+    
+    UPROPERTY(VisibleAnywhere)
+    UTextureRenderTarget2D* Image{nullptr};
+    
+    UPROPERTY(VisibleAnywhere)
     TArray<FPhotoSubjectData> Subjects;
 };
