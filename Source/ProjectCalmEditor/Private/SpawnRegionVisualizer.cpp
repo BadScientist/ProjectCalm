@@ -1,7 +1,7 @@
 #include "SpawnRegionVisualizer.h"
 #include "VisualizerProxy.h"
 
-#include "PhotoSubjectSpawnRegion.h"
+#include "ProjectCalm/Characters/PhotoSubjects/PhotoSubjectSpawnRegion.h"
 #include "EditorOnly/SpawnRegionVisualizerComponent.h"
 
 FSpawnRegionVisualizer::FSpawnRegionVisualizer()

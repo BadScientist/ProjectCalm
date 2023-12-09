@@ -2,8 +2,8 @@
 
 
 #include "PhotoSubjectAIController.h"
-#include "PhotoSubjectDataComponent.h"
-#include "PlayerCharacter.h"
+#include "ProjectCalm/Photos/PhotoSubjectDataComponent.h"
+#include "ProjectCalm/Characters/Player/PlayerCharacter.h"
 
 #include "Kismet/GameplayStatics.h"
 #include "BehaviorTree/BlackboardComponent.h"

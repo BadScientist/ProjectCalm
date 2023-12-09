@@ -2,9 +2,9 @@
 
 
 #include "CameraLens.h"
-#include "PhotoDataCollectorComponent.h"
-#include "PhotoData.h"
-#include "InfoFlagNameDefinitions.h"
+#include "ProjectCalm/Photos/PhotoDataCollectorComponent.h"
+#include "ProjectCalm/Photos/PhotoData.h"
+#include "ProjectCalm/Characters/Player/InfoFlagNameDefinitions.h"
 
 #include "Camera/CameraComponent.h"
 #include "Components/SceneCaptureComponent2D.h"

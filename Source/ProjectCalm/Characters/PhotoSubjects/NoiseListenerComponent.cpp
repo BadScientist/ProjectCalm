@@ -2,9 +2,9 @@
 
 
 #include "NoiseListenerComponent.h"
-#include "ProjectCalmGameMode.h"
-#include "PhotoSubjectAIController.h"
-#include "AlertLevel.h"
+#include "ProjectCalm/ProjectCalmGameMode.h"
+#include "ProjectCalm/AI/PhotoSubjectAIController.h"
+#include "ProjectCalm/AI/AlertLevel.h"
 
 #include "Kismet/GameplayStatics.h"
 

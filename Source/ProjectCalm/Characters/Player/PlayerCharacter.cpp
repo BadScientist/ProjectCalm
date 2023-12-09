@@ -2,14 +2,14 @@
 
 
 #include "PlayerCharacter.h"
-#include "EquipmentInterface.h"
+#include "ProjectCalm/Inventory/EquipmentInterface.h"
 #include "ViewBlenderComponent.h"
 #include "FlagManagerComponent.h"
-#include "PhotoCameraEquipment.h"
-#include "CameraFlash.h"
-#include "CameraLens.h"
+#include "ProjectCalm/Inventory/PhotoCameraEquipment.h"
+#include "ProjectCalm/Inventory/CameraFlash.h"
+#include "ProjectCalm/Inventory/CameraLens.h"
 #include "SpawnerComponent.h"
-#include "Utilities/LogMacros.h"
+#include "ProjectCalm/Utilities/LogMacros.h"
 
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"

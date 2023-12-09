@@ -1,5 +1,5 @@
 #include "PhotoSubjectComponent.h"
-#include "PhotoSubjectAIController.h"
+#include "ProjectCalm/AI/PhotoSubjectAIController.h"
 
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"

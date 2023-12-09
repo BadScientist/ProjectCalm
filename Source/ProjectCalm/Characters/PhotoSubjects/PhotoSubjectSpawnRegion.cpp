@@ -2,7 +2,7 @@
 #include "PhotoSubjectComponent.h"
 
 #if WITH_EDITORONLY_DATA
-#include "EditorOnly/SpawnRegionVisualizerComponent.h"
+#include "ProjectCalm/EditorOnly/SpawnRegionVisualizerComponent.h"
 #endif
 
 

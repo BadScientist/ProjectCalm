@@ -4,7 +4,7 @@
 #include "PhotoDataCollectorComponent.h"
 #include "PhotoSubjectDataComponent.h"
 #include "PhotoData.h"
-#include "SpawnerComponent.h"
+#include "ProjectCalm/Characters/Player/SpawnerComponent.h"
 
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/Character.h"

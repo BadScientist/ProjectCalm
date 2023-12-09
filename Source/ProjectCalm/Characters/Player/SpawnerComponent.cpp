@@ -2,7 +2,7 @@
 
 
 #include "SpawnerComponent.h"
-#include "PhotoSubjectSpawnRegion.h"
+#include "ProjectCalm/Characters/PhotoSubjects/PhotoSubjectSpawnRegion.h"
 
 #include "Kismet/GameplayStatics.h"
 

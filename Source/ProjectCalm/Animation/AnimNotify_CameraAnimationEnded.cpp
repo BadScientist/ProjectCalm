@@ -2,7 +2,7 @@
 
 
 #include "AnimNotify_CameraAnimationEnded.h"
-#include "PhotoCameraEquipment.h"
+#include "ProjectCalm/Inventory/PhotoCameraEquipment.h"
 
 #include "Kismet/GameplayStatics.h"
 

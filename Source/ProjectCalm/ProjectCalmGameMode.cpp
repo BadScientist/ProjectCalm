@@ -1,7 +1,6 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "ProjectCalmGameMode.h"
-#include "ProjectCalmCharacter.h"
 #include "UObject/ConstructorHelpers.h"
 
 AProjectCalmGameMode::AProjectCalmGameMode()

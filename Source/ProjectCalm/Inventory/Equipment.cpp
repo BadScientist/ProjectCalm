@@ -2,8 +2,8 @@
 
 
 #include "Equipment.h"
-#include "PlayerCharacter.h"
-#include "Utilities/LogMacros.h"
+#include "ProjectCalm/Characters/Player/PlayerCharacter.h"
+#include "ProjectCalm/Utilities/LogMacros.h"
 
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
