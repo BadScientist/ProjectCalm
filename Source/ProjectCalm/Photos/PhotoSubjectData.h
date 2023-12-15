@@ -19,7 +19,7 @@ struct FPhotoSubjectData
     };
     
     UPROPERTY(EditAnywhere)
-    TEnumAsByte<ESubjectName> Name;
+    TEnumAsByte<ESubjectName> Name {ESubjectName::NO_NAME};
     UPROPERTY(EditAnywhere)
     FVector Location {FVector::ZeroVector};
     UPROPERTY(EditAnywhere)

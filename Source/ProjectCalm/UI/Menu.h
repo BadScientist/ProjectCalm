@@ -1,0 +1,40 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "Blueprint/UserWidget.h"
+#include "Menu.generated.h"
+
+DECLARE_LOG_CATEGORY_EXTERN(LogMenuWidget, All, All)
+
+class UButton;
+
+
+/**
+ * 
+ */
+UCLASS()
+class PROJECTCALM_API UMenu : public UUserWidget
+{
+	GENERATED_BODY()
+
+public:
+	UMenu(const FObjectInitializer& ObjectInitializer);
+
+protected:
+	bool bIsInteractive{false};
+
+	virtual bool Initialize() override;
+	virtual void NativeDestruct() override;
+	class IMenuInterface* MenuInterface;
+
+private:
+	void SetGameOnlyControls();
+
+public:
+	void SetMenuInterface(IMenuInterface* NewMenuInterface);
+	void Setup(bool bIsInteractiveIn = true);
+	void Teardown();
+	
+};

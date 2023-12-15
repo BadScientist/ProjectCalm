@@ -8,8 +8,8 @@
 #include "EquipmentInterface.h"
 #include "Equipment.generated.h"
 
-
 DECLARE_LOG_CATEGORY_EXTERN(LogEquipment, All, All)
+
 
 class UCameraComponent;
 class UEnhancedInputLocalPlayerSubsystem;

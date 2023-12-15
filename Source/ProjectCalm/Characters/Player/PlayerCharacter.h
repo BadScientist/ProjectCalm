@@ -44,6 +44,8 @@ private:
 	UInputAction* MoveAction;	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* JumpAction;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* PauseAction;
 
 	APlayerController* PlayerController;
 	UEnhancedInputLocalPlayerSubsystem* Subsystem;
@@ -64,6 +66,7 @@ protected:
 
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
+	void Pause(const FInputActionValue& Value);
 
 public:
 	UCameraComponent* GetCameraComponent() {return FirstPersonCamera;};

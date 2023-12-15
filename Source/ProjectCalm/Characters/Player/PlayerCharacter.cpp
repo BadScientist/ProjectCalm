@@ -124,6 +124,8 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACharacter::Jump);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
+
+		EnhancedInputComponent->BindAction(PauseAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Pause);
 	}
 
 }
@@ -158,6 +160,11 @@ void APlayerCharacter::Look(const FInputActionValue& Value)  // Automatically ap
 	FVector2D Direction = Value.Get<FVector2D>();
 	AddControllerYawInput(Direction.X);
 	AddControllerPitchInput(Direction.Y);
+}
+
+void APlayerCharacter::Pause(const FInputActionValue &Value)
+{
+    PlayerController->ConsoleCommand(FString("LoadPauseMenu"), true);
 }
 
 float APlayerCharacter::BlendViewToSceneCaptureComponent(USceneCaptureComponent2D *SceneCaptureComponent)

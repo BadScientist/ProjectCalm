@@ -6,7 +6,7 @@
 UENUM(BlueprintType)
 enum ESubjectName
 {
-    TEST UMETA(DisplayName = "Test"),
+    NO_NAME UMETA(DisplayName = "Default"),
     DOE UMETA(DisplayName = "Doe"),
     BUCK UMETA(DisplayName = "Buck"),
     WOLF UMETA(DisplayName = "Wolf"),
@@ -20,8 +20,8 @@ public:
     {
         switch (InEnum)
         {
-        case ESubjectName::TEST :
-            return FString("Test");
+        case ESubjectName::NO_NAME :
+            return FString("No Name");
         case ESubjectName::DOE :
             return FString("Doe");
         case ESubjectName::BUCK :

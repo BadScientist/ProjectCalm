@@ -8,8 +8,8 @@
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
 
-
 DEFINE_LOG_CATEGORY(LogEquipment)
+
 
 // Sets default values
 AEquipment::AEquipment()
