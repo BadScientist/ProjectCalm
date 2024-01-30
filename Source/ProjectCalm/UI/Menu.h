@@ -29,12 +29,12 @@ protected:
 	virtual void NativeDestruct() override;
 	class IMenuInterface* MenuInterface;
 
-private:
 	void SetGameOnlyControls();
 
 public:
 	void SetMenuInterface(IMenuInterface* NewMenuInterface);
-	void Setup(bool bIsInteractiveIn = true);
-	void Teardown();
+
+	virtual void Setup(bool bIsInteractiveIn = true);
+	virtual void Teardown();
 	
 };

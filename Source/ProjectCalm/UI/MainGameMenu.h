@@ -27,5 +27,9 @@ private:
 	void StartGame();
 	UFUNCTION()
 	void ExitGame();
+
+public:
+	virtual void Setup(bool bIsInteractiveIn) override;
+	virtual void Teardown() override;
 	
 };

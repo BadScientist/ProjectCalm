@@ -3,7 +3,15 @@
 
 #include "ProjectCalmGameInstance.h"
 #include "UI/PauseMenu.h"
+#include "UI/InventoryMenu.h"
 #include "Utilities/LogMacros.h"
+
+#if WITH_EDITORONLY_DATA
+#include "Utilities/PCPlayerStatics.h"
+#include "Inventory/InventoryComponent.h"
+#endif
+
+#include "Kismet/GameplayStatics.h"
 
 
 UProjectCalmGameInstance::UProjectCalmGameInstance(const FObjectInitializer &ObjectInitializer)
@@ -39,7 +47,9 @@ void UProjectCalmGameInstance::StartGame()
     APlayerController* PlayerController = GetFirstLocalPlayerController();
     CHECK_NULLPTR_RET(PlayerController, LogPlayerController, "PCGameInstance:: PlayerController is NULL!");
 
-    PlayerController->ClientTravel("/Game/ProjectCalm/Maps/GameplayMap", ETravelType::TRAVEL_Absolute);
+    GameplayMap.LoadSynchronous();
+    CHECK_SOFTPTR_RET(GameplayMap, LogLoad, "PCGameInstance:: GameplayMap is NULL!");
+    UGameplayStatics::OpenLevelBySoftObjectPtr(PlayerController, GameplayMap);
 }
 
 void UProjectCalmGameInstance::QuitToMainMenu()
@@ -47,7 +57,9 @@ void UProjectCalmGameInstance::QuitToMainMenu()
     APlayerController* PlayerController = GetFirstLocalPlayerController();
     CHECK_NULLPTR_RET(PlayerController, LogPlayerController, "PCGameInstance:: PlayerController is NULL!");
 
-    PlayerController->ClientTravel("/Game/ProjectCalm/Maps/MainMenuMap", ETravelType::TRAVEL_Absolute);
+    MainMenuMap.LoadSynchronous();
+    CHECK_SOFTPTR_RET(MainMenuMap, LogLoad, "PCGameInstance:: MainMenuMap is NULL!");
+    UGameplayStatics::OpenLevelBySoftObjectPtr(PlayerController, MainMenuMap);
 }
 
 void UProjectCalmGameInstance::QuitToDesktop()
@@ -55,6 +67,27 @@ void UProjectCalmGameInstance::QuitToDesktop()
     APlayerController* PlayerController = GetFirstLocalPlayerController();
     CHECK_NULLPTR_RET(PlayerController, LogPlayerController, "PCGameInstance:: PlayerController is NULL!");
     PlayerController->ConsoleCommand(FString("quit"), true);
+}
+
+void UProjectCalmGameInstance::ClosePopupMenu(UPopupMenu* PopupMenu)
+{
+    if (MenuStack.Remove(PopupMenu)) {PopupMenu->Teardown();}
+}
+
+void UProjectCalmGameInstance::ClosePopupMenu()
+{
+    UPopupMenu* Menu = MenuStack.Pop();
+    if (Menu != nullptr) {Menu->Teardown();}
+}
+
+bool UProjectCalmGameInstance::IsPopupMenuOpen(UPopupMenu* PopupMenu)
+{
+    return MenuStack.Contains(PopupMenu);
+}
+
+bool UProjectCalmGameInstance::IsPopupMenuOpen()
+{
+    return !MenuStack.IsEmpty();
 }
 
 void UProjectCalmGameInstance::LoadMainMenu()
@@ -76,13 +109,17 @@ void UProjectCalmGameInstance::LoadPauseMenu()
     CHECK_NULLPTR_RET(PauseMenuClass, LogLoad, "PCGameInstance:: PauseMenu class is NULL!");
     UPauseMenu* Menu = CreateWidget<UPauseMenu>(this, PauseMenuClass);    
     SetupMenuWidget(Menu, true);
+
+    MenuStack.Push(Menu);
 }
 
 void UProjectCalmGameInstance::LoadInventoryMenu()
 {
     CHECK_NULLPTR_RET(InventoryMenuClass, LogLoad, "PCGameInstance:: InventoryMenu class is NULL!");
-    UPopupMenu* Menu = CreateWidget<UPopupMenu>(this, InventoryMenuClass);
+    UInventoryMenu* Menu = CreateWidget<UInventoryMenu>(this, InventoryMenuClass);
     SetupMenuWidget(Menu, true);
+    
+    MenuStack.Push(Menu);
 }
 
 void UProjectCalmGameInstance::SetupMenuWidget(UMenu* Menu, bool bIsInteractable)
@@ -91,3 +128,19 @@ void UProjectCalmGameInstance::SetupMenuWidget(UMenu* Menu, bool bIsInteractable
     Menu->SetMenuInterface(this);
     Menu->Setup(bIsInteractable);
 }
+
+
+// DEBUG COMMANDS
+
+void UProjectCalmGameInstance::AddItem(int32 ItemID)
+{
+    if (APlayerCharacter* PlayerCharacter = PCPlayerStatics::GetPlayerCharacter(this))
+    {
+        if (UInventoryComponent* InventoryComp = PlayerCharacter->GetInventoryComponent())
+        {
+            InventoryComp->AddItem(ItemID);
+        }
+    }
+}
+
+// END DEBUG COMMANDS

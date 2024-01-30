@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 
 #include "Equipment.h"
+#include "EquipperInterface.h"
 #include "PhotoCameraEquipment.generated.h"
 
 class UImage;
@@ -17,6 +18,7 @@ class ACameraFlash;
 class ACameraLens;
 struct FInputActionValue;
 struct FPhotoData;
+enum EEquipReply;
 
 
 UENUM()
@@ -32,7 +34,7 @@ enum ECameraState
 
 
 UCLASS()
-class PROJECTCALM_API APhotoCameraEquipment : public AEquipment
+class PROJECTCALM_API APhotoCameraEquipment : public AEquipment, public IEquipperInterface
 {
 	GENERATED_BODY()
 
@@ -63,7 +65,16 @@ protected:
 	ACameraFlash* AttachedCameraFlash = nullptr;
 	ACameraLens* AttachedCameraLens = nullptr;
 	
-	virtual void Equip(AActor* OwningActor, FName SocketName) override;
+	virtual EEquipReply Equip_Internal(AActor* OwningActor) override;
+	
+	// START EQUIPMENT INTERFACE
+	virtual void Unequip() override;
+	// END EQUIPMENT INTERFACE
+
+	// START IEQUIPPERINTERFACE
+	virtual bool AttachEquipment(IEquipmentInterface* Equipment, FName SocketName) override;
+	virtual void RemoveEquipment(IEquipmentInterface* Equipment) override;
+	// END IEQUIPPERINTERFACE
 
 	void OnSecondaryButtonDown();
 	void PlayRaiseLowerAnimation(bool bRaise=true);

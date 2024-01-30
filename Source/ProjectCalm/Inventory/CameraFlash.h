@@ -4,17 +4,18 @@
 
 #include "CoreMinimal.h"
 
-#include "Equipment.h"
+#include "Attachment.h"
 #include "CameraFlash.generated.h"
 
 
 class USpotLightComponent;
+enum EEquipReply;
 
 /**
  * 
  */
 UCLASS()
-class PROJECTCALM_API ACameraFlash : public AEquipment
+class PROJECTCALM_API ACameraFlash : public AAttachment
 {
 	GENERATED_BODY()
 
@@ -33,6 +34,10 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	
+	// START EQUIPMENT INTERFACE
+	virtual EEquipReply Equip(APlayerCharacter* OwningCharacter) override;
+	// END EQUIPMENT INTERFACE
 
 public:
 	float PlayCameraFlash();

@@ -2,19 +2,31 @@
 
 
 #include "PlayerCharacter.h"
-#include "ProjectCalm/Inventory/EquipmentInterface.h"
 #include "ViewBlenderComponent.h"
 #include "FlagManagerComponent.h"
+#include "SpawnerComponent.h"
+#include "ProjectCalm/ProjectCalmGameInstance.h"
+#include "ProjectCalm/Inventory/InventoryComponent.h"
+#include "ProjectCalm/Inventory/EquipmentInterface.h"
 #include "ProjectCalm/Inventory/PhotoCameraEquipment.h"
 #include "ProjectCalm/Inventory/CameraFlash.h"
 #include "ProjectCalm/Inventory/CameraLens.h"
-#include "SpawnerComponent.h"
+#include "ProjectCalm/Inventory/MeshSockets.h"
 #include "ProjectCalm/Utilities/LogMacros.h"
+#include "ProjectCalm/Utilities/PCGameStatics.h"
 
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+
+DEFINE_LOG_CATEGORY(LogPlayerCharacter)
+
+#define ABORT_IF_MENU_OPEN() {\
+	UProjectCalmGameInstance* GameInstance = PCGameStatics::GetPCGameInstance(this);\
+	CHECK_NULLPTR_RET(GameInstance, LogPlayerCharacter, "PlayerCharacter:: No Game Instance found!");\
+	if (GameInstance->IsPopupMenuOpen()) {return;}}
+
 
 // Sets default values
 APlayerCharacter::APlayerCharacter()
@@ -27,7 +39,7 @@ APlayerCharacter::APlayerCharacter()
 
 	//Setup first person camera
 	FirstPersonCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FirstPersonCamera"));
-	CHECK_NULLPTR_RET(FirstPersonCamera, LogActor, "PlayerCharacter:: Failed to create camera component!");
+	CHECK_NULLPTR_RET(FirstPersonCamera, LogPlayerCharacter, "PlayerCharacter:: Failed to create camera component!");
 	
 	FirstPersonCamera->SetupAttachment(GetCapsuleComponent());
 	FirstPersonCamera->SetRelativeLocation(FVector(-25.0f, 0.0f, 65.0f));
@@ -51,22 +63,10 @@ APlayerCharacter::APlayerCharacter()
 	
 	FlagManagerComponent = CreateDefaultSubobject<UFlagManagerComponent>(TEXT("FlagManagerComponent"));
 
+	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
+
 	SpawnerComponent = CreateDefaultSubobject<USpawnerComponent>(TEXT("SpawnerComponent"));
 	if (SpawnerComponent != nullptr) {SpawnerComponent->SetupAttachment(RootComponent);}
-
-	// Temporarily add camera with lens and flash to player on startup
-	// TODO: Add Inventory and Menu System for adding equipment
-    ConstructorHelpers::FClassFinder<APhotoCameraEquipment> CameraBPClass(TEXT("/Game/ProjectCalm/Blueprints/Equipment/BP_PhotoCameraEquipment_Basic"));
-	CHECK_NULLPTR_RET(CameraBPClass.Class, LogActor, "PlayerCharacter:: Failed to find PhotoCamera class!");
-    PhotoCameraClass = CameraBPClass.Class;
-	
-    ConstructorHelpers::FClassFinder<ACameraLens> CameraLensBPClass(TEXT("/Game/ProjectCalm/Blueprints/Equipment/BP_CameraLensBasic"));
-	CHECK_NULLPTR_RET(CameraLensBPClass.Class, LogActor, "PlayerCharacter:: Failed to find CameraLens class!");
-    CameraLensClass = CameraLensBPClass.Class;
-	
-    ConstructorHelpers::FClassFinder<ACameraFlash> CameraFlashBPClass(TEXT("/Game/ProjectCalm/Blueprints/Equipment/BP_CameraFlash"));
-	CHECK_NULLPTR_RET(CameraFlashBPClass.Class, LogActor, "PlayerCharacter:: Failed to find CameraFlash class!");
-    CameraFlashClass = CameraFlashBPClass.Class;
 }
 
 // Called when the game starts or when spawned
@@ -79,35 +79,7 @@ void APlayerCharacter::BeginPlay()
 	if (PlayerController != nullptr)
 	{
 		Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
-		if (Subsystem != nullptr)
-		{
-			Subsystem->AddMappingContext(DefaultMappingContext, 0);
-		}
-	}
-
-	// Temporarily add camera with lens and flash to player on startup
-	// TODO: Add Menu System for adding equipment
-	APhotoCameraEquipment* PhotoCamera = GetWorld()->SpawnActor<APhotoCameraEquipment>(PhotoCameraClass);
-	if (PhotoCamera != nullptr)
-	{
-		EquippedItem = Cast<IEquipmentInterface>(PhotoCamera);
-		EquippedItem->Equip(this, TEXT("GripPoint"));
-	
-		ACameraFlash* CameraFlash = GetWorld()->SpawnActor<ACameraFlash>(CameraFlashClass);
-		if (CameraFlash != nullptr)
-		{
-			IEquipmentInterface* FlashInterface = Cast<IEquipmentInterface>(CameraFlash);
-			FlashInterface->Equip(PhotoCamera, TEXT("FlashPoint"));
-			PhotoCamera->SetAttachedCameraFlash(CameraFlash);
-		}
-	
-		ACameraLens* CameraLens = GetWorld()->SpawnActor<ACameraLens>(CameraLensClass);
-		if (CameraLens != nullptr)
-		{
-			IEquipmentInterface* LensInterface = Cast<IEquipmentInterface>(CameraLens);
-			LensInterface->Equip(PhotoCamera, TEXT("LensPoint"));
-			PhotoCamera->SetAttachedCameraLens(CameraLens);
-		}
+		if (Subsystem != nullptr) {Subsystem->AddMappingContext(DefaultMappingContext, 0);}
 	}
 }
 
@@ -119,34 +91,36 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
 	{
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Look);
-
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Move);
-
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACharacter::Jump);
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Jump);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
-
 		EnhancedInputComponent->BindAction(PauseAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Pause);
+		EnhancedInputComponent->BindAction(OpenInventoryAction, ETriggerEvent::Triggered, this, &APlayerCharacter::OpenInventory);
 	}
+}
 
+void APlayerCharacter::Jump()
+{
+	ABORT_IF_MENU_OPEN();
+	Super::Jump();
 }
 
 bool APlayerCharacter::GetFlag(FName FlagName) const
 {
-	CHECK_NULLPTR_RETVAL(FlagManagerComponent, LogActor, "PlayerCharacter:: No FlagManagerComponent!", false);
+	CHECK_NULLPTR_RETVAL(FlagManagerComponent, LogPlayerCharacter, "PlayerCharacter:: No FlagManagerComponent!", false);
 	return FlagManagerComponent->GetFlag(FlagName);
 }
 
 void APlayerCharacter::SetFlag(FName FlagName, bool Value)
 {
-	CHECK_NULLPTR_RET(FlagManagerComponent, LogActor, "PlayerCharacter:: No FlagManagerComponent!");
+	CHECK_NULLPTR_RET(FlagManagerComponent, LogPlayerCharacter, "PlayerCharacter:: No FlagManagerComponent!");
 	FlagManagerComponent->SetFlag(FlagName, Value);
-	
-	// UE_LOG(LogTemp, Display, TEXT("All Flags: %s"), *(FlagManagerComponent->GetAllFlagsString()));
 }
 
 void APlayerCharacter::Move(const FInputActionValue& Value)  // Automatically applied. Do not call in Tick.
 {
-	CHECK_NULLPTR_RET(Controller, LogActor, "PlayerCharacter:: No Controller!");
+	ABORT_IF_MENU_OPEN();
+	CHECK_NULLPTR_RET(Controller, LogPlayerCharacter, "PlayerCharacter:: No Controller!");
 
 	FVector2D Direction = Value.Get<FVector2D>();
 	AddMovementInput(GetActorForwardVector(), Direction.Y);
@@ -155,7 +129,8 @@ void APlayerCharacter::Move(const FInputActionValue& Value)  // Automatically ap
 
 void APlayerCharacter::Look(const FInputActionValue& Value)  // Automatically applied. Do not call in Tick.
 {
-	CHECK_NULLPTR_RET(Controller, LogActor, "PlayerCharacter:: No Controller!");
+	ABORT_IF_MENU_OPEN();
+	CHECK_NULLPTR_RET(Controller, LogPlayerCharacter, "PlayerCharacter:: No Controller!");
 
 	FVector2D Direction = Value.Get<FVector2D>();
 	AddControllerYawInput(Direction.X);
@@ -164,17 +139,52 @@ void APlayerCharacter::Look(const FInputActionValue& Value)  // Automatically ap
 
 void APlayerCharacter::Pause(const FInputActionValue &Value)
 {
-    PlayerController->ConsoleCommand(FString("LoadPauseMenu"), true);
+	UProjectCalmGameInstance* GameInstance = PCGameStatics::GetPCGameInstance(this);
+	CHECK_NULLPTR_RET(GameInstance, LogPlayerCharacter, "Could not get ProjectCalmGameInstance!");
+
+	if (GameInstance->IsPopupMenuOpen()) {GameInstance->ClosePopupMenu();}
+	else {GameInstance->LoadPauseMenu();}
+}
+
+void APlayerCharacter::OpenInventory(const FInputActionValue &Value)
+{
+	UProjectCalmGameInstance* GameInstance = PCGameStatics::GetPCGameInstance(this);
+	CHECK_NULLPTR_RET(GameInstance, LogPlayerCharacter, "Could not get ProjectCalmGameInstance!");
+
+	if (!GameInstance->IsPopupMenuOpen()) {GameInstance->LoadInventoryMenu();}
+}
+
+bool APlayerCharacter::AttachEquipment(IEquipmentInterface *Equipment, FName SocketName)
+{
+	if (SocketName != SOCKET_PLAYER_GRIP) {return false;}
+	if (AActor* EquipmentActor = Cast<AActor>(Equipment))
+	{
+		EquipmentActor->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, SocketName);
+		EquippedItem = Equipment;
+		return true;
+	}
+	return false;
+}
+
+void APlayerCharacter::GetInventory(TArray<UItemData*>& OutInventory)
+{
+	CHECK_NULLPTR_RET(InventoryComponent, LogPlayerCharacter, "PlayerCharacter:: No InventoryComponent!");
+	InventoryComponent->GetInventory(OutInventory);
+}
+
+void APlayerCharacter::SwapInventoryItems(int32 FirstIndex, int32 SecondIndex)
+{
+	InventoryComponent->SwapItems(FirstIndex, SecondIndex);
 }
 
 float APlayerCharacter::BlendViewToSceneCaptureComponent(USceneCaptureComponent2D *SceneCaptureComponent)
 {
-	CHECK_NULLPTR_RETVAL(ViewBlenderComponent, LogActor, "PlayerCharacter:: No ViewBlenderComponent!", 0.0f);
+	CHECK_NULLPTR_RETVAL(ViewBlenderComponent, LogPlayerCharacter, "PlayerCharacter:: No ViewBlenderComponent!", 0.0f);
 	return ViewBlenderComponent->BlendToNewView(SceneCaptureComponent);
 }
 
 float APlayerCharacter::ResetCameraLocation()
 {
-	CHECK_NULLPTR_RETVAL(ViewBlenderComponent, LogActor, "PlayerCharacter:: No ViewBlenderComponent!", 0.0f);
+	CHECK_NULLPTR_RETVAL(ViewBlenderComponent, LogPlayerCharacter, "PlayerCharacter:: No ViewBlenderComponent!", 0.0f);
 	return ViewBlenderComponent->BlendToDefaultView();
 }

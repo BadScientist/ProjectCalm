@@ -6,6 +6,9 @@
 #include "UObject/Interface.h"
 #include "EquipmentInterface.generated.h"
 
+class APlayerCharacter;
+enum EEquipReply;
+
 UINTERFACE(MinimalAPI)
 class UEquipmentInterface : public UInterface
 {
@@ -18,5 +21,6 @@ class PROJECTCALM_API IEquipmentInterface
 	GENERATED_BODY()
 
 public:
-	virtual void Equip(AActor* OwningActor, FName SocketName) = 0;
+	virtual EEquipReply Equip(APlayerCharacter* OwningCharacter) = 0;
+	virtual void Unequip() = 0;
 };

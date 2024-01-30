@@ -1,0 +1,53 @@
+{
+    "Equipment": [
+        {
+            "id": "0x0001",
+            "type": "PhotoCamera",
+            "name": "Basic Camera",
+            "blueprint": "/Game/ProjectCalm/Blueprints/Equipment/BP_PhotoCameraEquipment_Basic",
+            "icon": "/Game/ProjectCalm/Assets/UI/Icons/IconCameraBasic",
+            "image": "",
+            "description": "PLACEHOLDER DESCRIPTION"
+        },
+        {
+            "id": "0x0101",
+            "type": "CameraLens",
+            "name": "Basic Lens",
+            "blueprint": "/Game/ProjectCalm/Blueprints/Equipment/BP_CameraLensBasic",
+            "icon": "",
+            "image": "",
+            "description": "PLACEHOLDER DESCRIPTION"
+        },
+        {
+            "id": "0x0201",
+            "type": "CameraFlash",
+            "name": "Basic Flash",
+            "blueprint": "/Game/ProjectCalm/Blueprints/Equipment/BP_CameraFlash",
+            "icon": "",
+            "image": "",
+            "description": "PLACEHOLDER DESCRIPTION"
+        }
+    ],
+    "EquipmentStats":{
+        "PhotoCamera":[
+            {
+                "id": "0x0001",
+                "film": 6
+            }
+        ],
+        "CameraLens":[
+            {
+                "id": "0x0101",
+                "zoom": 15
+            }
+        ],
+        "CameraFlash":[
+            {
+                "id": "0x0201",
+                "intensity": 15000,
+                "radius": 3000,
+                "angle": 85
+            }
+        ]
+    }
+}

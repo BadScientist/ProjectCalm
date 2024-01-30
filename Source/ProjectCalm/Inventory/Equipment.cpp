@@ -2,8 +2,11 @@
 
 
 #include "Equipment.h"
-#include "ProjectCalm/Characters/Player/PlayerCharacter.h"
+#include "EquipReply.h"
+#include "EquipperInterface.h"
+#include "MeshSockets.h"
 #include "ProjectCalm/Utilities/LogMacros.h"
+#include "ProjectCalm/Utilities/PCPlayerStatics.h"
 
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
@@ -20,85 +23,47 @@ AEquipment::AEquipment()
 	RootComponent = EquipmentMesh;
 }
 
-void AEquipment::Equip(AActor* OwningActor, FName SocketName)
+EEquipReply AEquipment::Equip_Internal(AActor* OwningActor)
 {
-	CHECK_NULLPTR_RET(OwningActor, LogEquipment, "Equipment:: No OwningActor!");
+	EEquipReply Response = EEquipReply::FAILED_DEFAULT;
+	CHECK_NULLPTR_RETVAL(OwningActor, LogEquipment, "Equipment:: No OwningActor!", Response);
 
 	SetOwner(OwningActor);
 
-	USceneComponent* ParentComp = nullptr;
-	if (ACharacter* Character = Cast<ACharacter>(OwningActor))
+	if (IEquipperInterface* Equipper = Cast<IEquipperInterface>(OwningActor))
 	{
-		ParentComp = Cast<USceneComponent>(Character->GetMesh());
-	}
-	else if (AEquipment* Equipment = Cast<AEquipment>(OwningActor))
-	{
-		ParentComp = Cast<USceneComponent>(Equipment->GetEquipmentMesh());
-	}
-
-	if (ParentComp != nullptr)
-	{
-		AttachToComponent(ParentComp, FAttachmentTransformRules::KeepRelativeTransform, SocketName);
+		if (Equipper->AttachEquipment(this, SOCKET_PLAYER_GRIP))
+		{
+			Response = EEquipReply::SUCCESS;
+			SetupPlayerControls();
+		}
 	}
 
-	SetupPlayerControls();
+	return Response;
 }
 
-APlayerCharacter* AEquipment::GetPlayerCharacter()
+EEquipReply AEquipment::Equip(APlayerCharacter *OwningCharacter)
 {
-	AActor* OwningActor = GetOwner();
-	CHECK_NULLPTR_RETVAL(OwningActor, LogEquipment, "Equipment:: No Owning Character found!", nullptr);
+	if (IEquipmentInterface* EquippedItem = OwningCharacter->GetEquippedItem()) {EquippedItem->Unequip();}
+	return Equip_Internal(OwningCharacter);
+}
 
-	if (APlayerCharacter* OwningCharacter = Cast<APlayerCharacter>(OwningActor))
+void AEquipment::Unequip()
+{
+	if (IEquipperInterface* Equipper = Cast<IEquipperInterface>(GetOwner()))
 	{
-		return OwningCharacter;
-	}
-	else if (AEquipment* OwningEquipment = Cast<AEquipment>(OwningActor))
-	{
-		return OwningEquipment->GetPlayerCharacter();
+		Equipper->RemoveEquipment(this);
 	}
 
-	UE_LOG(LogTemp, Error, TEXT("Equipment:: No Owning Character found!"));
-	return nullptr;
-}
-
-APlayerController* AEquipment::GetPlayerController()
-{
-	APlayerCharacter* PlayerCharacter = GetPlayerCharacter();
-	
-	if (PlayerCharacter == nullptr) {return nullptr;}
-	return Cast<APlayerController>(PlayerCharacter->GetController());
-}
-
-UCameraComponent* AEquipment::GetPlayerCamera()
-{
-	APlayerCharacter* PlayerCharacter = GetPlayerCharacter();
-	
-	if (PlayerCharacter == nullptr) {return nullptr;}
-	return PlayerCharacter->GetCameraComponent();
-}
-
-UEnhancedInputComponent* AEquipment::GetEnhancedInputComponent()
-{
-	APlayerController* PlayerController = GetPlayerController();
-
-	if (PlayerController == nullptr) {return nullptr;}
-	return Cast<UEnhancedInputComponent>(PlayerController->InputComponent);
-}
-
-UEnhancedInputLocalPlayerSubsystem* AEquipment::GetEnhancedInputLocalPlayerSubsystem()
-{
-	APlayerController* PlayerController = GetPlayerController();
-
-	if (PlayerController == nullptr) {return nullptr;}
-	return ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
+	ResetPlayerControls();
+	Destroy();
 }
 
 void AEquipment::SetupPlayerControls()
 {
 	if (EquipmentMappingContext != nullptr)
 	{
-		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = GetEnhancedInputLocalPlayerSubsystem())
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = PCPlayerStatics::GetEnhancedInputLocalPlayerSubsystem(this))
 		{
 			Subsystem->AddMappingContext(EquipmentMappingContext, 1);
 		}
@@ -106,30 +71,62 @@ void AEquipment::SetupPlayerControls()
 
 	if (EquipmentPrimaryAction != nullptr)
 	{
-		if (UEnhancedInputComponent* EnhancedInputComponent = GetEnhancedInputComponent())
+		if (UEnhancedInputComponent* EnhancedInputComponent = PCPlayerStatics::GetEnhancedInputComponent(this))
 		{		
-			EnhancedInputComponent->BindAction(EquipmentPrimaryAction, ETriggerEvent::Started, this, &AEquipment::PrimaryAction);
-			EnhancedInputComponent->BindAction(EquipmentPrimaryAction, ETriggerEvent::Completed, this, &AEquipment::PrimaryAction);
+			PrimaryInputStartBinding = &(EnhancedInputComponent->BindAction(EquipmentPrimaryAction, ETriggerEvent::Started, this, &AEquipment::PrimaryAction));
+			PrimaryInputCompletedBinding = &(EnhancedInputComponent->BindAction(EquipmentPrimaryAction, ETriggerEvent::Completed, this, &AEquipment::PrimaryAction));
 		}
 	}
 
 	if (EquipmentSecondaryAction != nullptr)
 	{
-		if (UEnhancedInputComponent* EnhancedInputComponent = GetEnhancedInputComponent())
+		if (UEnhancedInputComponent* EnhancedInputComponent = PCPlayerStatics::GetEnhancedInputComponent(this))
 		{
-			EnhancedInputComponent->BindAction(EquipmentSecondaryAction, ETriggerEvent::Started, this, &AEquipment::SecondaryAction);
-			EnhancedInputComponent->BindAction(EquipmentSecondaryAction, ETriggerEvent::Completed, this, &AEquipment::SecondaryAction);
+			SecondaryInputStartBinding = &(EnhancedInputComponent->BindAction(EquipmentSecondaryAction, ETriggerEvent::Started, this, &AEquipment::SecondaryAction));
+			SecondaryInputCompletedBinding = &(EnhancedInputComponent->BindAction(EquipmentSecondaryAction, ETriggerEvent::Completed, this, &AEquipment::SecondaryAction));
+		}
+	}
+}
+
+void AEquipment::ResetPlayerControls()
+{
+	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = PCPlayerStatics::GetEnhancedInputLocalPlayerSubsystem(this))
+	{
+		if (EquipmentMappingContext != nullptr) {Subsystem->RemoveMappingContext(EquipmentMappingContext);}
+	}
+
+	if (UEnhancedInputComponent* EnhancedInputComponent = PCPlayerStatics::GetEnhancedInputComponent(this))
+	{
+		if (PrimaryInputStartBinding != nullptr)
+		{
+			EnhancedInputComponent->RemoveActionBindingForHandle(PrimaryInputStartBinding->GetHandle());
+			PrimaryInputStartBinding = nullptr;
+		}
+		if (PrimaryInputCompletedBinding != nullptr)
+		{
+			EnhancedInputComponent->RemoveActionBindingForHandle(PrimaryInputCompletedBinding->GetHandle());
+			PrimaryInputCompletedBinding = nullptr;
+		}
+		if (SecondaryInputStartBinding != nullptr)
+		{
+			EnhancedInputComponent->RemoveActionBindingForHandle(SecondaryInputStartBinding->GetHandle());
+			SecondaryInputStartBinding = nullptr;
+		}
+		if (SecondaryInputCompletedBinding != nullptr)
+		{
+			EnhancedInputComponent->RemoveActionBindingForHandle(SecondaryInputCompletedBinding->GetHandle());
+			SecondaryInputCompletedBinding = nullptr;
 		}
 	}
 }
 
 bool AEquipment::GetPlayerFlag(FName FlagName)
 {
-	if (APlayerCharacter* OwningCharacter = GetPlayerCharacter()) {return OwningCharacter->GetFlag(FlagName);}
+	if (APlayerCharacter* OwningCharacter = PCPlayerStatics::GetPlayerCharacter(this)) {return OwningCharacter->GetFlag(FlagName);}
     return false;
 }
 
 void AEquipment::SetPlayerFlag(FName FlagName, bool Value)
 {
-	if (APlayerCharacter* OwningCharacter = GetPlayerCharacter()) {OwningCharacter->SetFlag(FlagName, Value);}
+	if (APlayerCharacter* OwningCharacter = PCPlayerStatics::GetPlayerCharacter(this)) {OwningCharacter->SetFlag(FlagName, Value);}
 }

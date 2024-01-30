@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Equipment.h"
+#include "Attachment.h"
 #include "CameraLens.generated.h"
 
 class UInputAction;
@@ -11,12 +11,13 @@ class USceneCaptureComponent2D;
 class UPhotoDataCollectorComponent;
 struct FConvexVolume;
 struct FPhotoData;
+enum EEquipReply;
 
 /**
  * 
  */
 UCLASS()
-class PROJECTCALM_API ACameraLens : public AEquipment
+class PROJECTCALM_API ACameraLens : public AAttachment
 {
 	GENERATED_BODY()
 
@@ -28,6 +29,7 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* LensZoomAction;
 
+	FEnhancedInputActionEventBinding* ZoomInputBinding;
 	UPhotoDataCollectorComponent* PhotoDataCollector;
 	UCameraComponent* PlayerCameraComponent;
 
@@ -35,7 +37,12 @@ public:
 	ACameraLens();
 
 protected:
-	virtual void Equip(AActor* OwningActor, FName SocketName) override;
+	virtual EEquipReply Equip_Internal(AActor* OwningActor) override;
+	
+	// START EQUIPMENT INTERFACE
+	virtual EEquipReply Equip(APlayerCharacter* OwningCharacter) override;
+	// END EQUIPMENT INTERFACE
+
 	virtual void Tick(float DeltaSeconds) override;
 
 private:	
@@ -56,6 +63,7 @@ private:
 	
 protected:
 	virtual void SetupPlayerControls() override;
+	virtual void ResetPlayerControls() override;
 
 public:
 	void ZoomAction(const FInputActionValue& Value);

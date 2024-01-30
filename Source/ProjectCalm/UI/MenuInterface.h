@@ -6,6 +6,9 @@
 #include "UObject/Interface.h"
 #include "MenuInterface.generated.h"
 
+class UPopupMenu;
+
+
 UINTERFACE(MinimalAPI)
 class UMenuInterface : public UInterface
 {
@@ -21,4 +24,5 @@ public:
 	virtual void StartGame() = 0;
 	virtual void QuitToMainMenu() = 0;
 	virtual void QuitToDesktop() = 0;
+	virtual void ClosePopupMenu(UPopupMenu* PopupMenu) = 0;
 };

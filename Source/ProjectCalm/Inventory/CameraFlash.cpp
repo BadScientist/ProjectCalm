@@ -2,12 +2,18 @@
 
 
 #include "CameraFlash.h"
+#include "MeshSockets.h"
+#include "ProjectCalm/Characters/Player/PlayerCharacter.h"
+
 #include "Components/SpotLightComponent.h"
 
 
 ACameraFlash::ACameraFlash()
 {
     PrimaryActorTick.bCanEverTick = true;
+
+    TargetSocket = SOCKET_CAMERA_FLASH;
+
 	SpotLight = CreateDefaultSubobject<USpotLightComponent>(TEXT("SpotLightComponent"));
 	SpotLight->SetupAttachment(EquipmentMesh, TEXT("SpotLightPoint"));
     SpotLight->SetRelativeLocation(FVector(0.0f, 5.0f, 1.25f));
@@ -18,6 +24,12 @@ void ACameraFlash::BeginPlay()
 {
     Super::BeginPlay();
     if (SpotLight != nullptr) {SpotLight->SetVisibility(false);}
+}
+
+EEquipReply ACameraFlash::Equip(APlayerCharacter *OwningCharacter)
+{
+    AActor* EquippedItem = Cast<AActor>(OwningCharacter->GetEquippedItem());
+    return Super::Equip_Internal(EquippedItem);
 }
 
 float ACameraFlash::PlayCameraFlash()

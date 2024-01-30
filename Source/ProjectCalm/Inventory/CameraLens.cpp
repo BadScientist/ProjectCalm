@@ -2,9 +2,14 @@
 
 
 #include "CameraLens.h"
+#include "EquipReply.h"
+#include "MeshSockets.h"
+#include "EquipperInterface.h"
 #include "ProjectCalm/Photos/PhotoDataCollectorComponent.h"
 #include "ProjectCalm/Photos/PhotoData.h"
+#include "ProjectCalm/Characters/Player/PlayerCharacter.h"
 #include "ProjectCalm/Characters/Player/InfoFlagNameDefinitions.h"
+#include "ProjectCalm/Utilities/PCPlayerStatics.h"
 
 #include "Camera/CameraComponent.h"
 #include "Components/SceneCaptureComponent2D.h"
@@ -18,6 +23,8 @@ ACameraLens::ACameraLens()
 {
     PrimaryActorTick.bCanEverTick = true;
 
+    TargetSocket = SOCKET_CAMERA_LENS;
+
 	PhotoDataCollector = CreateDefaultSubobject<UPhotoDataCollectorComponent>(TEXT("PhotoDataCollectorComponent"));
 	
 	SceneCaptureComponent = CreateDefaultSubobject<USceneCaptureComponent2D>(TEXT("SceneCaptureComponent"));
@@ -26,25 +33,33 @@ ACameraLens::ACameraLens()
     SceneCaptureComponent->SetRelativeRotation(FRotator(0.0f, 90.0f, 0.0f));
 }
 
-void ACameraLens::Equip(AActor* OwningActor, FName SocketName)
+EEquipReply ACameraLens::Equip_Internal(AActor* OwningActor)
 {
-    Super::Equip(OwningActor, SocketName);    
+    EEquipReply Response = Super::Equip_Internal(OwningActor);
+    if (Response != EEquipReply::SUCCESS) {return EEquipReply::FAILED_NO_CAMERA;}
     
     TargetFOV = MaxFOV;
     
-    PlayerCameraComponent = GetPlayerCamera();
+    PlayerCameraComponent = PCPlayerStatics::GetPlayerCamera(this);
 
-    if (SceneCaptureComponent == nullptr) {return;}
+    if (SceneCaptureComponent == nullptr) {return EEquipReply::FAILED_DEFAULT;}
     SceneCaptureComponent->FOVAngle = TargetFOV;
 
     // Set TextureTarget size based on Screen Resolution    
     FIntPoint ScreenResolution = FIntPoint(1280, 720);
     if (GEngine) {ScreenResolution = GEngine->GetGameUserSettings()->GetScreenResolution();}    
-    if (SceneCaptureComponent->TextureTarget != nullptr)
-    {
-        SceneCaptureComponent->TextureTarget->InitAutoFormat(ScreenResolution.X, ScreenResolution.Y);
-        SceneCaptureComponent->TextureTarget->UpdateResourceImmediate();
-    }
+    
+    if (SceneCaptureComponent->TextureTarget == nullptr) {return EEquipReply::FAILED_DEFAULT;}
+    SceneCaptureComponent->TextureTarget->InitAutoFormat(ScreenResolution.X, ScreenResolution.Y);
+    SceneCaptureComponent->TextureTarget->UpdateResourceImmediate();
+
+    return EEquipReply::SUCCESS;
+}
+
+EEquipReply ACameraLens::Equip(APlayerCharacter* OwningCharacter)
+{
+    AActor* EquippedItem = Cast<AActor>(OwningCharacter->GetEquippedItem());
+    return Equip_Internal(EquippedItem);
 }
 
 void ACameraLens::Tick(float DeltaSeconds)
@@ -54,8 +69,7 @@ void ACameraLens::Tick(float DeltaSeconds)
     {
         if (PlayerCameraComponent != nullptr) {PlayerCameraComponent->SetFieldOfView(TargetFOV);}
         SceneCaptureComponent->FOVAngle = TargetFOV;
-    }
-    
+    }    
 }
 
 UTextureRenderTarget2D* ACameraLens::CopyRenderTarget(UTextureRenderTarget2D *InRenderTarget)
@@ -114,11 +128,25 @@ void ACameraLens::SetupPlayerControls()
 
 	if (LensZoomAction != nullptr)
 	{
-		if (UEnhancedInputComponent* EnhancedInputComponent = GetEnhancedInputComponent())
+		if (UEnhancedInputComponent* EnhancedInputComponent = PCPlayerStatics::GetEnhancedInputComponent(this))
 		{
-			EnhancedInputComponent->BindAction(LensZoomAction, ETriggerEvent::Triggered, this, &ACameraLens::ZoomAction);
+			ZoomInputBinding = &(EnhancedInputComponent->BindAction(LensZoomAction, ETriggerEvent::Triggered, this, &ACameraLens::ZoomAction));
 		}
 	}
+}
+
+void ACameraLens::ResetPlayerControls()
+{
+	if (UEnhancedInputComponent* EnhancedInputComponent = PCPlayerStatics::GetEnhancedInputComponent(this))
+	{
+		if (ZoomInputBinding != nullptr)
+		{
+			EnhancedInputComponent->RemoveActionBindingForHandle(ZoomInputBinding->GetHandle());
+			ZoomInputBinding = nullptr;
+		}
+    }    
+
+    Super::ResetPlayerControls();
 }
 
 void ACameraLens::ZoomAction(const FInputActionValue& Value)

@@ -4,12 +4,17 @@
 #include "PhotoCameraEquipment.h"
 #include "CameraFlash.h"
 #include "CameraLens.h"
-#include "ProjectCalm/Characters/Player/PlayerCharacter.h"
+#include "EquipReply.h"
+#include "EquipperInterface.h"
+#include "MeshSockets.h"
+#include "ProjectCalm/ProjectCalmGameInstance.h"
 #include "ProjectCalm/Photos/PhotoData.h"
 #include "ProjectCalm/Photos/PhotoSubjectData.h"
 #include "ProjectCalm/Photos/PhotoSubjectPointOfInterest.h"
 #include "ProjectCalm/Characters/Player/InfoFlagNameDefinitions.h"
 #include "ProjectCalm/Utilities/LogMacros.h"
+#include "ProjectCalm/Utilities/PCPlayerStatics.h"
+#include "ProjectCalm/Utilities/PCGameStatics.h"
 
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
@@ -26,16 +31,62 @@ APhotoCameraEquipment::APhotoCameraEquipment()
 	PrimaryActionCooldown = 0.5f;
 }
 
-void APhotoCameraEquipment::Equip(AActor* OwningActor, FName SocketName)
+EEquipReply APhotoCameraEquipment::Equip_Internal(AActor* OwningActor)
 {
-	Super::Equip(OwningActor, SocketName);
+	EEquipReply Response = Super::Equip_Internal(OwningActor);
 
-	SetPlayerFlag(FLAG_PLAYER_HAS_CAMERA, true);
+	if (Response == EEquipReply::SUCCESS) {SetPlayerFlag(FLAG_PLAYER_HAS_CAMERA, true);}
+
+	return Response;
+}
+
+void APhotoCameraEquipment::Unequip()
+{
+	SetPlayerFlag(FLAG_PLAYER_HAS_CAMERA, false);
+
+	if (IEquipmentInterface* EquippedFlash = Cast<IEquipmentInterface>(AttachedCameraFlash)) {EquippedFlash->Unequip();}
+	if (IEquipmentInterface* EquippedLens = Cast<IEquipmentInterface>(AttachedCameraLens)) {EquippedLens->Unequip();}
+
+	Super::Unequip();
+}
+
+bool APhotoCameraEquipment::AttachEquipment(IEquipmentInterface *Equipment, FName SocketName)
+{
+	AActor* EquipmentActor{nullptr};
+	if (ACameraFlash* CameraFlash = Cast<ACameraFlash>(Equipment))
+	{
+		AttachedCameraFlash = CameraFlash;
+		EquipmentActor = CameraFlash;
+	}
+	else if (ACameraLens* CameraLens = Cast<ACameraLens>(Equipment))
+	{
+		AttachedCameraLens = CameraLens;
+		EquipmentActor = CameraLens;
+	}
+
+	if (EquipmentActor != nullptr)
+	{
+		EquipmentActor->AttachToComponent(GetEquipmentMesh(), FAttachmentTransformRules::KeepRelativeTransform, SocketName);
+		return true;
+	}
+
+    return false;
+}
+
+void APhotoCameraEquipment::RemoveEquipment(IEquipmentInterface *Equipment)
+{
+	if (ACameraFlash* CameraFlash = Cast<ACameraFlash>(Equipment))
+	{
+		AttachedCameraFlash = nullptr;
+	}
+	else if (ACameraLens* CameraLens = Cast<ACameraLens>(Equipment))
+	{
+		AttachedCameraLens = nullptr;
+	}
 }
 
 void APhotoCameraEquipment::OnSecondaryButtonDown()
 {
-	// UE_LOG(LogTemp, Warning, TEXT("PhotoCamera::OnSecondaryButtonDown()"));
 	GetWorldTimerManager().PauseTimer(BlendViewTimerHandle);
 
 	switch (CameraState)
@@ -65,15 +116,11 @@ void APhotoCameraEquipment::OnSecondaryButtonDown()
 
 void APhotoCameraEquipment::PlayRaiseLowerAnimation(bool bRaise)
 {
-	// UE_LOG(LogTemp, Warning, TEXT("PhotoCamera::PlayRaiseLowerAnimation()"));
-	
 	SetCameraState(bRaise ? ECameraState::RAISING : ECameraState::LOWERING);
 }
 
 void APhotoCameraEquipment::EnterCameraView()
 {
-	// UE_LOG(LogTemp, Warning, TEXT("PhotoCamera::EnterCameraView()"));
-	
 	if (CameraState != ECameraState::READY)
 	{
 		float BlendTime = BlendViewToPhotoCamera();
@@ -89,15 +136,12 @@ void APhotoCameraEquipment::EnterCameraView()
 
 void APhotoCameraEquipment::ActivateRaisedCameraMode()
 {
-	// UE_LOG(LogTemp, Warning, TEXT("PhotoCamera::ActivateRaisedCameraMode()"));
-
 	DisplayCameraHUD(true);	
 	SetCameraState(ECameraState::READY);
 }
 
 void APhotoCameraEquipment::OnSecondaryButtonUp()
 {
-	// UE_LOG(LogTemp, Warning, TEXT("PhotoCamera::OnSecondaryButtonUp()"));
 	GetWorldTimerManager().PauseTimer(BlendViewTimerHandle);
 
 	switch (CameraState)
@@ -127,7 +171,6 @@ void APhotoCameraEquipment::OnSecondaryButtonUp()
 
 void APhotoCameraEquipment::OnAnimationEnded()
 {
-	// UE_LOG(LogTemp, Warning, TEXT("PhotoCamera::OnAnimationEnded()"));
 	switch (CameraState)
 	{
 	case ECameraState::RAISING:
@@ -143,7 +186,6 @@ void APhotoCameraEquipment::OnAnimationEnded()
 
 void APhotoCameraEquipment::OnBlendViewTimerElapsed()
 {
-	// UE_LOG(LogTemp, Warning, TEXT("PhotoCamera::OnBlendViewTimerElapsed()"));
 	switch (CameraState)
 	{
 	case ECameraState::BLENDING_IN:
@@ -162,8 +204,6 @@ void APhotoCameraEquipment::OnBlendViewTimerElapsed()
 
 void APhotoCameraEquipment::ExitCameraView()
 {
-	// UE_LOG(LogTemp, Warning, TEXT("PhotoCamera::ExitCameraView()"));
-	
 	DisplayCameraHUD(false);
 
 	float BlendTime = BlendViewToPlayerCharacter();
@@ -174,15 +214,11 @@ void APhotoCameraEquipment::ExitCameraView()
 
 void APhotoCameraEquipment::LowerCamera()
 {
-	// UE_LOG(LogTemp, Warning, TEXT("PhotoCamera::LowerCamera()"));
-
 	PlayRaiseLowerAnimation(false);
 }
 
 void APhotoCameraEquipment::EnterDefaultState()
 {
-	// UE_LOG(LogTemp, Warning, TEXT("PhotoCamera::EnterDefaultState()"));
-
 	SetCameraState(ECameraState::DEFAULT);
 }
 
@@ -194,15 +230,6 @@ void APhotoCameraEquipment::SetCameraState(ECameraState InState)
 		InState == ECameraState::BLENDING_IN ||
 		InState == ECameraState::READY);
 	CameraState = InState;
-
-	// FString StateString = FString(
-	// 	InState == ECameraState::DEFAULT ? "Default" :
-	// 	InState == ECameraState::RAISING ? "Raising" :
-	// 	InState == ECameraState::BLENDING_IN ? "Blending In" :
-	// 	InState == ECameraState::READY ? "Ready" :
-	// 	InState == ECameraState::BLENDING_OUT ? "Blending Out" :
-	// 	InState == ECameraState::LOWERING ? "Lowering" : "ERROR");
-	// UE_LOG(LogTemp, Warning, TEXT("PhotoCamera::CameraState:%s"), *StateString);
 }
 
 float APhotoCameraEquipment::ActivateCameraFlash()
@@ -215,7 +242,7 @@ float APhotoCameraEquipment::ActivateCameraFlash()
 void APhotoCameraEquipment::TakePhoto()
 {
 	if (AttachedCameraLens == nullptr) {return;}
-	if (Photos.Num() >= MaxPhotos) {return;}  // TODO: Notify player
+	if (Photos.Num() >= MaxPhotos) {return;}
 	
 	FPhotoData NewPhoto = AttachedCameraLens->CapturePhoto();
 	Photos.Add(NewPhoto);
@@ -240,6 +267,10 @@ void APhotoCameraEquipment::PrimaryAction(const FInputActionValue& Value)
 
 void APhotoCameraEquipment::SecondaryAction(const FInputActionValue& Value)
 {
+	UProjectCalmGameInstance* GameInstance = PCGameStatics::GetPCGameInstance(this);
+	CHECK_NULLPTR_RET(GameInstance, LogEquipment, "PhotoCameraEquipment:: No Game Instance found!");
+	if (GameInstance->IsPopupMenuOpen()) {return;}
+
 	bool bValue = Value.Get<bool>();
 
 	if (bValue)
@@ -268,7 +299,7 @@ float APhotoCameraEquipment::BlendViewToPhotoCamera()
 	USceneCaptureComponent2D* LensCaptureComp = AttachedCameraLens->GetSceneCaptureComponent();
 	if (LensCaptureComp == nullptr) {return 0.0f;}
 
-	if (APlayerCharacter* PlayerCharacter = GetPlayerCharacter())
+	if (APlayerCharacter* PlayerCharacter = PCPlayerStatics::GetPlayerCharacter(this))
 	{
 		return PlayerCharacter->BlendViewToSceneCaptureComponent(LensCaptureComp);
 	}
@@ -278,7 +309,7 @@ float APhotoCameraEquipment::BlendViewToPhotoCamera()
 
 float APhotoCameraEquipment::BlendViewToPlayerCharacter()
 {
-	if (APlayerCharacter* PlayerCharacter = GetPlayerCharacter()) {return PlayerCharacter->ResetCameraLocation();}
+	if (APlayerCharacter* PlayerCharacter = PCPlayerStatics::GetPlayerCharacter(this)) {return PlayerCharacter->ResetCameraLocation();}
 
 	return 0.0f;
 }

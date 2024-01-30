@@ -10,7 +10,6 @@
 
 DECLARE_LOG_CATEGORY_EXTERN(LogEquipment, All, All)
 
-
 class UCameraComponent;
 class UEnhancedInputLocalPlayerSubsystem;
 class UEnhancedInputComponent;
@@ -20,6 +19,9 @@ class IEquipmentInterface;
 class APlayerCharacter;
 struct FInputActionValue;
 struct FInfoFlag;
+struct FEnhancedInputActionEventBinding;
+enum EEquipReply;
+
 
 UCLASS()
 class PROJECTCALM_API AEquipment : public AActor, public IEquipmentInterface
@@ -35,6 +37,13 @@ private:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* EquipmentSecondaryAction;
+
+	FEnhancedInputActionEventBinding* PrimaryInputStartBinding;
+	FEnhancedInputActionEventBinding* PrimaryInputCompletedBinding;
+	FEnhancedInputActionEventBinding* SecondaryInputStartBinding;
+	FEnhancedInputActionEventBinding* SecondaryInputCompletedBinding;
+
+	int32 InstanceID{0};
 	
 public:	
 	// Sets default values for this actor's properties
@@ -42,7 +51,15 @@ public:
 
 
 protected:
-	virtual void Equip(AActor* OwningActor, FName SocketName) override;
+	virtual EEquipReply Equip_Internal(AActor* OwningActor);
+
+	// START EQUIPMENT INTERFACE
+	virtual EEquipReply Equip(APlayerCharacter* OwningCharacter) override;
+	virtual void Unequip() override;
+	// END EQUIPMENT INTERFACE
+
+	virtual void SetupPlayerControls();
+	virtual void ResetPlayerControls();
 	
 	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
 	UStaticMeshComponent* EquipmentMesh;
@@ -61,16 +78,13 @@ protected:
 	void ClearPrimaryActionOnCooldown() {bPrimaryActionOnCooldown = false;};
 	void ClearSecondaryActionOnCooldown() {bSecondaryActionOnCooldown = false;};
 
-	APlayerCharacter* GetPlayerCharacter();
-	APlayerController* GetPlayerController();
-	UCameraComponent* GetPlayerCamera();
-	UEnhancedInputComponent* GetEnhancedInputComponent();
-	UEnhancedInputLocalPlayerSubsystem* GetEnhancedInputLocalPlayerSubsystem();
-	virtual void SetupPlayerControls();
 	bool GetPlayerFlag(FName FlagName);
 	void SetPlayerFlag(FName FlagName, bool Value);
 
 public:
+	void SetInstanceId(int32 InID) {if (InstanceID == 0) {InstanceID = InID;}};
+	int32 GetInstanceId() {return InstanceID;};
+
 	virtual void PrimaryAction(const FInputActionValue& Value) {};
 	virtual void SecondaryAction(const FInputActionValue& Value) {};
 	UStaticMeshComponent* GetEquipmentMesh() {return EquipmentMesh;};
