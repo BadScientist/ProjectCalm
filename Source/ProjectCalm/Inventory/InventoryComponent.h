@@ -26,8 +26,10 @@ public:
 	bool AddItem(UItemData* Item);
 	bool AddItem(UItemData* Item, int32 Index);
 	bool RemoveItem(int32 Index);
+	bool RemoveItem(UItemData* Item);
 	void SwapItems(int32 FirstIndex, int32 SecondIndex);
 	int32 GetNum(){return Num;};
+	int32 GetNumRemaining();
 	int32 GetFirstEmptySlot();
 
 	void GetInventory(TArray<UItemData*>& OutInventory);

@@ -13,8 +13,11 @@ DECLARE_LOG_CATEGORY_EXTERN(LogPlayerCharacter, All, All)
 
 class UCameraComponent;
 class USceneCaptureComponent2D;
+class UInteractionComponent;
 class UViewBlenderComponent;
 class UFlagManagerComponent;
+class UNotificationComponent;
+class UPlayerHUD;
 class UEnhancedInputLocalPlayerSubsystem;
 class UInputAction;
 class UInputMappingContext;
@@ -23,9 +26,6 @@ class USpawnerComponent;
 class UInventoryComponent;
 class UItemData;
 enum EEquipReply;
-class APhotoCameraEquipment;  // TODO: Add Menu System for adding equipment
-class ACameraFlash;  // TODO: Add Menu System for adding equipment
-class ACameraLens;  // TODO: Add Menu System for adding equipment
 
 
 UCLASS(config = game)
@@ -40,10 +40,14 @@ private:
 	UViewBlenderComponent* ViewBlenderComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Flags, meta = (AllowPrivateAccess = "true"))
 	UFlagManagerComponent* FlagManagerComponent;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Flags, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = PlayerNotifications, meta = (AllowPrivateAccess = "true"))
+	UNotificationComponent* NotificationComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = PhotoSubjectSpawns, meta = (AllowPrivateAccess = "true"))
 	USpawnerComponent* SpawnerComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Inventory, meta = (AllowPrivateAccess = "true"))
 	UInventoryComponent* InventoryComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Gameplay, meta = (AllowPrivateAccess = "true"))
+	UInteractionComponent* InteractionComponent;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputMappingContext* DefaultMappingContext;	
@@ -57,6 +61,12 @@ private:
 	UInputAction* PauseAction;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* OpenInventoryAction;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* InteractAction;
+
+	UPROPERTY(EditDefaultsOnly, Category = HUD)
+	TSubclassOf<UPlayerHUD> PlayerHUDClass;
+	UPlayerHUD* PlayerHUD{nullptr};
 
 	APlayerController* PlayerController;
 	UEnhancedInputLocalPlayerSubsystem* Subsystem;
@@ -76,6 +86,7 @@ protected:
 	void Look(const FInputActionValue& Value);
 	void Pause(const FInputActionValue& Value);
 	void OpenInventory(const FInputActionValue& Value);
+	void Interact(const FInputActionValue& Value);
 
 	// START IEQUIPPERINTERFACE
 	virtual bool AttachEquipment(IEquipmentInterface* Equipment, FName SocketName) override;
@@ -93,6 +104,9 @@ public:
 	UInventoryComponent* GetInventoryComponent() {return InventoryComponent;};
 	IEquipmentInterface* GetEquippedItem() {return EquippedItem;};
 	void GetInventory(TArray<UItemData*>& OutInventory);
+	int32 GetInventorySlotsRemaining();
+	bool AddItem(UItemData* Item);
+	bool RemoveItem(UItemData* Item);
 	void SwapInventoryItems(int32 FirstIndex, int32 SecondIndex);
 
 	float BlendViewToSceneCaptureComponent(USceneCaptureComponent2D* SceneCaptureComponent);
@@ -102,5 +116,10 @@ public:
 	bool GetFlag(FName FlagName) const;
 	UFUNCTION(BlueprintCallable)
 	void SetFlag(FName FlagName, bool Value);
+	UFUNCTION(BlueprintCallable)
+	void NotifyPlayer(FString InString);
+	
+	void ShowHUD();
+	void HideHUD();
 
 };

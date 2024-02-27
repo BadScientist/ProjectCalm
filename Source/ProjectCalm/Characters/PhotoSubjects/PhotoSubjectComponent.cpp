@@ -6,7 +6,7 @@
 #include "GameFramework/Character.h"
 
 
-#define MAX_TRACE_LENGTH 3000
+#define MAX_TRACE_LENGTH 30000
 #define DESPAWN_DISTANCE 10000
 
 
@@ -14,10 +14,10 @@ UPhotoSubjectComponent::UPhotoSubjectComponent()
 {
 }
 
-bool UPhotoSubjectComponent::Spawn()
+bool UPhotoSubjectComponent::Spawn(float RegionHeight)
 {
     FVector TraceStart = GetOwner()->GetActorLocation();
-    FVector TraceEnd = FVector(TraceStart.X, TraceStart.Y, TraceStart.Z - MAX_TRACE_LENGTH);
+    FVector TraceEnd = FVector(TraceStart.X, TraceStart.Y, TraceStart.Z - (RegionHeight <=0 ? MAX_TRACE_LENGTH : RegionHeight));
     FHitResult OutHit;
     FCollisionQueryParams Params;
     Params.AddIgnoredActor(GetOwner());

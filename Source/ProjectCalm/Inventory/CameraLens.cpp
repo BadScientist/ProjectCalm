@@ -58,7 +58,7 @@ EEquipReply ACameraLens::Equip_Internal(AActor* OwningActor)
 
 EEquipReply ACameraLens::Equip(APlayerCharacter* OwningCharacter)
 {
-    AActor* EquippedItem = Cast<AActor>(OwningCharacter->GetEquippedItem());
+    AActor* EquippedItem = Cast<AActor>(OwningCharacter->GetEquippedItem()->_getUObject());
     return Equip_Internal(EquippedItem);
 }
 

@@ -52,11 +52,30 @@ bool UInventoryComponent::RemoveItem(int32 Index)
 	return true;
 }
 
+bool UInventoryComponent::RemoveItem(UItemData* Item)
+{
+	int32 i = 0;
+    for (UItemData* InventoryItem : Inventory)
+	{
+		if (InventoryItem == Item)
+		{
+			return RemoveItem(i);
+		}
+		i++;
+	}
+	return false;
+}
+
 void UInventoryComponent::SwapItems(int32 FirstIndex, int32 SecondIndex)
 {
 	UItemData* FirstItem = Inventory[FirstIndex];
 	Inventory[FirstIndex] = Inventory[SecondIndex];
 	Inventory[SecondIndex] = FirstItem;
+}
+
+int32 UInventoryComponent::GetNumRemaining()
+{
+    return MAX_ITEMS - Num;
 }
 
 int32 UInventoryComponent::GetFirstEmptySlot()

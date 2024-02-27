@@ -69,7 +69,7 @@ EBTNodeResult::Type UBTTask_GetLocationToward::ExecuteTask(UBehaviorTreeComponen
 
     FVector ReferenceLocation;
     bool bLocationFound = GetReferenceLocation(BlackboardComponent, ReferenceLocation);
-    if (!bLocationFound) {return EBTNodeResult::Failed;}
+    if (!bLocationFound) {return EBTNodeResult::Aborted;}
 
     FVector PawnLocation = AIPawn->GetActorLocation();
     FVector ReferenceDirection = CalculateReferenceDirection(PawnLocation, ReferenceLocation);

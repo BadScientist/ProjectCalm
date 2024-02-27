@@ -95,7 +95,7 @@ bool APhotoSubjectSpawnRegion::SpawnPhotoSubject(FVector SpawnLocation)
     // Move Actor to the ground
     // On success, track spawn counts
     // On failure Destroy Actor
-    if (SubjectComp->Spawn())
+    if (SubjectComp->Spawn(Size.Z))
     {
         SpawnedSubjects.Add(SpawnedSubject);
         SpawnableSubjects[SubjectIdx].ActiveSpawns += 1;

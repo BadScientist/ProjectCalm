@@ -16,7 +16,7 @@ public:
     UPhotoSubjectComponent();
 
 public:
-    bool Spawn();
+    bool Spawn(float RegionHeight = 0.0f);
     bool Despawn(AActor* Player);
 
 };

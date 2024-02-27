@@ -103,10 +103,10 @@ void UInventoryMenu::Setup(bool bIsInteractiveIn)
 
 void UInventoryMenu::OnSlotClicked()
 {
-    UE_LOG(LogTemp, Display, TEXT("InventoryMenu:: LMB DOWN ------------------------------------------------------"));
+    // UE_LOG(LogTemp, Display, TEXT("InventoryMenu:: LMB DOWN ------------------------------------------------------"));
     if (UInventorySlot* HoveredSlot = GetHoveredSlot())
     {
-        UE_LOG(LogTemp, Display, TEXT("InventoryMenu:: HoveredSlot: %i"), HoveredSlot->GetIndex());
+        // UE_LOG(LogTemp, Display, TEXT("InventoryMenu:: HoveredSlot: %i"), HoveredSlot->GetIndex());
         if (UInventorySlot* SelectedSlot = GetSelectedSlot()) {SelectedSlot->SetIsSelected(false);}
         if (!HoveredSlot->IsEmpty()) {HoveredSlot->SetIsSelected(true);}
         DisplayDetails(HoveredSlot);
@@ -115,13 +115,13 @@ void UInventoryMenu::OnSlotClicked()
 
 void UInventoryMenu::OnSlotReleased()
 {
-    UE_LOG(LogTemp, Display, TEXT("InventoryMenu:: LMB UP ------------------------------------------------------"));
+    // UE_LOG(LogTemp, Display, TEXT("InventoryMenu:: LMB UP ------------------------------------------------------"));
     if (UInventorySlot* HoveredSlot = GetHoveredSlot())
     {
-        UE_LOG(LogTemp, Display, TEXT("InventoryMenu:: HoveredSlot: %i"), HoveredSlot->GetIndex());
+        // UE_LOG(LogTemp, Display, TEXT("InventoryMenu:: HoveredSlot: %i"), HoveredSlot->GetIndex());
         if (UInventorySlot* SelectedSlot = GetSelectedSlot())
         {
-            UE_LOG(LogTemp, Display, TEXT("InventoryMenu:: SelectedSlot: %i"), SelectedSlot->GetIndex());
+            // UE_LOG(LogTemp, Display, TEXT("InventoryMenu:: SelectedSlot: %i"), SelectedSlot->GetIndex());
             if (HoveredSlot != SelectedSlot)
             {
                 APlayerCharacter* PlayerCharacter = PCPlayerStatics::GetPlayerCharacter(this);
@@ -150,5 +150,10 @@ void UInventoryMenu::OnSlotRightClicked()
     }
 
     if (bSuccess) {UpdateContents();}
-    else {UE_LOG(LogMenuWidget, Warning, TEXT("InventoryMenu::Slot Activation Failed: %s"), *FailureResponse);}
+    else if (!FailureResponse.IsEmpty())
+    {
+        APlayerCharacter* PlayerCharacter = PCPlayerStatics::GetPlayerCharacter(this);
+        CHECK_NULLPTR_RET(PlayerCharacter, LogMenuWidget, "InventoryMenu:: PlayerCharacter not found!");
+        PlayerCharacter->NotifyPlayer(FailureResponse);
+    }
 }

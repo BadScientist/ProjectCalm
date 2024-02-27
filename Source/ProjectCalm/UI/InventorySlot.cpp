@@ -31,7 +31,7 @@ bool UInventorySlot::Initialize()
 
 FReply UInventorySlot::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& MouseEvent)
 {
-    UE_LOG(LogTemp, Display, TEXT("InventorySlot:: Slot %i:: OnMouseButtonDown()"), InventoryIndex);
+    // UE_LOG(LogTemp, Display, TEXT("InventorySlot:: Slot %i:: OnMouseButtonDown()"), InventoryIndex);
     if (MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
     {
         if (MouseEvent.IsMouseButtonDown(EKeys::LeftMouseButton)) {OnMouseButtonDown.ExecuteIfBound();}
@@ -46,7 +46,7 @@ FReply UInventorySlot::NativeOnMouseButtonDown(const FGeometry& InGeometry, cons
 
 FReply UInventorySlot::NativeOnMouseButtonUp(const FGeometry& InGeometry, const FPointerEvent& MouseEvent)
 {
-    UE_LOG(LogTemp, Display, TEXT("InventorySlot:: Slot %i:: OnMouseButtonUp()"), InventoryIndex);
+    // UE_LOG(LogTemp, Display, TEXT("InventorySlot:: Slot %i:: OnMouseButtonUp()"), InventoryIndex);
     if (MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
     {
         OnMouseButtonUp.ExecuteIfBound();
@@ -58,7 +58,7 @@ FReply UInventorySlot::NativeOnMouseButtonUp(const FGeometry& InGeometry, const 
 void UInventorySlot::NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& MouseEvent)
 {
     bIsHovered = true;
-    UE_LOG(LogTemp, Display, TEXT("InventorySlot:: HoveredSlot: %i"), InventoryIndex);
+    // UE_LOG(LogTemp, Display, TEXT("InventorySlot:: HoveredSlot: %i"), InventoryIndex);
 
     Super::NativeOnMouseEnter(InGeometry, MouseEvent);
 }
@@ -73,7 +73,7 @@ void UInventorySlot::NativeOnMouseLeave(const FPointerEvent& MouseEvent)
 void UInventorySlot::NativeOnDragEnter(const FGeometry &InGeometry, const FDragDropEvent &InDragDropEvent, UDragDropOperation *InOperation)
 {
     bIsHovered = true;
-    UE_LOG(LogTemp, Display, TEXT("InventorySlot:: HoveredSlot: %i"), InventoryIndex);
+    // UE_LOG(LogTemp, Display, TEXT("InventorySlot:: HoveredSlot: %i"), InventoryIndex);
 
     Super::NativeOnDragEnter(InGeometry, InDragDropEvent, InOperation);
 }
@@ -87,14 +87,14 @@ void UInventorySlot::NativeOnDragLeave(const FDragDropEvent &InDragDropEvent, UD
 
 bool UInventorySlot::NativeOnDrop(const FGeometry &InGeometry, const FDragDropEvent &InDragDropEvent, UDragDropOperation *InOperation)
 {
-    UE_LOG(LogTemp, Display, TEXT("InventorySlot:: Slot: %i::OnDrop()"), InventoryIndex);
+    // UE_LOG(LogTemp, Display, TEXT("InventorySlot:: Slot: %i::OnDrop()"), InventoryIndex);
     OnMouseButtonUp.ExecuteIfBound();
     return Super::NativeOnDrop(InGeometry, InDragDropEvent, InOperation);
 }
 
 void UInventorySlot::NativeOnDragCancelled(const FDragDropEvent &InDragDropEvent, UDragDropOperation *InOperation)
 {
-    UE_LOG(LogTemp, Display, TEXT("InventorySlot:: Slot: %i::OnDragCancelled()"), InventoryIndex);
+    // UE_LOG(LogTemp, Display, TEXT("InventorySlot:: Slot: %i::OnDragCancelled()"), InventoryIndex);
     OnMouseButtonUp.ExecuteIfBound();
     Super::NativeOnDragCancelled(InDragDropEvent, InOperation);
 }

@@ -2,16 +2,16 @@
 
 
 #include "PlayerCharacter.h"
+#include "InteractionComponent.h"
 #include "ViewBlenderComponent.h"
 #include "FlagManagerComponent.h"
+#include "NotificationComponent.h"
 #include "SpawnerComponent.h"
 #include "ProjectCalm/ProjectCalmGameInstance.h"
 #include "ProjectCalm/Inventory/InventoryComponent.h"
 #include "ProjectCalm/Inventory/EquipmentInterface.h"
-#include "ProjectCalm/Inventory/PhotoCameraEquipment.h"
-#include "ProjectCalm/Inventory/CameraFlash.h"
-#include "ProjectCalm/Inventory/CameraLens.h"
 #include "ProjectCalm/Inventory/MeshSockets.h"
+#include "ProjectCalm/UI/PlayerHUD.h"
 #include "ProjectCalm/Utilities/LogMacros.h"
 #include "ProjectCalm/Utilities/PCGameStatics.h"
 
@@ -42,8 +42,11 @@ APlayerCharacter::APlayerCharacter()
 	CHECK_NULLPTR_RET(FirstPersonCamera, LogPlayerCharacter, "PlayerCharacter:: Failed to create camera component!");
 	
 	FirstPersonCamera->SetupAttachment(GetCapsuleComponent());
-	FirstPersonCamera->SetRelativeLocation(FVector(-25.0f, 0.0f, 65.0f));
+	FirstPersonCamera->SetRelativeLocation(FVector(-6.0f, 0.0f, 75.0f));
 	FirstPersonCamera->bUsePawnControlRotation = true;
+
+	InteractionComponent = CreateDefaultSubobject<UInteractionComponent>(TEXT("InteractionComponent"));
+	if (InteractionComponent != nullptr) {InteractionComponent->SetupAttachment(FirstPersonCamera);}
 	
 	// Setup player mesh
 	USkeletalMeshComponent* CharacterMesh = GetMesh();
@@ -59,9 +62,10 @@ APlayerCharacter::APlayerCharacter()
 	
 	// Setup Actor Components
 	ViewBlenderComponent = CreateDefaultSubobject<UViewBlenderComponent>(TEXT("ViewBlenderComponent"));
-	if (ViewBlenderComponent != nullptr) {ViewBlenderComponent->SetCharacterEyes(FirstPersonCamera);}	
+	if (ViewBlenderComponent != nullptr) {ViewBlenderComponent->SetCharacterEyes(FirstPersonCamera);}
 	
 	FlagManagerComponent = CreateDefaultSubobject<UFlagManagerComponent>(TEXT("FlagManagerComponent"));
+	NotificationComponent = CreateDefaultSubobject<UNotificationComponent>(TEXT("NotificationComponent"));
 
 	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
 
@@ -81,6 +85,22 @@ void APlayerCharacter::BeginPlay()
 		Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
 		if (Subsystem != nullptr) {Subsystem->AddMappingContext(DefaultMappingContext, 0);}
 	}
+
+	if (PlayerHUDClass != nullptr) {PlayerHUD = CreateWidget<UPlayerHUD>(PlayerController, PlayerHUDClass.Get());}
+	else {UE_LOG(LogTemp, Error, TEXT("PlayerCharacter:: PlayerHUDClass not set!"));}
+
+	if (PlayerHUD != nullptr) 
+	{
+		PlayerHUD->AddToViewport();
+		
+		if (NotificationComponent != nullptr) {NotificationComponent->SetActiveWidget(PlayerHUD->GetNotificationWidget());}
+		else {UE_LOG(LogTemp, Error, TEXT("PlayerCharacter:: NotificationComponent not found!"));}
+
+		if (InteractionComponent != nullptr) {InteractionComponent->SetInteractionLabelText(PlayerHUD->GetInteractionLabelText());}
+		else {UE_LOG(LogTemp, Error, TEXT("PlayerCharacter:: InteractionComponent not found!"));}
+	}
+	else {UE_LOG(LogTemp, Error, TEXT("PlayerCharacter:: Failed to create PlayerHUD!"));}
+
 }
 
 // Called to bind functionality to input
@@ -96,6 +116,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 		EnhancedInputComponent->BindAction(PauseAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Pause);
 		EnhancedInputComponent->BindAction(OpenInventoryAction, ETriggerEvent::Triggered, this, &APlayerCharacter::OpenInventory);
+		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Interact);
 	}
 }
 
@@ -115,6 +136,22 @@ void APlayerCharacter::SetFlag(FName FlagName, bool Value)
 {
 	CHECK_NULLPTR_RET(FlagManagerComponent, LogPlayerCharacter, "PlayerCharacter:: No FlagManagerComponent!");
 	FlagManagerComponent->SetFlag(FlagName, Value);
+}
+
+void APlayerCharacter::NotifyPlayer(FString InString)
+{
+	CHECK_NULLPTR_RET(NotificationComponent, LogPlayerCharacter, "PlayerCharacter:: NotificationComponent not found!");
+	NotificationComponent->DisplayString(InString);
+}
+
+void APlayerCharacter::ShowHUD()
+{
+	if (PlayerHUD != nullptr) {PlayerHUD->Show();}
+}
+
+void APlayerCharacter::HideHUD()
+{
+	if (PlayerHUD != nullptr) {PlayerHUD->Hide();}
 }
 
 void APlayerCharacter::Move(const FInputActionValue& Value)  // Automatically applied. Do not call in Tick.
@@ -140,7 +177,7 @@ void APlayerCharacter::Look(const FInputActionValue& Value)  // Automatically ap
 void APlayerCharacter::Pause(const FInputActionValue &Value)
 {
 	UProjectCalmGameInstance* GameInstance = PCGameStatics::GetPCGameInstance(this);
-	CHECK_NULLPTR_RET(GameInstance, LogPlayerCharacter, "Could not get ProjectCalmGameInstance!");
+	CHECK_NULLPTR_RET(GameInstance, LogPlayerCharacter, "PlayerCharacter:: Could not get ProjectCalmGameInstance!");
 
 	if (GameInstance->IsPopupMenuOpen()) {GameInstance->ClosePopupMenu();}
 	else {GameInstance->LoadPauseMenu();}
@@ -149,15 +186,21 @@ void APlayerCharacter::Pause(const FInputActionValue &Value)
 void APlayerCharacter::OpenInventory(const FInputActionValue &Value)
 {
 	UProjectCalmGameInstance* GameInstance = PCGameStatics::GetPCGameInstance(this);
-	CHECK_NULLPTR_RET(GameInstance, LogPlayerCharacter, "Could not get ProjectCalmGameInstance!");
+	CHECK_NULLPTR_RET(GameInstance, LogPlayerCharacter, "PlayerCharacter:: Could not get ProjectCalmGameInstance!");
 
 	if (!GameInstance->IsPopupMenuOpen()) {GameInstance->LoadInventoryMenu();}
+}
+
+void APlayerCharacter::Interact(const FInputActionValue &Value)
+{
+	CHECK_NULLPTR_RET(InteractionComponent, LogPlayerCharacter, "PlayerCharacter:: No InteractionComponent found!")
+	InteractionComponent->Interact();
 }
 
 bool APlayerCharacter::AttachEquipment(IEquipmentInterface *Equipment, FName SocketName)
 {
 	if (SocketName != SOCKET_PLAYER_GRIP) {return false;}
-	if (AActor* EquipmentActor = Cast<AActor>(Equipment))
+	if (AActor* EquipmentActor = Cast<AActor>(Equipment->_getUObject()))
 	{
 		EquipmentActor->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, SocketName);
 		EquippedItem = Equipment;
@@ -170,6 +213,21 @@ void APlayerCharacter::GetInventory(TArray<UItemData*>& OutInventory)
 {
 	CHECK_NULLPTR_RET(InventoryComponent, LogPlayerCharacter, "PlayerCharacter:: No InventoryComponent!");
 	InventoryComponent->GetInventory(OutInventory);
+}
+
+int32 APlayerCharacter::GetInventorySlotsRemaining()
+{
+	return InventoryComponent->GetNumRemaining();
+}
+
+bool APlayerCharacter::AddItem(UItemData *Item)
+{
+	return InventoryComponent->AddItem(Item);
+}
+
+bool APlayerCharacter::RemoveItem(UItemData *Item)
+{
+	return InventoryComponent->RemoveItem(Item);
 }
 
 void APlayerCharacter::SwapInventoryItems(int32 FirstIndex, int32 SecondIndex)

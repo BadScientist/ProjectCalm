@@ -3,6 +3,7 @@
 
 #include "CameraFlash.h"
 #include "MeshSockets.h"
+#include "EquipReply.h"
 #include "ProjectCalm/Characters/Player/PlayerCharacter.h"
 
 #include "Components/SpotLightComponent.h"
@@ -28,8 +29,15 @@ void ACameraFlash::BeginPlay()
 
 EEquipReply ACameraFlash::Equip(APlayerCharacter *OwningCharacter)
 {
-    AActor* EquippedItem = Cast<AActor>(OwningCharacter->GetEquippedItem());
+    AActor* EquippedItem = Cast<AActor>(OwningCharacter->GetEquippedItem()->_getUObject());
     return Super::Equip_Internal(EquippedItem);
+}
+
+EEquipReply ACameraFlash::Equip_Internal(AActor* OwningActor)
+{
+    EEquipReply Response = Super::Equip_Internal(OwningActor);
+    if (Response != EEquipReply::SUCCESS) {return EEquipReply::FAILED_NO_CAMERA;}
+    return Response;
 }
 
 float ACameraFlash::PlayCameraFlash()

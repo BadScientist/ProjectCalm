@@ -38,6 +38,8 @@ protected:
 	// START EQUIPMENT INTERFACE
 	virtual EEquipReply Equip(APlayerCharacter* OwningCharacter) override;
 	// END EQUIPMENT INTERFACE
+	
+	virtual EEquipReply Equip_Internal(AActor* OwningActor) override;
 
 public:
 	float PlayCameraFlash();
