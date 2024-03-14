@@ -2,11 +2,18 @@
 
 
 #include "InteractableActor.h"
+#include "ProjectCalm/Utilities/LogMacros.h"
 
-DEFINE_LOG_CATEGORY(LogInteractable)
+#include "Components/BoxComponent.h"
+#include "Components/StaticMeshComponent.h"
 
 
-void AInteractableActor::Interact(APlayerCharacter* InteractingPlayer)
+void AInteractableActor::Interact(APlayerCharacter *InteractingPlayer)
 {
 	if (InteractingPlayer != nullptr) {PlayerCharacter = InteractingPlayer;}
+}
+
+void AInteractableActor::SetCollisionEnabled(bool bValue)
+{
+    if (InteractionCollision != nullptr) {InteractionCollision->SetCollisionEnabled(bValue ? ActiveCollisionType : InactiveCollisionType);}
 }

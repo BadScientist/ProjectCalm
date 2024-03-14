@@ -18,11 +18,23 @@ AProprietor::AProprietor()
 
     InteractionLabel = FString("Talk");
 
-    ProprietorMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ProprietorMesh"));
-    if (ProprietorMesh != nullptr) {SetRootComponent(ProprietorMesh);}
+    InteractionCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("InteractionCollision"));
+    if (InteractionCollision != nullptr)
+    {
+        SetRootComponent(InteractionCollision);
+        InteractionCollision->SetCollisionProfileName("OverlapAllDynamic");
+        InteractionCollision->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel1, ECollisionResponse::ECR_Block);
+        InteractionCollision->SetEnableGravity(false);
+    }
 
-    ProprietorCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("ProprietorCollision"));
-    if (ProprietorCollision != nullptr) {ProprietorCollision->SetupAttachment(ProprietorMesh);}
+    InteractionMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ProprietorMesh"));
+    if (InteractionMesh != nullptr)
+    {
+        InteractionMesh->SetupAttachment(InteractionCollision);
+        InteractionMesh->SetCollisionProfileName("BlockAllDynamic");
+        InteractionMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+        InteractionMesh->SetEnableGravity(false);
+    }
 }
 
 // Called when the game starts or when spawned
@@ -40,9 +52,4 @@ void AProprietor::Interact(APlayerCharacter* InteractingPlayer)
 	CHECK_NULLPTR_RET(InteractingPlayer, LogPlayerCharacter, "AProprietor:: Interact was not passed a valid PlayerCharacter!");
 
     InteractingPlayer->NotifyPlayer(FString("Suzanne the Proprietor: All your base are belong to us!"));    
-}
-
-void AProprietor::SetCollisionEnabled(bool bValue)
-{
-    if (ProprietorCollision != nullptr) {ProprietorCollision->SetCollisionEnabled(bValue ? ECollisionEnabled::QueryOnly : ECollisionEnabled::NoCollision);}
 }

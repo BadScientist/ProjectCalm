@@ -5,17 +5,10 @@
 #include "MenuInterface.h"
 #include "ProjectCalm/Utilities/LogMacros.h"
 
-DEFINE_LOG_CATEGORY(LogMenuWidget)
-
 
 UMenu::UMenu(const FObjectInitializer& ObjectInitializer) : UUserWidget(ObjectInitializer)
 {
     
-}
-
-bool UMenu::Initialize()
-{
-    return Super::Initialize();
 }
 
 void UMenu::SetMenuInterface(IMenuInterface* NewMenuInterface)
@@ -45,7 +38,7 @@ void UMenu::NativeDestruct()
 void UMenu::SetGameOnlyControls()
 {
     APlayerController* PlayerController = GetOwningPlayer();
-    CHECK_NULLPTR_RET(PlayerController, LogMenuWidget, "Menu:: PlayerController is NULL!");
+    CHECK_NULLPTR_RET(PlayerController, LogUserWidget, "Menu:: PlayerController is NULL!");
 
     FInputModeGameOnly InputModeData;
     InputModeData.SetConsumeCaptureMouseDown(false);

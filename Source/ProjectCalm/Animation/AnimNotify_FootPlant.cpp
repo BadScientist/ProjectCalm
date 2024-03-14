@@ -2,7 +2,7 @@
 
 
 #include "AnimNotify_FootPlant.h"
-#include "ProjectCalm/Characters/NoiseMakerComponent.h"
+#include "ProjectCalm/Gameplay/NoiseMakerComponent.h"
 
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"

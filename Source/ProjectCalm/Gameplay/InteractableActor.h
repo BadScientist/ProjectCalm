@@ -8,12 +8,9 @@
 #include "InteractableInterface.h"
 #include "InteractableActor.generated.h"
 
-DECLARE_LOG_CATEGORY_EXTERN(LogInteractable, All, All)
-
 class APlayerCharacter;
 class UBoxComponent;
 class UStaticMeshComponent;
-class UArrowComponent;
 
 
 UCLASS()
@@ -21,9 +18,18 @@ class PROJECTCALM_API AInteractableActor : public AActor, public IInteractableIn
 {
 	GENERATED_BODY()
 
-protected:
+protected:    
+	UPROPERTY(EditDefaultsOnly, Category = Mesh, meta = (AllowPrivateAccess = "true"))
+	UStaticMeshComponent* InteractionMesh{nullptr};
+
+	UPROPERTY(EditDefaultsOnly, Category = Interaction, meta = (AllowPrivateAccess = "true"))
+	UBoxComponent* InteractionCollision{nullptr};
+
 	UPROPERTY(EditDefaultsOnly, Category = Interaction)
 	FString InteractionLabel{FString("Activate")};
+
+	ECollisionEnabled::Type ActiveCollisionType{ECollisionEnabled::QueryOnly};
+	ECollisionEnabled::Type InactiveCollisionType{ECollisionEnabled::NoCollision};
 
     APlayerCharacter* PlayerCharacter{nullptr};
 	
@@ -35,5 +41,7 @@ public:
 	virtual FString GetInteractionLabel() const override {return InteractionLabel;};
     virtual void Interact(APlayerCharacter* InteractingPlayer);
 	// END INTERACTABLEINTERFACE
+
+	void SetCollisionEnabled(bool bValue);
 
 };

@@ -8,8 +8,6 @@
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "Components/Image.h"
 
-DEFINE_LOG_CATEGORY(LogInventorySlot)
-
 
 bool UInventorySlot::Initialize()
 {
@@ -17,13 +15,13 @@ bool UInventorySlot::Initialize()
     if (!Success) {return false;}
     SetVisibility(ESlateVisibility::Visible);
 
-    CHECK_NULLPTR_RETVAL(SlotButton, LogInventorySlot, "PopupMenu:: No SlotButton in Widget Blueprint!", false);
+    CHECK_NULLPTR_RETVAL(SlotButton, LogUserWidget, "PopupMenu:: No SlotButton in Widget Blueprint!", false);
     SlotButton->SetVisibility(ESlateVisibility::HitTestInvisible);
 
-    CHECK_NULLPTR_RETVAL(ItemIcon, LogInventorySlot, "PopupMenu:: No ItemIcon in Widget Blueprint!", false);
+    CHECK_NULLPTR_RETVAL(ItemIcon, LogUserWidget, "PopupMenu:: No ItemIcon in Widget Blueprint!", false);
     ItemIcon->SetVisibility(ESlateVisibility::Hidden);
 
-    CHECK_NULLPTR_RETVAL(EquippedIcon, LogInventorySlot, "PopupMenu:: No EquippedIcon in Widget Blueprint!", false);
+    CHECK_NULLPTR_RETVAL(EquippedIcon, LogUserWidget, "PopupMenu:: No EquippedIcon in Widget Blueprint!", false);
     EquippedIcon->SetVisibility(ESlateVisibility::Hidden);
 
     return true;
@@ -106,14 +104,14 @@ bool UInventorySlot::GetIsHovered()
 
 void UInventorySlot::UpdateContents()
 {
-    CHECK_NULLPTR_RET(ItemIcon, LogInventorySlot, "InventorySlot:: No Image Widget for ItemIcon!");
-    CHECK_NULLPTR_RET(EquippedIcon, LogInventorySlot, "InventorySlot:: No Image Widget for EquippedIcon!");
+    CHECK_NULLPTR_RET(ItemIcon, LogUserWidget, "InventorySlot:: No Image Widget for ItemIcon!");
+    CHECK_NULLPTR_RET(EquippedIcon, LogUserWidget, "InventorySlot:: No Image Widget for EquippedIcon!");
 
     if (Item != nullptr)
     {
         UTexture2D* Texture = Item->GetInventoryIcon();
 
-        CHECK_NULLPTR_RET(Texture, LogInventorySlot, "InventorySlot:: No Texture found in ItemData!")
+        CHECK_NULLPTR_RET(Texture, LogUserWidget, "InventorySlot:: No Texture found in ItemData!")
         ItemIcon->SetBrushFromTexture(Texture, true);
         ItemIcon->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 

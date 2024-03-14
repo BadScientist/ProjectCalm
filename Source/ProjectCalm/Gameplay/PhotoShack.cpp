@@ -23,16 +23,34 @@ APhotoShack::APhotoShack()
     SetRootComponent(Arrow);
 
     ShackMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ShackMesh"));
-    if (ShackMesh != nullptr) {ShackMesh->SetupAttachment(Arrow);}
+    if (ShackMesh != nullptr)
+    {
+        ShackMesh->SetupAttachment(Arrow);
+        SetupMeshCollisionAndPhysics(ShackMesh);
+    }
 
-    WindowMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("WindowMesh"));
-    if (WindowMesh != nullptr) {WindowMesh->SetupAttachment(ShackMesh);}
+    InteractionMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("WindowMesh"));
+    if (InteractionMesh != nullptr)
+    {
+        InteractionMesh->SetupAttachment(ShackMesh);
+        SetupMeshCollisionAndPhysics(InteractionMesh);
+    }
 
-    WindowCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("WindowCollision"));
-    if (WindowCollision != nullptr) {WindowCollision->SetupAttachment(WindowMesh);}
+    InteractionCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("InteractionCollision"));
+    if (InteractionCollision != nullptr)
+    {
+        InteractionCollision->SetupAttachment(InteractionMesh);
+        InteractionCollision->SetCollisionProfileName("OverlapAllDynamic");
+        InteractionCollision->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel1, ECollisionResponse::ECR_Block);
+        InteractionCollision->SetEnableGravity(false);
+    }
 
     PlanksMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PlanksMesh"));
-    if (PlanksMesh != nullptr) {PlanksMesh->SetupAttachment(ShackMesh);}
+    if (PlanksMesh != nullptr)
+    {
+        PlanksMesh->SetupAttachment(ShackMesh);
+        SetupMeshCollisionAndPhysics(PlanksMesh);
+    }
 }
 
 // Called when the game starts or when spawned
@@ -77,12 +95,20 @@ void APhotoShack::Tick(float DeltaTime)
 
 }
 
+void APhotoShack::SetupMeshCollisionAndPhysics(UStaticMeshComponent* Mesh)
+{
+    CHECK_NULLPTR_RET(Mesh, LogInteractable, "APhotoShack:: SetupMeshCollisionAndPhysics was passed a nullptr!");
+    Mesh->SetCollisionProfileName("BlockAllDynamic");
+    Mesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+    Mesh->SetEnableGravity(false);
+}
+
 void APhotoShack::SetState(EShackState NewState)
 {
     EShackState PreviousState = ShackState;
     ShackState = NewState;
 
-    CHECK_NULLPTR_RET(WindowCollision, LogInteractable, "PhotoShack:: WindowCollision not found!");
+    CHECK_NULLPTR_RET(InteractionCollision, LogInteractable, "PhotoShack:: InteractionCollision not found!");
     CHECK_NULLPTR_RET(Proprietor, LogInteractable, "PhotoShack:: Proprietor not found!");
 
     if (PreviousState != ShackState)
@@ -90,10 +116,10 @@ void APhotoShack::SetState(EShackState NewState)
         switch (ShackState)
         {
         case EShackState::SHOP_CLOSED:
-            WindowCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+            SetCollisionEnabled(true);
             break;
         case EShackState::PROPRIETOR_MOVING_IN:
-            WindowCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+            SetCollisionEnabled(false);
             break;
         case EShackState::SHOP_OPEN:
             if (Proprietor != nullptr){Proprietor->SetCollisionEnabled(true);}
@@ -107,13 +133,13 @@ void APhotoShack::SetState(EShackState NewState)
         }
     }
 
-    FString StateString = ShackState == EShackState::SHOP_OPEN ? FString("Shop Open") : \
-        ShackState == EShackState::PROPRIETOR_MOVING_IN ? FString("Proprietor Moving In") : \
-        ShackState == EShackState::WINDOW_OPENING ? FString("Window Opening") : \
-        ShackState == EShackState::SHOP_CLOSED ? FString("Shop Closed") : \
-        ShackState == EShackState::WINDOW_CLOSING ? FString("Window Closing") : FString("Proprietor Moving Out");
+    // FString StateString = ShackState == EShackState::SHOP_OPEN ? FString("Shop Open") : \
+    //     ShackState == EShackState::PROPRIETOR_MOVING_IN ? FString("Proprietor Moving In") : \
+    //     ShackState == EShackState::WINDOW_OPENING ? FString("Window Opening") : \
+    //     ShackState == EShackState::SHOP_CLOSED ? FString("Shop Closed") : \
+    //     ShackState == EShackState::WINDOW_CLOSING ? FString("Window Closing") : FString("Proprietor Moving Out");
 
-    UE_LOG(LogTemp, Warning, TEXT("PhotoShack:: State: %s"), *StateString);
+    // UE_LOG(LogTemp, Warning, TEXT("PhotoShack:: State: %s"), *StateString);
 }
 
 void APhotoShack::MoveProprietor(float DeltaTime)

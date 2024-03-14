@@ -9,14 +9,13 @@
 #include "ProjectCalm/Inventory/EquipperInterface.h"
 #include "PlayerCharacter.generated.h"
 
-DECLARE_LOG_CATEGORY_EXTERN(LogPlayerCharacter, All, All)
-
 class UCameraComponent;
 class USceneCaptureComponent2D;
 class UInteractionComponent;
 class UViewBlenderComponent;
 class UFlagManagerComponent;
 class UNotificationComponent;
+class UNoiseMakerComponent;
 class UPlayerHUD;
 class UEnhancedInputLocalPlayerSubsystem;
 class UInputAction;
@@ -46,6 +45,8 @@ private:
 	USpawnerComponent* SpawnerComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Inventory, meta = (AllowPrivateAccess = "true"))
 	UInventoryComponent* InventoryComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Gameplay, meta = (AllowPrivateAccess = "true"))
+	UNoiseMakerComponent* NoiseMakerComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Gameplay, meta = (AllowPrivateAccess = "true"))
 	UInteractionComponent* InteractionComponent;
 	

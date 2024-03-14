@@ -32,7 +32,7 @@ void UInventoryMenu::UpdateContents()
     int32 i = 0;
     for (UInventorySlot* InventorySlot : Slots)
     {
-        CHECK_NULLPTR_RET(InventorySlot, LogMenuWidget, "InventoryMenu:: InventorySlot is NULL!");
+        CHECK_NULLPTR_RET(InventorySlot, LogUserWidget, "InventoryMenu:: InventorySlot is NULL!");
 
         if (i < PlayerInventory.Num())
         {
@@ -84,13 +84,13 @@ void UInventoryMenu::Setup(bool bIsInteractiveIn)
 
     for (UHorizontalBox* Row : {InventoryRowTop, InventoryRowMiddle, InventoryRowBottom})
     {
-        CHECK_NULLPTR_RET(Row, LogMenuWidget, "InventoryMenu:: Missing row in InventoryList!");
+        CHECK_NULLPTR_RET(Row, LogUserWidget, "InventoryMenu:: Missing row in InventoryList!");
 
         for (UWidget* InventorySlotWidget : Row->GetAllChildren())
         {
             UInventorySlot* InventorySlot = Cast<UInventorySlot>(InventorySlotWidget);
             
-            CHECK_NULLPTR_RET(InventorySlot, LogMenuWidget, "InventoryMenu:: InventorySlot is NULL!");
+            CHECK_NULLPTR_RET(InventorySlot, LogUserWidget, "InventoryMenu:: InventorySlot is NULL!");
             InventorySlot->OnMouseButtonDown.BindUObject(this, &UInventoryMenu::OnSlotClicked);
             InventorySlot->OnMouseButtonUp.BindUObject(this, &UInventoryMenu::OnSlotReleased);
             InventorySlot->OnRightMouseButtonDown.BindUObject(this, &UInventoryMenu::OnSlotRightClicked);
@@ -125,7 +125,7 @@ void UInventoryMenu::OnSlotReleased()
             if (HoveredSlot != SelectedSlot)
             {
                 APlayerCharacter* PlayerCharacter = PCPlayerStatics::GetPlayerCharacter(this);
-                CHECK_NULLPTR_RET(PlayerCharacter, LogMenuWidget, "InventoryMenu:: PlayerCharacter not found!");
+                CHECK_NULLPTR_RET(PlayerCharacter, LogUserWidget, "InventoryMenu:: PlayerCharacter not found!");
 
                 int32 SelectedSlotIdx = SelectedSlot->GetIndex();
                 int32 HoveredSlotIdx = HoveredSlot->GetIndex();
@@ -153,7 +153,7 @@ void UInventoryMenu::OnSlotRightClicked()
     else if (!FailureResponse.IsEmpty())
     {
         APlayerCharacter* PlayerCharacter = PCPlayerStatics::GetPlayerCharacter(this);
-        CHECK_NULLPTR_RET(PlayerCharacter, LogMenuWidget, "InventoryMenu:: PlayerCharacter not found!");
+        CHECK_NULLPTR_RET(PlayerCharacter, LogUserWidget, "InventoryMenu:: PlayerCharacter not found!");
         PlayerCharacter->NotifyPlayer(FailureResponse);
     }
 }

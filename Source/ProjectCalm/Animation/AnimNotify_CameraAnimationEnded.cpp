@@ -3,17 +3,14 @@
 
 #include "AnimNotify_CameraAnimationEnded.h"
 #include "ProjectCalm/Inventory/PhotoCameraEquipment.h"
+#include "ProjectCalm/Utilities/LogMacros.h"
 
 #include "Kismet/GameplayStatics.h"
 
 void UAnimNotify_CameraAnimationEnded::Notify(USkeletalMeshComponent *MeshComp, UAnimSequenceBase *Animation, const FAnimNotifyEventReference &EventReference)
 {
     AActor* OwnerActor = MeshComp->GetOwner();
-    if (OwnerActor == nullptr)
-    {
-        UE_LOG(LogAnimation, Error, TEXT("AnimNotify_CameraAnimationEnded:: No Owning Actor found!"))
-        return;
-    }
+    CHECK_NULLPTR_RET(OwnerActor,LogAnimation , "AnimNotify_CameraAnimationEnded:: No Owning Actor found!");
 
     TArray<AActor*> AttachedActors;
     OwnerActor->GetAttachedActors(AttachedActors);

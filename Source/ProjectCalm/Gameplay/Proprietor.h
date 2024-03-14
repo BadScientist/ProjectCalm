@@ -8,20 +8,12 @@
 #include "Proprietor.generated.h"
 
 class APlayerCharacter;
-class UBoxComponent;
-class UStaticMeshComponent;
-class UArrowComponent;
 
 
 UCLASS()
 class PROJECTCALM_API AProprietor : public AInteractableActor
 {
 	GENERATED_BODY()
-    
-	UPROPERTY(EditDefaultsOnly, Category = Mesh)
-	UStaticMeshComponent* ProprietorMesh{nullptr};
-	UPROPERTY(EditDefaultsOnly)
-	UBoxComponent* ProprietorCollision{nullptr};
 	
 public:	
 	// Sets default values for this actor's properties
@@ -35,7 +27,5 @@ public:
 	// START INTERACTABLEINTERFACE
     virtual void Interact(APlayerCharacter* InteractingPlayer) override;
 	// END INTERACTABLEINTERFACE
-
-    void SetCollisionEnabled(bool bValue);
 
 };

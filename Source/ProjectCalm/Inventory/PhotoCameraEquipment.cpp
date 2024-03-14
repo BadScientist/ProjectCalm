@@ -298,7 +298,7 @@ void APhotoCameraEquipment::SecondaryAction(const FInputActionValue& Value)
 {
 	UProjectCalmGameInstance* GameInstance = PCGameStatics::GetPCGameInstance(this);
 	CHECK_NULLPTR_RET(GameInstance, LogEquipment, "PhotoCameraEquipment:: No Game Instance found!");
-	if (GameInstance->IsPopupMenuOpen()) {return;}
+	if (GameInstance->IsPopupOpen()) {return;}
 
 	bool bValue = Value.Get<bool>();
 

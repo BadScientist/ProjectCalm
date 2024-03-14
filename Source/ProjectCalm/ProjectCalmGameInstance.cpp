@@ -4,6 +4,7 @@
 #include "ProjectCalmGameInstance.h"
 #include "UI/PauseMenu.h"
 #include "UI/InventoryMenu.h"
+#include "UI/FancyTextDisplay.h"
 #include "Utilities/LogMacros.h"
 
 #if WITH_EDITORONLY_DATA
@@ -17,21 +18,21 @@
 UProjectCalmGameInstance::UProjectCalmGameInstance(const FObjectInitializer &ObjectInitializer)
 {
     UE_LOG(LogLoad, Warning, TEXT("Creating ProjectCalmGameInstance..."));
-    ConstructorHelpers::FClassFinder<UMenu> MainMenuBPClass(TEXT("/Game/ProjectCalm/Blueprints/UI/WBP_MainMenu"));
-    CHECK_NULLPTR_RET(MainMenuBPClass.Class, LogLoad, "PCGameInstance:: Could not find MainMenu blueprint class!");
-    MainMenuClass = MainMenuBPClass.Class;
+    // ConstructorHelpers::FClassFinder<UMenu> MainMenuBPClass(TEXT("/Game/ProjectCalm/Blueprints/UI/WBP_MainMenu"));
+    // CHECK_NULLPTR_RET(MainMenuBPClass.Class, LogLoad, "PCGameInstance:: Could not find MainMenu blueprint class!");
+    // MainMenuClass = MainMenuBPClass.Class;
     
-    ConstructorHelpers::FClassFinder<UMenu> LoadingScreenBPClass(TEXT("/Game/ProjectCalm/Blueprints/UI/WBP_LoadingScreen"));
-    CHECK_NULLPTR_RET(LoadingScreenBPClass.Class, LogLoad, "PCGameInstance:: Could not find LoadingScreen blueprint class!");
-    LoadingScreenClass = LoadingScreenBPClass.Class;
+    // ConstructorHelpers::FClassFinder<UMenu> LoadingScreenBPClass(TEXT("/Game/ProjectCalm/Blueprints/UI/WBP_LoadingScreen"));
+    // CHECK_NULLPTR_RET(LoadingScreenBPClass.Class, LogLoad, "PCGameInstance:: Could not find LoadingScreen blueprint class!");
+    // LoadingScreenClass = LoadingScreenBPClass.Class;
 
-    ConstructorHelpers::FClassFinder<UPauseMenu> PauseMenuBPClass(TEXT("/Game/ProjectCalm/Blueprints/UI/WBP_PauseMenu"));
-    CHECK_NULLPTR_RET(PauseMenuBPClass.Class, LogLoad, "PCGameInstance:: Could not find PauseMenu blueprint class!");
-    PauseMenuClass = PauseMenuBPClass.Class;    
+    // ConstructorHelpers::FClassFinder<UPauseMenu> PauseMenuBPClass(TEXT("/Game/ProjectCalm/Blueprints/UI/WBP_PauseMenu"));
+    // CHECK_NULLPTR_RET(PauseMenuBPClass.Class, LogLoad, "PCGameInstance:: Could not find PauseMenu blueprint class!");
+    // PauseMenuClass = PauseMenuBPClass.Class;    
     
-    ConstructorHelpers::FClassFinder<UPopupMenu> InventoryMenuBPClass(TEXT("/Game/ProjectCalm/Blueprints/UI/WBP_Inventory"));
-    CHECK_NULLPTR_RET(InventoryMenuBPClass.Class, LogLoad, "PCGameInstance:: Could not find InventoryMenu blueprint class!");
-    InventoryMenuClass = InventoryMenuBPClass.Class;
+    // ConstructorHelpers::FClassFinder<UPopupMenu> InventoryMenuBPClass(TEXT("/Game/ProjectCalm/Blueprints/UI/WBP_Inventory"));
+    // CHECK_NULLPTR_RET(InventoryMenuBPClass.Class, LogLoad, "PCGameInstance:: Could not find InventoryMenu blueprint class!");
+    // InventoryMenuClass = InventoryMenuBPClass.Class;
 }
 
 void UProjectCalmGameInstance::Init()
@@ -69,25 +70,29 @@ void UProjectCalmGameInstance::QuitToDesktop()
     PlayerController->ConsoleCommand(FString("quit"), true);
 }
 
-void UProjectCalmGameInstance::ClosePopupMenu(UPopupMenu* PopupMenu)
+void UProjectCalmGameInstance::ClosePopup(UPopupWidget* Popup)
 {
-    if (MenuStack.Remove(PopupMenu)) {PopupMenu->Teardown();}
+    if (Popup != nullptr && PopupStack.Remove(Popup)) {Popup->Teardown();}
 }
 
 void UProjectCalmGameInstance::ClosePopupMenu()
 {
-    UPopupMenu* Menu = MenuStack.Pop();
-    if (Menu != nullptr) {Menu->Teardown();}
+    if (UPopupMenu* TopPopupMenu = GetTopPopupMenu()) {ClosePopup(TopPopupMenu);} 
 }
 
 bool UProjectCalmGameInstance::IsPopupMenuOpen(UPopupMenu* PopupMenu)
 {
-    return MenuStack.Contains(PopupMenu);
+    return PopupStack.Contains(PopupMenu);
 }
 
 bool UProjectCalmGameInstance::IsPopupMenuOpen()
 {
-    return !MenuStack.IsEmpty();
+    return GetTopPopupMenu() != nullptr;
+}
+
+bool UProjectCalmGameInstance::IsPopupOpen()
+{
+    return !PopupStack.IsEmpty();
 }
 
 void UProjectCalmGameInstance::LoadMainMenu()
@@ -107,10 +112,10 @@ void UProjectCalmGameInstance::LoadLoadingScreen()
 void UProjectCalmGameInstance::LoadPauseMenu()
 {
     CHECK_NULLPTR_RET(PauseMenuClass, LogLoad, "PCGameInstance:: PauseMenu class is NULL!");
-    UPauseMenu* Menu = CreateWidget<UPauseMenu>(this, PauseMenuClass);    
+    UPauseMenu* Menu = CreateWidget<UPauseMenu>(this, PauseMenuClass);
     SetupMenuWidget(Menu, true);
 
-    MenuStack.Push(Menu);
+    PopupStack.Push(Menu);
 }
 
 void UProjectCalmGameInstance::LoadInventoryMenu()
@@ -119,14 +124,58 @@ void UProjectCalmGameInstance::LoadInventoryMenu()
     UInventoryMenu* Menu = CreateWidget<UInventoryMenu>(this, InventoryMenuClass);
     SetupMenuWidget(Menu, true);
     
-    MenuStack.Push(Menu);
+    PopupStack.Push(Menu);
+}
+
+void UProjectCalmGameInstance::LoadDialogueBox()
+{
+    CHECK_NULLPTR_RET(DialogueBoxClass, LogLoad, "PCGameInstance:: DialogueBox class is NULL!");
+    UFancyTextDisplay* DialogueBox = CreateWidget<UFancyTextDisplay>(this, DialogueBoxClass);
+    SetupMenuWidget(DialogueBox, true);
+
+    // TArray<FString> TestStrings{
+    //     FString("This is a test string."),
+    //     FString("This is a second test string for testing the dialogue box with a longer string of text."),
+    //     FString("This is a third test string. \nThis is the same string after a newline character."),
+    //     FString(("This is yet another test string to test the dialogue box with an even longer string of "
+    //     "text that will not fit in a single dialogue box due to the character and line limits. This means "
+    //     "that multiple pages of dialogue will need to be displayed sequentially in order to display all of "
+    //     "the text in this one string. If all goes well, it will be divided up into parts and each part will "
+    //     "be printed when the player presses the 'E' key.")),
+    //     FString(("This is a string with multiple styles of text marked by tags:\nThis is "
+    //     "{header}header{/header} text,  this is {spooky}spoooOOOoooky{/spooky} text and this is "
+    //     "{scared}scared{/scared} text. The rest is default.\nLorem ipsum dolor sit amet, consectetur "
+    //     "adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad "
+    //     "minim veniam, quis nostrud exercitation ullamco laboris nisi ut {header}aliquip ex ea commodo "
+    //     "consequat. Duis aute irure dolor in{/header} reprehenderit in voluptate velit {spooky}esse cillum "
+    //     "dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui "
+    //     "officia deserunt mollit anim id{/spooky} est laborum."))};
+    // DialogueBox->SetStringsToDisplay(TestStrings);
+    
+    PopupStack.Push(DialogueBox);
 }
 
 void UProjectCalmGameInstance::SetupMenuWidget(UMenu* Menu, bool bIsInteractable)
 {
-    CHECK_NULLPTR_RET(Menu, LogMenuWidget, "PCGameInstance:: Failed to create menu widget!");
+    CHECK_NULLPTR_RET(Menu, LogUserWidget, "PCGameInstance:: Failed to create menu widget!");
     Menu->SetMenuInterface(this);
     Menu->Setup(bIsInteractable);
+}
+
+UPopupMenu *UProjectCalmGameInstance::GetTopPopupMenu()
+{
+    UPopupWidget* Popup{nullptr};
+    UPopupMenu* PopupMenu{nullptr};
+    int32 Idx = 0;
+    do
+    {
+        Popup = PopupStack.Peak(Idx);
+        PopupMenu = Cast<UPopupMenu>(Popup);
+        if (PopupMenu != nullptr) {return PopupMenu;}
+        Idx++;
+    } while (Popup != nullptr);
+
+    return nullptr;
 }
 
 

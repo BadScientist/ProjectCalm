@@ -10,8 +10,6 @@ class UItemData;
 class UImage;
 struct FItemDetails;
 
-DECLARE_LOG_CATEGORY_EXTERN(LogInventorySlot, All, All)
-
 DECLARE_DELEGATE(FMouseEventDelegate);
 
 

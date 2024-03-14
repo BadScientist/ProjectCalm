@@ -29,7 +29,6 @@ bool UPhotoSubjectComponent::Spawn(float RegionHeight)
         return true;
     }
 
-    UE_LOG(LogTemp, Warning, TEXT("PhotoSubjectComponent:: Failed to find point on ground"));
     return false;
 }
 
@@ -39,7 +38,7 @@ bool UPhotoSubjectComponent::Despawn(AActor* Player)
     double DistanceToPlayer = FVector::Distance(SubjectLocation, Player->GetActorLocation());
     if (DistanceToPlayer < DESPAWN_DISTANCE) {return false;}
     
-    // TODO: Fix hardcoded values
+    // @todo: Fix hardcoded values
     FVector Direction = UKismetMathLibrary::GetDirectionUnitVector(Player->GetActorLocation(), SubjectLocation);
     double Angle = FMath::RadiansToDegrees(FMath::Acos(FVector::DotProduct(Direction, Player->GetActorForwardVector())));
     bool bInVisionCone = Angle <= 45;

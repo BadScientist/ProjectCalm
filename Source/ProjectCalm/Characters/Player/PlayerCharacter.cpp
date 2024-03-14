@@ -7,6 +7,7 @@
 #include "FlagManagerComponent.h"
 #include "NotificationComponent.h"
 #include "SpawnerComponent.h"
+#include "ProjectCalm/Gameplay/NoiseMakerComponent.h"
 #include "ProjectCalm/ProjectCalmGameInstance.h"
 #include "ProjectCalm/Inventory/InventoryComponent.h"
 #include "ProjectCalm/Inventory/EquipmentInterface.h"
@@ -20,12 +21,9 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 
-DEFINE_LOG_CATEGORY(LogPlayerCharacter)
-
-#define ABORT_IF_MENU_OPEN() {\
-	UProjectCalmGameInstance* GameInstance = PCGameStatics::GetPCGameInstance(this);\
+#define ABORT_IF_POPUP_OPEN(GameInstance) {\
 	CHECK_NULLPTR_RET(GameInstance, LogPlayerCharacter, "PlayerCharacter:: No Game Instance found!");\
-	if (GameInstance->IsPopupMenuOpen()) {return;}}
+	if (GameInstance->IsPopupOpen()) {return;}}
 
 
 // Sets default values
@@ -66,8 +64,8 @@ APlayerCharacter::APlayerCharacter()
 	
 	FlagManagerComponent = CreateDefaultSubobject<UFlagManagerComponent>(TEXT("FlagManagerComponent"));
 	NotificationComponent = CreateDefaultSubobject<UNotificationComponent>(TEXT("NotificationComponent"));
-
 	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
+	NoiseMakerComponent = CreateDefaultSubobject<UNoiseMakerComponent>(TEXT("NoiseMakerComponent"));
 
 	SpawnerComponent = CreateDefaultSubobject<USpawnerComponent>(TEXT("SpawnerComponent"));
 	if (SpawnerComponent != nullptr) {SpawnerComponent->SetupAttachment(RootComponent);}
@@ -122,7 +120,8 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 void APlayerCharacter::Jump()
 {
-	ABORT_IF_MENU_OPEN();
+	UProjectCalmGameInstance* GameInstance = PCGameStatics::GetPCGameInstance(this);
+	ABORT_IF_POPUP_OPEN(GameInstance);
 	Super::Jump();
 }
 
@@ -156,7 +155,8 @@ void APlayerCharacter::HideHUD()
 
 void APlayerCharacter::Move(const FInputActionValue& Value)  // Automatically applied. Do not call in Tick.
 {
-	ABORT_IF_MENU_OPEN();
+	UProjectCalmGameInstance* GameInstance = PCGameStatics::GetPCGameInstance(this);
+	ABORT_IF_POPUP_OPEN(GameInstance);
 	CHECK_NULLPTR_RET(Controller, LogPlayerCharacter, "PlayerCharacter:: No Controller!");
 
 	FVector2D Direction = Value.Get<FVector2D>();
@@ -166,7 +166,8 @@ void APlayerCharacter::Move(const FInputActionValue& Value)  // Automatically ap
 
 void APlayerCharacter::Look(const FInputActionValue& Value)  // Automatically applied. Do not call in Tick.
 {
-	ABORT_IF_MENU_OPEN();
+	UProjectCalmGameInstance* GameInstance = PCGameStatics::GetPCGameInstance(this);
+	ABORT_IF_POPUP_OPEN(GameInstance);
 	CHECK_NULLPTR_RET(Controller, LogPlayerCharacter, "PlayerCharacter:: No Controller!");
 
 	FVector2D Direction = Value.Get<FVector2D>();
@@ -186,13 +187,15 @@ void APlayerCharacter::Pause(const FInputActionValue &Value)
 void APlayerCharacter::OpenInventory(const FInputActionValue &Value)
 {
 	UProjectCalmGameInstance* GameInstance = PCGameStatics::GetPCGameInstance(this);
-	CHECK_NULLPTR_RET(GameInstance, LogPlayerCharacter, "PlayerCharacter:: Could not get ProjectCalmGameInstance!");
+	ABORT_IF_POPUP_OPEN(GameInstance);
 
-	if (!GameInstance->IsPopupMenuOpen()) {GameInstance->LoadInventoryMenu();}
+	GameInstance->LoadInventoryMenu();
 }
 
 void APlayerCharacter::Interact(const FInputActionValue &Value)
 {
+	UProjectCalmGameInstance* GameInstance = PCGameStatics::GetPCGameInstance(this);
+	ABORT_IF_POPUP_OPEN(GameInstance);
 	CHECK_NULLPTR_RET(InteractionComponent, LogPlayerCharacter, "PlayerCharacter:: No InteractionComponent found!")
 	InteractionComponent->Interact();
 }

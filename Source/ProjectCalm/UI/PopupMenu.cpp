@@ -8,11 +8,9 @@
 #include "ProjectCalm/Utilities/PCPlayerStatics.h"
 
 #include "Components/Button.h"
-#include "EnhancedInputSubsystems.h"
-#include "EnhancedInputComponent.h"
 
 
-UPopupMenu::UPopupMenu(const FObjectInitializer& ObjectInitializer) : UMenu(ObjectInitializer)
+UPopupMenu::UPopupMenu(const FObjectInitializer& ObjectInitializer) : UPopupWidget(ObjectInitializer)
 {
 	bIsFocusable = true;
 }
@@ -22,17 +20,10 @@ bool UPopupMenu::Initialize()
     bool Success = Super::Initialize();
     if (!Success) {return false;}
 
-    CHECK_NULLPTR_RETVAL(CloseButton, LogMenuWidget, "PopupMenu:: No CloseButton in Widget Blueprint!", false);
+    CHECK_NULLPTR_RETVAL(CloseButton, LogUserWidget, "PopupMenu:: No CloseButton in Widget Blueprint!", false);
     CloseButton->OnClicked.AddDynamic(this, &UPopupMenu::CloseMenu);
 
     return true;
-}
-
-void UPopupMenu::CloseMenu()
-{
-    CHECK_NULLPTR_RET(MenuInterface, LogMenuWidget, "PopupMenu:: No MenuInterface!");
-
-    MenuInterface->ClosePopupMenu(this);
 }
 
 void UPopupMenu::Setup(bool bIsInteractiveIn)
@@ -42,7 +33,7 @@ void UPopupMenu::Setup(bool bIsInteractiveIn)
     if (!bIsInteractive) {return;}
 
     APlayerController* PlayerController = GetOwningPlayer();
-    CHECK_NULLPTR_RET(PlayerController, LogMenuWidget, "Menu:: PlayerController is NULL!");
+    CHECK_NULLPTR_RET(PlayerController, LogUserWidget, "PopupMenu:: PlayerController is NULL!");
 
     FInputModeGameAndUI InputModeData;
     InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::LockInFullscreen);
@@ -50,47 +41,11 @@ void UPopupMenu::Setup(bool bIsInteractiveIn)
     InputModeData.SetWidgetToFocus(TakeWidget());
     PlayerController->SetInputMode(InputModeData);
     PlayerController->bShowMouseCursor = true;
-
-	// if (MenuMappingContext != nullptr)
-	// {
-	// 	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = PCPlayerStatics::GetEnhancedInputLocalPlayerSubsystem(this))
-	// 	{
-	// 		Subsystem->AddMappingContext(MenuMappingContext, 1);
-	// 	}
-	// }
-
-	// if (CloseAction != nullptr)
-	// {
-	// 	if (UEnhancedInputComponent* EnhancedInputComponent = PCPlayerStatics::GetEnhancedInputComponent(this))
-	// 	{		
-	// 		ActionBinding = &(EnhancedInputComponent->BindAction(CloseAction, ETriggerEvent::Triggered, this, &UPopupMenu::CloseMenu));
-	// 	}
-	// }
 }
 
 void UPopupMenu::Teardown()
-{    
+{
     if (bIsInteractive) {SetGameOnlyControls();}
-    
-	// if (CloseAction != nullptr)
-	// {
-	// 	if (UEnhancedInputComponent* EnhancedInputComponent = PCPlayerStatics::GetEnhancedInputComponent(this))
-	// 	{		
-	// 		if (ActionBinding != nullptr)
-    //         {
-    //             EnhancedInputComponent->RemoveActionBindingForHandle(ActionBinding->GetHandle());
-    //             ActionBinding = nullptr;
-    //         }
-	// 	}
-	// }
-
-	// if (MenuMappingContext != nullptr)
-	// {
-	// 	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = PCPlayerStatics::GetEnhancedInputLocalPlayerSubsystem(this))
-	// 	{
-	// 		Subsystem->RemoveMappingContext(MenuMappingContext);
-	// 	}
-	// }
 
     Super::Teardown();
 }

@@ -10,10 +10,10 @@ bool UMainGameMenu::Initialize()
     bool Success = Super::Initialize();
     if (!Success) {return false;}
 
-    CHECK_NULLPTR_RETVAL(StartButton, LogMenuWidget, "MainGameMenu:: No StartButton in Widget Blueprint!", false);
+    CHECK_NULLPTR_RETVAL(StartButton, LogUserWidget, "MainGameMenu:: No StartButton in Widget Blueprint!", false);
     StartButton->OnClicked.AddDynamic(this, &UMainGameMenu::StartGame);
 
-    CHECK_NULLPTR_RETVAL(ExitButton, LogMenuWidget, "MainGameMenu:: No ExitButton in Widget Blueprint!", false);
+    CHECK_NULLPTR_RETVAL(ExitButton, LogUserWidget, "MainGameMenu:: No ExitButton in Widget Blueprint!", false);
     ExitButton->OnClicked.AddDynamic(this, &UMainGameMenu::ExitGame);
 
     return true;
@@ -21,14 +21,14 @@ bool UMainGameMenu::Initialize()
 
 void UMainGameMenu::StartGame()
 {
-    CHECK_NULLPTR_RET(MenuInterface, LogMenuWidget, "MainGameMenu:: No MenuInterface!");
+    CHECK_NULLPTR_RET(MenuInterface, LogUserWidget, "MainGameMenu:: No MenuInterface!");
 
     MenuInterface->StartGame();
 }
 
 void UMainGameMenu::ExitGame()
 {
-    CHECK_NULLPTR_RET(MenuInterface, LogMenuWidget, "MainGameMenu:: No MenuInterface!");
+    CHECK_NULLPTR_RET(MenuInterface, LogUserWidget, "MainGameMenu:: No MenuInterface!");
 
     bIsInteractive = false;
     MenuInterface->QuitToDesktop();
@@ -41,7 +41,7 @@ void UMainGameMenu::Setup(bool bIsInteractiveIn)
     if (!bIsInteractive) {return;}
 
     APlayerController* PlayerController = GetOwningPlayer();
-    CHECK_NULLPTR_RET(PlayerController, LogMenuWidget, "Menu:: PlayerController is NULL!");
+    CHECK_NULLPTR_RET(PlayerController, LogUserWidget, "Menu:: PlayerController is NULL!");
 
     bIsFocusable = true;
     FInputModeUIOnly InputModeData;

@@ -13,7 +13,7 @@ bool UPauseMenu::Initialize()
     bool Success = Super::Initialize();
     if (!Success) {return false;}
 
-    CHECK_NULLPTR_RETVAL(QuitButton, LogMenuWidget, "PauseMenu:: No QuitButton in Widget Blueprint!", false);
+    CHECK_NULLPTR_RETVAL(QuitButton, LogUserWidget, "PauseMenu:: No QuitButton in Widget Blueprint!", false);
     QuitButton->OnClicked.AddDynamic(this, &UPauseMenu::QuitToMainMenu);
 
     return true;
@@ -21,7 +21,7 @@ bool UPauseMenu::Initialize()
 
 void UPauseMenu::QuitToMainMenu()
 {
-    CHECK_NULLPTR_RET(MenuInterface, LogMenuWidget, "PauseMenu:: No MenuInterface!");
+    CHECK_NULLPTR_RET(MenuInterface, LogUserWidget, "PauseMenu:: No MenuInterface!");
 
     MenuInterface->QuitToMainMenu();
 }

@@ -6,13 +6,14 @@
 #include "Engine/GameInstance.h"
 
 #include "UI/MenuInterface.h"
-#include "UI/PopupMenuStack.h"
+#include "UI/PopupStack.h"
 #include "ProjectCalmGameInstance.generated.h"
 
 class UMenu;
 class UPopupMenu;
 class UPauseMenu;
 class UInventoryMenu;
+class UFancyTextDisplay;
 
 
 /**
@@ -28,13 +29,19 @@ class PROJECTCALM_API UProjectCalmGameInstance : public UGameInstance, public IM
 	UPROPERTY(EditAnywhere, Category = Maps)
 	TSoftObjectPtr<UWorld> GameplayMap;
 
+    UPROPERTY(EditDefaultsOnly, Category = WidgetClasses)
 	TSubclassOf<UPauseMenu> PauseMenuClass;
+    UPROPERTY(EditDefaultsOnly, Category = WidgetClasses)
 	TSubclassOf<UInventoryMenu> InventoryMenuClass;
+    UPROPERTY(EditDefaultsOnly, Category = WidgetClasses)
 	TSubclassOf<UMenu> MainMenuClass;
+    UPROPERTY(EditDefaultsOnly, Category = WidgetClasses)
 	TSubclassOf<UMenu> LoadingScreenClass;
+    UPROPERTY(EditDefaultsOnly, Category = WidgetClasses)
+	TSubclassOf<UFancyTextDisplay> DialogueBoxClass;
 	// class UMainMenu* MainMenu;
 
-	FPopupMenuStack MenuStack{FPopupMenuStack()};
+	FPopupStack PopupStack{FPopupStack()};
 
 
 public:
@@ -48,13 +55,14 @@ public:
 	virtual void QuitToMainMenu() override;
 	UFUNCTION(exec)
 	virtual void QuitToDesktop() override;
-	virtual void ClosePopupMenu(UPopupMenu* PopupMenu) override;
+	virtual void ClosePopup(UPopupWidget* Popup) override;
 	// End Menu Interface Implementation
 
 	UFUNCTION(BlueprintCallable)
 	void ClosePopupMenu();
 	bool IsPopupMenuOpen(UPopupMenu* PopupMenu);
 	bool IsPopupMenuOpen();
+	bool IsPopupOpen();
 	
 	UFUNCTION(exec, BlueprintCallable)
 	void LoadMainMenu();
@@ -64,6 +72,8 @@ public:
 	void LoadPauseMenu();
 	UFUNCTION(exec, BlueprintCallable)
 	void LoadInventoryMenu();
+	UFUNCTION(exec, BlueprintCallable)
+	void LoadDialogueBox();
 
 
 	// DEBUG COMMANDS
@@ -75,5 +85,6 @@ public:
 
 private:
 	void SetupMenuWidget(UMenu* Menu, bool bIsInteractable);
+	UPopupMenu* GetTopPopupMenu();
 	
 };

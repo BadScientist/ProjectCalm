@@ -78,6 +78,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 private:
+	void SetupMeshCollisionAndPhysics(UStaticMeshComponent* Mesh);
 	void SetState(EShackState NewState);
 	void MoveProprietor(float DeltaTime);
 	void MoveWindow(float DeltaTime);

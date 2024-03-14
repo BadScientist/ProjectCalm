@@ -304,22 +304,6 @@
 		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
 	},
 	{
-		"file": "C:\\Users\\Valued Customer\\repos\\unreal\\ProjectCalm\\Source\\ProjectCalm\\Characters\\NoiseMakerComponent.cpp",
-		"arguments": [
-			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.36.32532\\bin\\HostX64\\x64\\cl.exe",
-			"@C:\\Users\\Valued Customer\\repos\\unreal\\ProjectCalm\\.vscode\\compileCommands_Default\\ProjectCalm.256.rsp"
-		],
-		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
-	},
-	{
-		"file": "C:\\Users\\Valued Customer\\repos\\unreal\\ProjectCalm\\Source\\ProjectCalm\\Characters\\NoiseMakerComponent.h",
-		"arguments": [
-			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.36.32532\\bin\\HostX64\\x64\\cl.exe",
-			"@C:\\Users\\Valued Customer\\repos\\unreal\\ProjectCalm\\.vscode\\compileCommands_Default\\ProjectCalm.256.rsp"
-		],
-		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
-	},
-	{
 		"file": "C:\\Users\\Valued Customer\\repos\\unreal\\ProjectCalm\\Source\\ProjectCalm\\Characters\\PhotoSubjects\\NoiseListenerComponent.cpp",
 		"arguments": [
 			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.36.32532\\bin\\HostX64\\x64\\cl.exe",
@@ -529,6 +513,22 @@
 	},
 	{
 		"file": "C:\\Users\\Valued Customer\\repos\\unreal\\ProjectCalm\\Source\\ProjectCalm\\Gameplay\\InteractableInterface.h",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.36.32532\\bin\\HostX64\\x64\\cl.exe",
+			"@C:\\Users\\Valued Customer\\repos\\unreal\\ProjectCalm\\.vscode\\compileCommands_Default\\ProjectCalm.256.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\Valued Customer\\repos\\unreal\\ProjectCalm\\Source\\ProjectCalm\\Gameplay\\NoiseMakerComponent.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.36.32532\\bin\\HostX64\\x64\\cl.exe",
+			"@C:\\Users\\Valued Customer\\repos\\unreal\\ProjectCalm\\.vscode\\compileCommands_Default\\ProjectCalm.256.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\Valued Customer\\repos\\unreal\\ProjectCalm\\Source\\ProjectCalm\\Gameplay\\NoiseMakerComponent.h",
 		"arguments": [
 			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.36.32532\\bin\\HostX64\\x64\\cl.exe",
 			"@C:\\Users\\Valued Customer\\repos\\unreal\\ProjectCalm\\.vscode\\compileCommands_Default\\ProjectCalm.256.rsp"
@@ -880,6 +880,38 @@
 		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
 	},
 	{
+		"file": "C:\\Users\\Valued Customer\\repos\\unreal\\ProjectCalm\\Source\\ProjectCalm\\UI\\FancyText.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.36.32532\\bin\\HostX64\\x64\\cl.exe",
+			"@C:\\Users\\Valued Customer\\repos\\unreal\\ProjectCalm\\.vscode\\compileCommands_Default\\ProjectCalm.256.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\Valued Customer\\repos\\unreal\\ProjectCalm\\Source\\ProjectCalm\\UI\\FancyText.h",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.36.32532\\bin\\HostX64\\x64\\cl.exe",
+			"@C:\\Users\\Valued Customer\\repos\\unreal\\ProjectCalm\\.vscode\\compileCommands_Default\\ProjectCalm.256.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\Valued Customer\\repos\\unreal\\ProjectCalm\\Source\\ProjectCalm\\UI\\FancyTextDisplay.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.36.32532\\bin\\HostX64\\x64\\cl.exe",
+			"@C:\\Users\\Valued Customer\\repos\\unreal\\ProjectCalm\\.vscode\\compileCommands_Default\\ProjectCalm.256.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\Valued Customer\\repos\\unreal\\ProjectCalm\\Source\\ProjectCalm\\UI\\FancyTextDisplay.h",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.36.32532\\bin\\HostX64\\x64\\cl.exe",
+			"@C:\\Users\\Valued Customer\\repos\\unreal\\ProjectCalm\\.vscode\\compileCommands_Default\\ProjectCalm.256.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
 		"file": "C:\\Users\\Valued Customer\\repos\\unreal\\ProjectCalm\\Source\\ProjectCalm\\UI\\InventoryMenu.cpp",
 		"arguments": [
 			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.36.32532\\bin\\HostX64\\x64\\cl.exe",
@@ -1056,7 +1088,7 @@
 		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
 	},
 	{
-		"file": "C:\\Users\\Valued Customer\\repos\\unreal\\ProjectCalm\\Source\\ProjectCalm\\UI\\PopupMenuNode.h",
+		"file": "C:\\Users\\Valued Customer\\repos\\unreal\\ProjectCalm\\Source\\ProjectCalm\\UI\\PopupNode.h",
 		"arguments": [
 			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.36.32532\\bin\\HostX64\\x64\\cl.exe",
 			"@C:\\Users\\Valued Customer\\repos\\unreal\\ProjectCalm\\.vscode\\compileCommands_Default\\ProjectCalm.256.rsp"
@@ -1064,7 +1096,47 @@
 		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
 	},
 	{
-		"file": "C:\\Users\\Valued Customer\\repos\\unreal\\ProjectCalm\\Source\\ProjectCalm\\UI\\PopupMenuStack.h",
+		"file": "C:\\Users\\Valued Customer\\repos\\unreal\\ProjectCalm\\Source\\ProjectCalm\\UI\\PopupStack.h",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.36.32532\\bin\\HostX64\\x64\\cl.exe",
+			"@C:\\Users\\Valued Customer\\repos\\unreal\\ProjectCalm\\.vscode\\compileCommands_Default\\ProjectCalm.256.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\Valued Customer\\repos\\unreal\\ProjectCalm\\Source\\ProjectCalm\\UI\\PopupWidget.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.36.32532\\bin\\HostX64\\x64\\cl.exe",
+			"@C:\\Users\\Valued Customer\\repos\\unreal\\ProjectCalm\\.vscode\\compileCommands_Default\\ProjectCalm.256.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\Valued Customer\\repos\\unreal\\ProjectCalm\\Source\\ProjectCalm\\UI\\PopupWidget.h",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.36.32532\\bin\\HostX64\\x64\\cl.exe",
+			"@C:\\Users\\Valued Customer\\repos\\unreal\\ProjectCalm\\.vscode\\compileCommands_Default\\ProjectCalm.256.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\Valued Customer\\repos\\unreal\\ProjectCalm\\Source\\ProjectCalm\\UI\\TextStyle.h",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.36.32532\\bin\\HostX64\\x64\\cl.exe",
+			"@C:\\Users\\Valued Customer\\repos\\unreal\\ProjectCalm\\.vscode\\compileCommands_Default\\ProjectCalm.256.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\Valued Customer\\repos\\unreal\\ProjectCalm\\Source\\ProjectCalm\\UI\\TextStyleData.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.36.32532\\bin\\HostX64\\x64\\cl.exe",
+			"@C:\\Users\\Valued Customer\\repos\\unreal\\ProjectCalm\\.vscode\\compileCommands_Default\\ProjectCalm.256.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\Valued Customer\\repos\\unreal\\ProjectCalm\\Source\\ProjectCalm\\UI\\TextStyleData.h",
 		"arguments": [
 			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.36.32532\\bin\\HostX64\\x64\\cl.exe",
 			"@C:\\Users\\Valued Customer\\repos\\unreal\\ProjectCalm\\.vscode\\compileCommands_Default\\ProjectCalm.256.rsp"
@@ -1081,6 +1153,14 @@
 	},
 	{
 		"file": "C:\\Users\\Valued Customer\\repos\\unreal\\ProjectCalm\\Source\\ProjectCalm\\Utilities\\ActorBlueprintClassFinder.h",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.36.32532\\bin\\HostX64\\x64\\cl.exe",
+			"@C:\\Users\\Valued Customer\\repos\\unreal\\ProjectCalm\\.vscode\\compileCommands_Default\\ProjectCalm.256.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\Valued Customer\\repos\\unreal\\ProjectCalm\\Source\\ProjectCalm\\Utilities\\LogMacros.cpp",
 		"arguments": [
 			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.36.32532\\bin\\HostX64\\x64\\cl.exe",
 			"@C:\\Users\\Valued Customer\\repos\\unreal\\ProjectCalm\\.vscode\\compileCommands_Default\\ProjectCalm.256.rsp"

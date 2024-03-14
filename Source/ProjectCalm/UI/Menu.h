@@ -6,8 +6,6 @@
 #include "Blueprint/UserWidget.h"
 #include "Menu.generated.h"
 
-DECLARE_LOG_CATEGORY_EXTERN(LogMenuWidget, All, All)
-
 class UButton;
 
 
@@ -25,7 +23,6 @@ public:
 protected:
 	bool bIsInteractive{false};
 
-	virtual bool Initialize() override;
 	virtual void NativeDestruct() override;
 	class IMenuInterface* MenuInterface;
 

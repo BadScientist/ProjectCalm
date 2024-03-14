@@ -6,8 +6,6 @@
 #include "Blueprint/UserWidget.h"
 #include "NotificationWidget.generated.h"
 
-DECLARE_LOG_CATEGORY_EXTERN(LogNotificationWidget, All, All)
-
 class UTextBlock;
 class UImage;
 
