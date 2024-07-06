@@ -32,6 +32,8 @@ public:
 	void SetMenuInterface(IMenuInterface* NewMenuInterface);
 
 	virtual void Setup(bool bIsInteractiveIn = true);
+
+	UFUNCTION()
 	virtual void Teardown();
 	
 };

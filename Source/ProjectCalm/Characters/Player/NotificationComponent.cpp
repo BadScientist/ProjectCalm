@@ -1,7 +1,9 @@
 #include "NotificationComponent.h"
 #include "ProjectCalm/UI/NotificationWidget.h"
 #include "ProjectCalm/Utilities/LogMacros.h"
+
 #include "GameFramework/Character.h"
+
 
 UNotificationComponent::UNotificationComponent()
 {

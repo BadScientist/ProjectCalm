@@ -3,7 +3,7 @@
 
 #include "InventoryComponent.h"
 #include "ItemData.h"
-#include "ProjectCalm/ProjectCalmGameMode.h"
+#include "ProjectCalm/Game/ProjectCalmGameMode.h"
 #include "ProjectCalm/Utilities/PCGameStatics.h"
 #include "ProjectCalm/Utilities/LogMacros.h"
 

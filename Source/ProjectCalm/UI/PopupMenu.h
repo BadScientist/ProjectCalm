@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "PopupWidget.h"
+#include "Menu.h"
 #include "PopupMenu.generated.h"
 
 class UInputMappingContext;
@@ -14,15 +14,14 @@ struct FEnhancedInputActionEventBinding;
  * 
  */
 UCLASS()
-class PROJECTCALM_API UPopupMenu : public UPopupWidget
+class PROJECTCALM_API UPopupMenu : public UMenu
 {
 	GENERATED_BODY()
 
-public:
-	UPopupMenu(const FObjectInitializer& ObjectInitializer);
-
 protected:
 	virtual bool Initialize() override;
+	
+	virtual FReply NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent);
 
 private:
 	UPROPERTY(meta = (BindWidget))

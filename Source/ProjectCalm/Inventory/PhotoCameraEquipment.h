@@ -43,10 +43,12 @@ private:
 	UAnimMontage* RaiseAnimation;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Animation, meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* LowerAnimation;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = PhotoCamera, meta = (AllowPrivateAccess = "true"))
 	int32 MaxPhotos = 12;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = PhotoCamera, meta = (AllowPrivateAccess = "true"))
 	TArray<FPhotoData> Photos;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = HUD, meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UUserWidget> CameraHUD;
 	UUserWidget* CameraHUDInstance;

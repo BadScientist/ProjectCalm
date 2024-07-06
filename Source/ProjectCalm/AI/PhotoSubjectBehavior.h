@@ -13,3 +13,28 @@ enum EPhotoSubjectBehavior
     SEARCH_MOBILE UMETA(DisplayName = "Search Mobile"),
     CHASE UMETA(DisplayName = "Chase")
 };
+
+class PhotoSubjectBehavior
+{
+public:
+    static const FString PhotoSubjectBehaviorEnumToString(EPhotoSubjectBehavior InEnum)
+    {
+        switch (InEnum)
+        {
+        case EPhotoSubjectBehavior::WANDER :
+            return FString("Moving About");
+        case EPhotoSubjectBehavior::GRAZE :
+            return FString("Grazing");
+        case EPhotoSubjectBehavior::REST :
+            return FString("Resting");
+        case EPhotoSubjectBehavior::SEARCH_STATIONARY || EPhotoSubjectBehavior::SEARCH_MOBILE:
+            return FString("Searching");
+        case EPhotoSubjectBehavior::CHASE :
+            return FString("Chasing");
+        
+        default:
+            return FString("Idle");
+        }
+        return FString();
+    }
+};

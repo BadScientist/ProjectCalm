@@ -57,4 +57,12 @@ public:
         if (PlayerController == nullptr) {return nullptr;}
         return ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
     }
+
+    static void SendOnScreenNotification(const UObject* WorldContextObject, FString InString)
+    {
+        if (APlayerCharacter* PlayerCharacter = GetPlayerCharacter(WorldContextObject))
+        {
+            PlayerCharacter->NotifyPlayer(InString);
+        }
+    }
 };

@@ -4,6 +4,9 @@
 #include "PhotoSubjectDataComponent.h"
 #include "PhotoSubjectData.h"
 #include "PhotoSubjectPointOfInterest.h"
+#include "ProjectCalm/AI/PhotoSubjectAIController.h"
+
+#include "GameFramework/Character.h"
 
 // Sets default values for this component's properties
 UPhotoSubjectDataComponent::UPhotoSubjectDataComponent()
@@ -24,7 +27,19 @@ bool UPhotoSubjectDataComponent::GeneratePhotoSubjectData(FConvexVolume ViewFrus
 {
 	bool Result = false;
 	OutSubjectData.Name = SubjectName;
-	if (AActor* Owner = GetOwner()) {OutSubjectData.Location = Owner->GetActorLocation();}
+
+	if (AActor* Owner = GetOwner())
+	{
+		OutSubjectData.Location = Owner->GetActorLocation();
+
+		if (ACharacter* OwningCharacter = Cast<ACharacter>(Owner))
+		{
+			if (APhotoSubjectAIController* AIController = Cast<APhotoSubjectAIController>(OwningCharacter->GetController()))
+			{
+				OutSubjectData.Behavior = AIController->GetActiveBehavior();
+			}
+		}
+	}
 
 	UWorld* World = GetWorld();
 	if (World == nullptr) {return Result;}

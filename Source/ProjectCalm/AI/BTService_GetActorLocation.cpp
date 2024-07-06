@@ -8,6 +8,7 @@
 #include "BehaviorTree/Blackboard/BlackboardKeyType_Object.h"
 #include "BehaviorTree/Blackboard/BlackboardKeyType_Vector.h"
 
+
 void UBTService_GetActorLocation::InitializeFromAsset(UBehaviorTree &Asset)
 {
 	Super::InitializeFromAsset(Asset);

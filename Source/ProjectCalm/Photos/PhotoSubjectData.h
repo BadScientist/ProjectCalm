@@ -2,6 +2,7 @@
 
 #include "PhotoSubjectPointOfInterest.h"
 #include "PhotoSubjectName.h"
+#include "ProjectCalm/AI/PhotoSubjectBehavior.h"
 #include "PhotoSubjectData.generated.h"
 
 
@@ -20,6 +21,8 @@ struct FPhotoSubjectData
     
     UPROPERTY(EditAnywhere)
     TEnumAsByte<ESubjectName> Name {ESubjectName::NO_NAME};
+    UPROPERTY(EditAnywhere)
+    TEnumAsByte<EPhotoSubjectBehavior> Behavior {EPhotoSubjectBehavior::NONE};  // @todo: set on photo capture
     UPROPERTY(EditAnywhere)
     FVector Location {FVector::ZeroVector};
     UPROPERTY(EditAnywhere)

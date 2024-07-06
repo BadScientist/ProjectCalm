@@ -2,7 +2,7 @@
 
 
 #include "NoiseListenerComponent.h"
-#include "ProjectCalm/ProjectCalmGameMode.h"
+#include "ProjectCalm/Game/ProjectCalmGameMode.h"
 #include "ProjectCalm/AI/PhotoSubjectAIController.h"
 #include "ProjectCalm/AI/AlertLevel.h"
 

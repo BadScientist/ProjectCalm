@@ -2,6 +2,7 @@
 
 
 #include "InteractableActor.h"
+#include "ProjectCalm/Utilities/PCGameStatics.h"
 #include "ProjectCalm/Utilities/LogMacros.h"
 
 #include "Components/BoxComponent.h"
@@ -11,6 +12,10 @@
 void AInteractableActor::Interact(APlayerCharacter *InteractingPlayer)
 {
 	if (InteractingPlayer != nullptr) {PlayerCharacter = InteractingPlayer;}
+
+    AProjectCalmGameMode* GameMode = PCGameStatics::GetPCGameMode(this);
+    CHECK_NULLPTR_RET(GameMode, LogQuest, "QuestObjective:: No PCGameMode found!");
+    GameMode->OnInteract.Broadcast(this);
 }
 
 void AInteractableActor::SetCollisionEnabled(bool bValue)

@@ -4,6 +4,7 @@
 #include "BTTask_ClearBlackboardKey.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
+
 UBTTask_ClearBlackboardKey::UBTTask_ClearBlackboardKey()
 {
     NodeName = TEXT("Clear Blackboard Key");

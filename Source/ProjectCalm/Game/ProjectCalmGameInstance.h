@@ -5,15 +5,16 @@
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
 
-#include "UI/MenuInterface.h"
-#include "UI/PopupStack.h"
+#include "ProjectCalm/UI/MenuInterface.h"
 #include "ProjectCalmGameInstance.generated.h"
 
 class UMenu;
 class UPopupMenu;
 class UPauseMenu;
 class UInventoryMenu;
-class UFancyTextDisplay;
+class UQuestLog;
+class UDialogueBox;
+struct FDialogue;
 
 
 /**
@@ -34,14 +35,13 @@ class PROJECTCALM_API UProjectCalmGameInstance : public UGameInstance, public IM
     UPROPERTY(EditDefaultsOnly, Category = WidgetClasses)
 	TSubclassOf<UInventoryMenu> InventoryMenuClass;
     UPROPERTY(EditDefaultsOnly, Category = WidgetClasses)
+	TSubclassOf<UQuestLog> QuestLogClass;
+    UPROPERTY(EditDefaultsOnly, Category = WidgetClasses)
 	TSubclassOf<UMenu> MainMenuClass;
     UPROPERTY(EditDefaultsOnly, Category = WidgetClasses)
 	TSubclassOf<UMenu> LoadingScreenClass;
     UPROPERTY(EditDefaultsOnly, Category = WidgetClasses)
-	TSubclassOf<UFancyTextDisplay> DialogueBoxClass;
-	// class UMainMenu* MainMenu;
-
-	FPopupStack PopupStack{FPopupStack()};
+	TSubclassOf<UDialogueBox> DialogueBoxClass;
 
 
 public:
@@ -55,14 +55,7 @@ public:
 	virtual void QuitToMainMenu() override;
 	UFUNCTION(exec)
 	virtual void QuitToDesktop() override;
-	virtual void ClosePopup(UPopupWidget* Popup) override;
 	// End Menu Interface Implementation
-
-	UFUNCTION(BlueprintCallable)
-	void ClosePopupMenu();
-	bool IsPopupMenuOpen(UPopupMenu* PopupMenu);
-	bool IsPopupMenuOpen();
-	bool IsPopupOpen();
 	
 	UFUNCTION(exec, BlueprintCallable)
 	void LoadMainMenu();
@@ -73,7 +66,9 @@ public:
 	UFUNCTION(exec, BlueprintCallable)
 	void LoadInventoryMenu();
 	UFUNCTION(exec, BlueprintCallable)
-	void LoadDialogueBox();
+	void LoadQuestLog();
+	UFUNCTION(BlueprintCallable)
+	void LoadDialogueBox(FDialogue Dialogue);
 
 
 	// DEBUG COMMANDS
@@ -85,6 +80,5 @@ public:
 
 private:
 	void SetupMenuWidget(UMenu* Menu, bool bIsInteractable);
-	UPopupMenu* GetTopPopupMenu();
 	
 };

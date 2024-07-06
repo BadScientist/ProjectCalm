@@ -11,6 +11,7 @@
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
+
 #define MIN_RESPONSE_ANGLE 10
 
 void UBTTask_LookAt::InitializeMemory(UBehaviorTreeComponent &OwnerComp, uint8 *NodeMemory, EBTMemoryInit::Type InitType) const

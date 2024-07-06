@@ -10,10 +10,6 @@
 #include "Components/HorizontalBox.h"
 
 
-UInventoryMenu::UInventoryMenu(const FObjectInitializer &ObjectInitializer) : UPopupMenu(ObjectInitializer)
-{
-}
-
 UInventorySlot* UInventoryMenu::GetHoveredSlot()
 {
     for (UInventorySlot* InventorySlot : Slots) {if (InventorySlot->GetIsHovered()) {return InventorySlot;}}

@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 
 #include "TextStyle.h"
-#include "PopupWidget.h"
+#include "Menu.h"
 #include "FancyTextDisplay.generated.h"
 
 class USizeBox;
@@ -18,7 +18,7 @@ class UTextStyleData;
  * 
  */
 UCLASS()
-class PROJECTCALM_API UFancyTextDisplay : public UPopupWidget
+class PROJECTCALM_API UFancyTextDisplay : public UMenu
 {
 	GENERATED_BODY()
 	
@@ -71,7 +71,6 @@ protected:
 	virtual FReply NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent);
 
 private:
-	void HandleKeyDown();
 	int32 ReadAndSetStyle(FString InString, int32 Idx);
 	void SetupWrapBoxSlot(UWrapBoxSlot* InSlot);
 	float GetTotalSlotWidth(TArray<UWrapBoxSlot*> Letters);

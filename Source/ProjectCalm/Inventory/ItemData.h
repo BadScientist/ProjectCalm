@@ -10,6 +10,7 @@
 
 class AEquipment;
 class IEquipmentInterface;
+class APickup;
 enum EEquipReply;
 
 
@@ -29,9 +30,11 @@ private:
     int32 ItemID{0x0000};
     UPROPERTY(EditAnywhere, Category = Details)
     FItemDetails ItemDetails;
-    UPROPERTY(EditAnywhere, Category = Images)
+    UPROPERTY(EditAnywhere, Category = Assets)
     UTexture2D* Icon{nullptr};
-    UPROPERTY(EditAnywhere, Category = Blueprint)
+    UPROPERTY(EditAnywhere, Category = Assets)
+    UStaticMesh* Mesh{nullptr};
+    UPROPERTY(EditAnywhere, Category = Assets)
     TSubclassOf<AActor> ItemBPClass{nullptr};
 
     AActor* EquippedInstance;
@@ -40,6 +43,7 @@ public:
     int32 GetID() {return ItemID;};
     UTexture2D* GetInventoryIcon() {return Icon;};
     FItemDetails GetItemDetails();
+    UStaticMesh* GetMesh() {return Mesh;}
 
     bool GetIsEquipped();
 

@@ -23,9 +23,7 @@ UCLASS()
 class PROJECTCALM_API UInventoryMenu : public UPopupMenu
 {
 	GENERATED_BODY()
-
-public:
-	UInventoryMenu(const FObjectInitializer& ObjectInitializer);
+	
 
 private:
 	UPROPERTY(meta = (BindWidget))

@@ -7,7 +7,7 @@
 #include "EquipReply.h"
 #include "EquipperInterface.h"
 #include "MeshSockets.h"
-#include "ProjectCalm/ProjectCalmGameInstance.h"
+#include "ProjectCalm/Game/ProjectCalmGameInstance.h"
 #include "ProjectCalm/Photos/PhotoData.h"
 #include "ProjectCalm/Photos/PhotoSubjectData.h"
 #include "ProjectCalm/Photos/PhotoSubjectPointOfInterest.h"
@@ -296,10 +296,6 @@ void APhotoCameraEquipment::PrimaryAction(const FInputActionValue& Value)
 
 void APhotoCameraEquipment::SecondaryAction(const FInputActionValue& Value)
 {
-	UProjectCalmGameInstance* GameInstance = PCGameStatics::GetPCGameInstance(this);
-	CHECK_NULLPTR_RET(GameInstance, LogEquipment, "PhotoCameraEquipment:: No Game Instance found!");
-	if (GameInstance->IsPopupOpen()) {return;}
-
 	bool bValue = Value.Get<bool>();
 
 	if (bValue)

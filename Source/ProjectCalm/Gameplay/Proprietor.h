@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "InteractableActor.h"
+#include "QuestGiver.h"
 
 #include "Proprietor.generated.h"
 
@@ -11,7 +11,7 @@ class APlayerCharacter;
 
 
 UCLASS()
-class PROJECTCALM_API AProprietor : public AInteractableActor
+class PROJECTCALM_API AProprietor : public AQuestGiver
 {
 	GENERATED_BODY()
 	

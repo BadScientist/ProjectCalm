@@ -3,8 +3,8 @@
 #include "CoreMinimal.h"
 #include "Kismet/GameplayStatics.h"
 
-#include "ProjectCalm/ProjectCalmGameInstance.h"
-#include "ProjectCalm/ProjectCalmGameMode.h"
+#include "ProjectCalm/Game/ProjectCalmGameInstance.h"
+#include "ProjectCalm/Game/ProjectCalmGameMode.h"
 
 
 class PCGameStatics

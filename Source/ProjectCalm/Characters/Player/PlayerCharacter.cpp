@@ -8,7 +8,7 @@
 #include "NotificationComponent.h"
 #include "SpawnerComponent.h"
 #include "ProjectCalm/Gameplay/NoiseMakerComponent.h"
-#include "ProjectCalm/ProjectCalmGameInstance.h"
+#include "ProjectCalm/Game/ProjectCalmGameInstance.h"
 #include "ProjectCalm/Inventory/InventoryComponent.h"
 #include "ProjectCalm/Inventory/EquipmentInterface.h"
 #include "ProjectCalm/Inventory/MeshSockets.h"
@@ -20,10 +20,6 @@
 #include "Components/CapsuleComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
-
-#define ABORT_IF_POPUP_OPEN(GameInstance) {\
-	CHECK_NULLPTR_RET(GameInstance, LogPlayerCharacter, "PlayerCharacter:: No Game Instance found!");\
-	if (GameInstance->IsPopupOpen()) {return;}}
 
 
 // Sets default values
@@ -110,19 +106,13 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	{
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Look);
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Move);
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Jump);
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACharacter::Jump);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 		EnhancedInputComponent->BindAction(PauseAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Pause);
 		EnhancedInputComponent->BindAction(OpenInventoryAction, ETriggerEvent::Triggered, this, &APlayerCharacter::OpenInventory);
+		EnhancedInputComponent->BindAction(OpenQuestLogAction, ETriggerEvent::Triggered, this, &APlayerCharacter::OpenQuestLog);
 		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Interact);
 	}
-}
-
-void APlayerCharacter::Jump()
-{
-	UProjectCalmGameInstance* GameInstance = PCGameStatics::GetPCGameInstance(this);
-	ABORT_IF_POPUP_OPEN(GameInstance);
-	Super::Jump();
 }
 
 bool APlayerCharacter::GetFlag(FName FlagName) const
@@ -155,8 +145,6 @@ void APlayerCharacter::HideHUD()
 
 void APlayerCharacter::Move(const FInputActionValue& Value)  // Automatically applied. Do not call in Tick.
 {
-	UProjectCalmGameInstance* GameInstance = PCGameStatics::GetPCGameInstance(this);
-	ABORT_IF_POPUP_OPEN(GameInstance);
 	CHECK_NULLPTR_RET(Controller, LogPlayerCharacter, "PlayerCharacter:: No Controller!");
 
 	FVector2D Direction = Value.Get<FVector2D>();
@@ -166,8 +154,6 @@ void APlayerCharacter::Move(const FInputActionValue& Value)  // Automatically ap
 
 void APlayerCharacter::Look(const FInputActionValue& Value)  // Automatically applied. Do not call in Tick.
 {
-	UProjectCalmGameInstance* GameInstance = PCGameStatics::GetPCGameInstance(this);
-	ABORT_IF_POPUP_OPEN(GameInstance);
 	CHECK_NULLPTR_RET(Controller, LogPlayerCharacter, "PlayerCharacter:: No Controller!");
 
 	FVector2D Direction = Value.Get<FVector2D>();
@@ -179,23 +165,25 @@ void APlayerCharacter::Pause(const FInputActionValue &Value)
 {
 	UProjectCalmGameInstance* GameInstance = PCGameStatics::GetPCGameInstance(this);
 	CHECK_NULLPTR_RET(GameInstance, LogPlayerCharacter, "PlayerCharacter:: Could not get ProjectCalmGameInstance!");
-
-	if (GameInstance->IsPopupMenuOpen()) {GameInstance->ClosePopupMenu();}
-	else {GameInstance->LoadPauseMenu();}
+	GameInstance->LoadPauseMenu();
 }
 
 void APlayerCharacter::OpenInventory(const FInputActionValue &Value)
 {
 	UProjectCalmGameInstance* GameInstance = PCGameStatics::GetPCGameInstance(this);
-	ABORT_IF_POPUP_OPEN(GameInstance);
-
+	CHECK_NULLPTR_RET(GameInstance, LogPlayerCharacter, "PlayerCharacter:: Could not get ProjectCalmGameInstance!");
 	GameInstance->LoadInventoryMenu();
+}
+
+void APlayerCharacter::OpenQuestLog(const FInputActionValue &Value)
+{
+	UProjectCalmGameInstance* GameInstance = PCGameStatics::GetPCGameInstance(this);
+	CHECK_NULLPTR_RET(GameInstance, LogPlayerCharacter, "PlayerCharacter:: Could not get ProjectCalmGameInstance!");
+	GameInstance->LoadQuestLog();
 }
 
 void APlayerCharacter::Interact(const FInputActionValue &Value)
 {
-	UProjectCalmGameInstance* GameInstance = PCGameStatics::GetPCGameInstance(this);
-	ABORT_IF_POPUP_OPEN(GameInstance);
 	CHECK_NULLPTR_RET(InteractionComponent, LogPlayerCharacter, "PlayerCharacter:: No InteractionComponent found!")
 	InteractionComponent->Interact();
 }

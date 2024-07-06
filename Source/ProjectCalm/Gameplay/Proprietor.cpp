@@ -3,7 +3,6 @@
 
 #include "Proprietor.h"
 #include "ProjectCalm/Characters/Player/PlayerCharacter.h"
-#include "ProjectCalm/Inventory/ItemData.h"
 #include "ProjectCalm/Utilities/LogMacros.h"
 
 #include "Components/BoxComponent.h"
@@ -17,6 +16,8 @@ AProprietor::AProprietor()
 	PrimaryActorTick.bCanEverTick = true;
 
     InteractionLabel = FString("Talk");
+    DisplayName = FName("Suzanne the Proprietor");
+    DefaultDialogue.Add(FString("I have nothing for you. Begone!"));
 
     InteractionCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("InteractionCollision"));
     if (InteractionCollision != nullptr)

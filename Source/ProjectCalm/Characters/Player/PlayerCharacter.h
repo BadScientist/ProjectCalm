@@ -63,6 +63,8 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* OpenInventoryAction;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* OpenQuestLogAction;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* InteractAction;
 
 	UPROPERTY(EditDefaultsOnly, Category = HUD)
@@ -87,6 +89,7 @@ protected:
 	void Look(const FInputActionValue& Value);
 	void Pause(const FInputActionValue& Value);
 	void OpenInventory(const FInputActionValue& Value);
+	void OpenQuestLog(const FInputActionValue& Value);
 	void Interact(const FInputActionValue& Value);
 
 	// START IEQUIPPERINTERFACE
@@ -97,8 +100,6 @@ protected:
 public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
-	virtual void Jump() override;
 
 	UCameraComponent* GetCameraComponent() {return FirstPersonCamera;};
 

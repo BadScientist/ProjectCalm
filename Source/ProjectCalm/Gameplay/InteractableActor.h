@@ -18,11 +18,11 @@ class PROJECTCALM_API AInteractableActor : public AActor, public IInteractableIn
 {
 	GENERATED_BODY()
 
-protected:    
-	UPROPERTY(EditDefaultsOnly, Category = Mesh, meta = (AllowPrivateAccess = "true"))
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Mesh, meta = (AllowPrivateAccess = "true"))
 	UStaticMeshComponent* InteractionMesh{nullptr};
 
-	UPROPERTY(EditDefaultsOnly, Category = Interaction, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Interaction, meta = (AllowPrivateAccess = "true"))
 	UBoxComponent* InteractionCollision{nullptr};
 
 	UPROPERTY(EditDefaultsOnly, Category = Interaction)
@@ -36,6 +36,7 @@ protected:
 public:	
 	// Sets default values for this actor's properties
 	AInteractableActor(){};
+	AInteractableActor(const FObjectInitializer& ObjectInitializer) : AInteractableActor(){};
 
 	// START INTERACTABLEINTERFACE
 	virtual FString GetInteractionLabel() const override {return InteractionLabel;};

@@ -37,15 +37,18 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	// START INTERACTABLEINTERFACE
-    virtual void Interact(APlayerCharacter* InteractingPlayer) override;
-	// END INTERACTABLEINTERFACE
-
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 private:
 	void AbortPickup(APlayerCharacter* InteractingPlayer);
+
+public:
+	// START INTERACTABLEINTERFACE
+    virtual void Interact(APlayerCharacter* InteractingPlayer) override;
+	// END INTERACTABLEINTERFACE
+
+	void Setup(UItemData* ItemData);
 
 };

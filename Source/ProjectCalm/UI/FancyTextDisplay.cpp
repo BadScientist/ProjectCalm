@@ -16,9 +16,9 @@
 	- TEST
 */
 
-UFancyTextDisplay::UFancyTextDisplay(const FObjectInitializer &ObjectInitializer) : UPopupWidget(ObjectInitializer)
+UFancyTextDisplay::UFancyTextDisplay(const FObjectInitializer &ObjectInitializer) : UMenu(ObjectInitializer)
 {
-	bIsFocusable = true;
+	// ...
 }
 
 bool UFancyTextDisplay::Initialize()
@@ -41,9 +41,25 @@ void UFancyTextDisplay::NativeTick(const FGeometry& MyGeometry, float InDeltaTim
 
 FReply UFancyTextDisplay::NativeOnKeyDown(const FGeometry &InGeometry, const FKeyEvent &InKeyEvent)
 {
-	if (InKeyEvent.GetKey() == EKeys::E) {HandleKeyDown();}
+	FReply Reply = Super::NativeOnKeyDown(InGeometry, InKeyEvent);
+	
+	if (InKeyEvent.GetKey() == EKeys::E)
+	{
+		OnEKeyDown();
+		
+		if (!bInputOnCooldown)
+		{
+			bInputOnCooldown = true;
+			GetWorld()->GetTimerManager().SetTimer(CooldownTimerHandle, this, &UFancyTextDisplay::ClearCooldown, InputCooldown);
 
-    return Super::NativeOnKeyDown(InGeometry, InKeyEvent);
+			if (bPrinting) {CompleteCurrentString();}
+			else {DisplayNextString();}
+		}
+
+		return FReply::Handled();
+	}
+
+    return Reply;
 }
 
 void UFancyTextDisplay::SetStringsToDisplay(TArray<FString> InStringsToDisplay)
@@ -80,19 +96,6 @@ void UFancyTextDisplay::Teardown()
     if (bIsInteractive) {SetGameOnlyControls();}
 
     Super::Teardown();
-}
-
-void UFancyTextDisplay::HandleKeyDown()
-{
-	OnEKeyDown();
-	
-	if (bInputOnCooldown) {return;}
-
-	bInputOnCooldown = true;
-	GetWorld()->GetTimerManager().SetTimer(CooldownTimerHandle, this, &UFancyTextDisplay::ClearCooldown, InputCooldown);
-
-	if (bPrinting) {CompleteCurrentString();}
-	else {DisplayNextString();}
 }
 
 int32 UFancyTextDisplay::ReadAndSetStyle(FString InString, int32 Idx)
@@ -147,13 +150,13 @@ float UFancyTextDisplay::GetMaxSlotHeight(TArray<UWrapBoxSlot*> Letters)
 
 void UFancyTextDisplay::DisplayNextString()
 {
-	UE_LOG(LogUserWidget, Error, TEXT("UFancyTextDisplay::DisplayNextString()"));
+	// UE_LOG(LogUserWidget, Error, TEXT("UFancyTextDisplay::DisplayNextString()"));
 	CHECK_NULLPTR_RET(TextArea, LogUserWidget, "UFancyTextDisplay:: No bound SizeBox for TextArea!");
 	CHECK_NULLPTR_RET(WrapBox, LogUserWidget, "UFancyTextDisplay:: No bound WrapBox!");
 
 	WrapBox->ClearChildren();
 	
-	if (CurrentStringIdx >= StringsToDisplay.Num()) {CloseMenu(); return;}
+	if (CurrentStringIdx >= StringsToDisplay.Num()) {return Teardown();}
 	FString CurrentString = StringsToDisplay[CurrentStringIdx];
 
 	ForceLayoutPrepass();
@@ -162,7 +165,7 @@ void UFancyTextDisplay::DisplayNextString()
 	int32 LastSpace{-2}, SlotIdx{0};
 	TArray<UWrapBoxSlot*> CurrentWord, CurrentLine;
 
-	UE_LOG(LogUserWidget, Warning, TEXT("FancyTextDisplay::TextArea Size: %s"), *TextAreaSize.ToString());
+	// UE_LOG(LogUserWidget, Warning, TEXT("FancyTextDisplay::TextArea Size: %s"), *TextAreaSize.ToString());
 
 	for (int32 i = CurrentCharacterIdx; i < CurrentString.Len(); i++)
 	{
@@ -193,7 +196,7 @@ void UFancyTextDisplay::DisplayNextString()
 				SetupWrapBoxSlot(NewSlot);
 				ForceLayoutPrepass();
 				FVector2D CharacterSize = NewFancyText->GetDesiredSize();
-				UE_LOG(LogUserWidget, Warning, TEXT("FancyTextDisplay::FancyText Size: %s"), *CharacterSize.ToString());
+				// UE_LOG(LogUserWidget, Warning, TEXT("FancyTextDisplay::FancyText Size: %s"), *CharacterSize.ToString());
 				LineWidth += CharacterSize.X;
 
 				if (CurrentString[i] == NEWLINE_CHAR)
@@ -212,7 +215,7 @@ void UFancyTextDisplay::DisplayNextString()
 
 				CurrentWord.Add(NewSlot);
 				LineHeight = FMath::Max(LineHeight, CharacterSize.Y);
-				UE_LOG(LogUserWidget, Display, TEXT("FancyTextDisplay::LineHeight: %f"), LineHeight);
+				// UE_LOG(LogUserWidget, Display, TEXT("FancyTextDisplay::LineHeight: %f"), LineHeight);
 			}
 		}
 
@@ -231,8 +234,8 @@ void UFancyTextDisplay::DisplayNextString()
 
 			if (TotalHeight + LineHeight >= TextAreaSize.Y)
 			{
-				UE_LOG(LogUserWidget, Display, TEXT("FancyTextDisplay::TotalHeight: %f, LineHeight: %f, WrapBoxHeight: %f"),
-					TotalHeight, LineHeight, TextAreaSize.Y);
+				// UE_LOG(LogUserWidget, Display, TEXT("FancyTextDisplay::TotalHeight: %f, LineHeight: %f, WrapBoxHeight: %f"),
+				// 	TotalHeight, LineHeight, TextAreaSize.Y);
 				CurrentCharacterIdx -= (CurrentWord.Num() - 1);
 				for (UWrapBoxSlot* Letter : CurrentWord) {WrapBox->RemoveChild(Letter->Content);}
 				break;

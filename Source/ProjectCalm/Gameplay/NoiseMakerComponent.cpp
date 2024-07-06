@@ -2,7 +2,7 @@
 
 
 #include "NoiseMakerComponent.h"
-#include "ProjectCalm/ProjectCalmGameMode.h"
+#include "ProjectCalm/Game/ProjectCalmGameMode.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 

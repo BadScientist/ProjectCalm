@@ -2,7 +2,7 @@
     "configurations": [
         {
             "name": "ProjectCalmEditor Editor Win64 Development (ProjectCalm)",
-            "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.36.32532\\bin\\HostX64\\x64\\cl.exe",
+            "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.39.33519\\bin\\HostX64\\x64\\cl.exe",
             "cStandard": "c17",
             "cppStandard": "c++17",
             "intelliSenseMode": "msvc-x64",
@@ -10,7 +10,7 @@
         },
         {
             "name": "Win32",
-            "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.36.32532\\bin\\HostX64\\x64\\cl.exe",
+            "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.39.33519\\bin\\HostX64\\x64\\cl.exe",
             "cStandard": "c17",
             "cppStandard": "c++17",
             "intelliSenseMode": "msvc-x64",

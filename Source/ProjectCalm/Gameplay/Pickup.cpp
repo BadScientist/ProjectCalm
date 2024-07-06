@@ -97,6 +97,18 @@ void APickup::Interact(APlayerCharacter *InteractingPlayer)
 	Destroy();
 }
 
+void APickup::Setup(UItemData* ItemData)
+{
+	CHECK_NULLPTR_RET(ItemData, LogActor, "APickup:: Setup was not passed valid ItemData!");
+
+	Items.Add(ItemData);
+	
+	CHECK_NULLPTR_RET(InteractionMesh, LogActor, "APickup:: No InteractionMesh!");
+	InteractionMesh->SetStaticMesh(ItemData->GetMesh());
+	CHECK_NULLPTR_RET(InteractionCollision, LogActor, "APickup:: No InteractionCollision!");
+	InteractionCollision->SetBoxExtent(InteractionMesh->CalcLocalBounds().BoxExtent);
+}
+
 void APickup::BeginPlay()
 {
 	Super::BeginPlay();

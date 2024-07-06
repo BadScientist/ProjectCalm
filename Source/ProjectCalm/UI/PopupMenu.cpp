@@ -10,20 +10,26 @@
 #include "Components/Button.h"
 
 
-UPopupMenu::UPopupMenu(const FObjectInitializer& ObjectInitializer) : UPopupWidget(ObjectInitializer)
-{
-	bIsFocusable = true;
-}
-
 bool UPopupMenu::Initialize()
 {
     bool Success = Super::Initialize();
     if (!Success) {return false;}
 
     CHECK_NULLPTR_RETVAL(CloseButton, LogUserWidget, "PopupMenu:: No CloseButton in Widget Blueprint!", false);
-    CloseButton->OnClicked.AddDynamic(this, &UPopupMenu::CloseMenu);
-
+    CloseButton->OnClicked.AddDynamic(this, &UPopupMenu::Teardown);
+    
     return true;
+}
+
+FReply UPopupMenu::NativeOnKeyDown(const FGeometry &InGeometry, const FKeyEvent &InKeyEvent)
+{
+    FReply Reply = Super::NativeOnKeyDown(InGeometry, InKeyEvent);
+	if (InKeyEvent.GetKey() == EKeys::Escape)
+    {
+        Teardown();
+        return FReply::Handled();}
+
+    return Reply;
 }
 
 void UPopupMenu::Setup(bool bIsInteractiveIn)
@@ -35,9 +41,8 @@ void UPopupMenu::Setup(bool bIsInteractiveIn)
     APlayerController* PlayerController = GetOwningPlayer();
     CHECK_NULLPTR_RET(PlayerController, LogUserWidget, "PopupMenu:: PlayerController is NULL!");
 
-    FInputModeGameAndUI InputModeData;
+    FInputModeUIOnly InputModeData;
     InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::LockInFullscreen);
-	InputModeData.SetHideCursorDuringCapture(false);
     InputModeData.SetWidgetToFocus(TakeWidget());
     PlayerController->SetInputMode(InputModeData);
     PlayerController->bShowMouseCursor = true;
