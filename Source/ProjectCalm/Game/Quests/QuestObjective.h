@@ -74,10 +74,11 @@ protected:
 UCLASS()
 class PROJECTCALM_API AInteractObjective : public AQuestObjective
 {
-	GENERATED_BODY()
-	
-	TSubclassOf<AInteractableActor> TargetClass;
-	AInteractableActor* Target;
+	GENERATED_BODY()	
+
+protected:
+	TSubclassOf<AInteractableActor> InteractTargetClass;
+	AInteractableActor* InteractTarget;
 	
 public:
 	// Sets default values for this actor's properties
@@ -95,12 +96,14 @@ protected:
 
 
 UCLASS()
-class PROJECTCALM_API APhotoObjective : public AQuestObjective
+class PROJECTCALM_API APhotoObjective : public AInteractObjective
 {
 	GENERATED_BODY()
 
-    TArray<FSubjectBehaviorPair> Targets;
+    TArray<FSubjectBehaviorPair> PhotoTargets;
 	float Score{0};
+
+	bool bHasQualifiedPhoto{false};
 	
 public:
 	// Sets default values for this actor's properties
@@ -111,7 +114,15 @@ public:
 	UFUNCTION()
 	virtual void OnPhotoTaken(FPhotoData Photo);
 
+	UFUNCTION()
+	virtual void OnPhotoDeleted();
+
+	virtual void OnInteract(AInteractableActor* Interactable) override;
+
 protected:
 	virtual void BeginPlay() override;
+
+private:
+	bool IsQualifiedPhoto(FPhotoData Photo);
 
 };

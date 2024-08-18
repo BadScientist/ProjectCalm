@@ -49,11 +49,15 @@ public:
 
 
 protected:
+	APlayerCharacter* OwningPlayerCharacter{nullptr};
+
 	virtual EEquipReply Equip_Internal(AActor* OwningActor);
 
 	// START EQUIPMENT INTERFACE
 	virtual EEquipReply Equip(APlayerCharacter* OwningCharacter) override;
 	virtual void Unequip() override;
+	void SetInstanceID(int32 InID) {if (InstanceID == 0) {InstanceID = InID;}};
+	int32 GetInstanceID() {return InstanceID;};
 	// END EQUIPMENT INTERFACE
 
 	virtual void SetupPlayerControls();
@@ -61,6 +65,8 @@ protected:
 	
 	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
 	UStaticMeshComponent* EquipmentMesh;
+	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
+	USkeletalMeshComponent* EquipmentSkeletalMesh;
 
 	UPROPERTY(EditDefaultsOnly, Category = Input, meta = (ClampMin = "0.0", UIMin = "0.0"))
 	float PrimaryActionCooldown = 0.1f;
@@ -80,11 +86,10 @@ protected:
 	void SetPlayerFlag(FName FlagName, bool Value);
 
 public:
-	void SetInstanceId(int32 InID) {if (InstanceID == 0) {InstanceID = InID;}};
-	int32 GetInstanceId() {return InstanceID;};
 
 	virtual void PrimaryAction(const FInputActionValue& Value) {};
 	virtual void SecondaryAction(const FInputActionValue& Value) {};
-	UStaticMeshComponent* GetEquipmentMesh() {return EquipmentMesh;};
+
+	UMeshComponent* GetEquipmentMesh();
 
 };

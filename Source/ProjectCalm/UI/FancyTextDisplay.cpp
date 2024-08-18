@@ -169,7 +169,11 @@ void UFancyTextDisplay::DisplayNextString()
 
 	for (int32 i = CurrentCharacterIdx; i < CurrentString.Len(); i++)
 	{
-		if (CurrentString[i] == STYLE_TAG_START) {i = ReadAndSetStyle(CurrentString, i);}
+		while (i < CurrentString.Len() && CurrentString[i] == STYLE_TAG_START)
+		{
+			i = ReadAndSetStyle(CurrentString, i);
+		}
+		if (i >= CurrentString.Len()) {break;}
 		if (CurrentString[i] == WORD_DELIMITER) {LastSpace = i;}
 		CurrentCharacterIdx = i;
 

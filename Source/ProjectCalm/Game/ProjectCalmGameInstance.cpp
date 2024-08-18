@@ -5,9 +5,11 @@
 #include "ProjectCalm/UI/PauseMenu.h"
 #include "ProjectCalm/UI/InventoryMenu.h"
 #include "ProjectCalm/UI/QuestLog.h"
+#include "ProjectCalm/UI/PhotoLog.h"
 #include "ProjectCalm/UI/DialogueBox.h"
 #include "ProjectCalm/UI/Dialogue.h"
 #include "ProjectCalm/Utilities/LogMacros.h"
+#include "ProjectCalm/Photos/PhotoData.h"
 
 #if WITH_EDITORONLY_DATA
 #include "ProjectCalm/Utilities/PCPlayerStatics.h"
@@ -19,14 +21,11 @@
 
 UProjectCalmGameInstance::UProjectCalmGameInstance(const FObjectInitializer &ObjectInitializer)
 {
-    UE_LOG(LogLoad, Warning, TEXT("Creating ProjectCalmGameInstance..."));
 }
 
 void UProjectCalmGameInstance::Init()
 {
     Super::Init();
-
-    UE_LOG(LogTemp, Warning, TEXT("ProjectCalmGameInstance::Init()"));
 
 }
 
@@ -90,6 +89,14 @@ void UProjectCalmGameInstance::LoadQuestLog()
     CHECK_NULLPTR_RET(QuestLogClass, LogLoad, "ProjectCalmGameInstance:: InventoryMenu class is NULL!");
     UQuestLog* Menu = CreateWidget<UQuestLog>(this, QuestLogClass);
     SetupMenuWidget(Menu, true);
+}
+
+void UProjectCalmGameInstance::LoadPhotoLog(uint32 CameraID)
+{
+    CHECK_NULLPTR_RET(PhotoLogClass, LogLoad, "ProjectCalmGameInstance:: InventoryMenu class is NULL!");
+    UPhotoLog* Menu = CreateWidget<UPhotoLog>(this, PhotoLogClass);
+    SetupMenuWidget(Menu, true);
+    Menu->PopulateLog(CameraID);
 }
 
 void UProjectCalmGameInstance::LoadDialogueBox(FDialogue Dialogue)

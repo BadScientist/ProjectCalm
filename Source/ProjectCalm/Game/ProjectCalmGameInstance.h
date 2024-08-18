@@ -13,6 +13,7 @@ class UPopupMenu;
 class UPauseMenu;
 class UInventoryMenu;
 class UQuestLog;
+class UPhotoLog;
 class UDialogueBox;
 struct FDialogue;
 
@@ -36,6 +37,8 @@ class PROJECTCALM_API UProjectCalmGameInstance : public UGameInstance, public IM
 	TSubclassOf<UInventoryMenu> InventoryMenuClass;
     UPROPERTY(EditDefaultsOnly, Category = WidgetClasses)
 	TSubclassOf<UQuestLog> QuestLogClass;
+    UPROPERTY(EditDefaultsOnly, Category = WidgetClasses)
+	TSubclassOf<UPhotoLog> PhotoLogClass;
     UPROPERTY(EditDefaultsOnly, Category = WidgetClasses)
 	TSubclassOf<UMenu> MainMenuClass;
     UPROPERTY(EditDefaultsOnly, Category = WidgetClasses)
@@ -61,13 +64,15 @@ public:
 	void LoadMainMenu();
 	UFUNCTION(exec, BlueprintCallable)
 	void LoadLoadingScreen();
-	UFUNCTION(exec, BlueprintCallable)
+	UFUNCTION(exec)
 	void LoadPauseMenu();
-	UFUNCTION(exec, BlueprintCallable)
+	UFUNCTION(exec)
 	void LoadInventoryMenu();
-	UFUNCTION(exec, BlueprintCallable)
+	UFUNCTION(exec)
 	void LoadQuestLog();
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(exec)
+	void LoadPhotoLog(uint32 CameraID);
+	UFUNCTION()
 	void LoadDialogueBox(FDialogue Dialogue);
 
 

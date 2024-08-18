@@ -37,6 +37,8 @@ public:
 	FQuestDetails GetQuestDetails(uint32 QuestID);
 	void GetActiveQuests(TArray<FQuestDetails>& OutArray, bool bIncludeHidden=false);
 
+	void MarkIntroDialoguePlayed(uint32 QuestID, int32 StageID);
+
 private:
 	void CleanupActiveObjectives(uint32 QuestID);
 	bool SpawnStageObjectives(uint32 QuestID, int32 StageIdx);

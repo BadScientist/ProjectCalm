@@ -28,7 +28,7 @@ ACameraLens::ACameraLens()
 	PhotoDataCollector = CreateDefaultSubobject<UPhotoDataCollectorComponent>(TEXT("PhotoDataCollectorComponent"));
 	
 	SceneCaptureComponent = CreateDefaultSubobject<USceneCaptureComponent2D>(TEXT("SceneCaptureComponent"));
-	SceneCaptureComponent->SetupAttachment(EquipmentMesh);
+	SceneCaptureComponent->SetupAttachment(GetEquipmentMesh());
     SceneCaptureComponent->SetRelativeLocation(FVector(0.0f, 2.0f, 0.0f));
     SceneCaptureComponent->SetRelativeRotation(FRotator(0.0f, 90.0f, 0.0f));
 }
@@ -59,6 +59,7 @@ EEquipReply ACameraLens::Equip_Internal(AActor* OwningActor)
 EEquipReply ACameraLens::Equip(APlayerCharacter* OwningCharacter)
 {
     AActor* EquippedItem = Cast<AActor>(OwningCharacter->GetEquippedItem()->_getUObject());
+    OwningPlayerCharacter = OwningCharacter;
     return Equip_Internal(EquippedItem);
 }
 

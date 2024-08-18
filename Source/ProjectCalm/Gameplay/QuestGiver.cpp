@@ -44,8 +44,24 @@ void AQuestGiver::HandleInteraction()
     if (CurrentQuestID != 0)
     {
         FQuestDetails CurrentQuest = GameMode->GetQuestDetails(CurrentQuestID);
-        if (!CurrentQuest.IsActive() && GameMode->StartQuest(CurrentQuestID)) {Dialogue.Strings = CurrentQuest.Stages[0].IntroDialogue;}
-        else if (CurrentQuest.IsActive() && !CurrentQuest.IsComplete()) {Dialogue.Strings = CurrentQuest.Stages[CurrentQuest.ActiveStageIdx].OngoingDialogue;}
+
+        if (!CurrentQuest.IsActive() && GameMode->StartQuest(CurrentQuestID))
+        {
+            Dialogue.Strings = CurrentQuest.Stages[0].IntroDialogue;
+            GameMode->MarkIntroDialoguePlayed(CurrentQuest.QuestID, 0);
+        }
+        else if (CurrentQuest.IsActive() && !CurrentQuest.IsComplete())
+        {
+            if (!CurrentQuest.Stages[CurrentQuest.ActiveStageIdx].bIntroPlayed && !CurrentQuest.Stages[CurrentQuest.ActiveStageIdx].IntroDialogue.IsEmpty())
+            {
+                Dialogue.Strings = CurrentQuest.Stages[CurrentQuest.ActiveStageIdx].IntroDialogue;
+                GameMode->MarkIntroDialoguePlayed(CurrentQuest.QuestID, CurrentQuest.ActiveStageIdx);
+            }
+            else
+            {
+                Dialogue.Strings = CurrentQuest.Stages[CurrentQuest.ActiveStageIdx].OngoingDialogue;
+            }
+        }
         else if (CurrentQuest.IsActive() && CurrentQuest.IsComplete())
         {
             CurrentQuestID = CurrentQuest.NextQuestID;
@@ -68,6 +84,7 @@ uint32 AQuestGiver::SpawnRewards(TArray<uint32> ItemIDs)
     for (uint32 ItemID : ItemIDs)
     {
         if (GameMode->SpawnPickup(ItemID, SpawnLocation, SpawnRotation) != nullptr) {RewardsSpawned++;}
+        else {UE_LOG(LogInteractable, Warning, TEXT("QuestGiver:: No Pickup spawned by GameMode!"));}
     }
 
     return RewardsSpawned;
@@ -76,15 +93,14 @@ uint32 AQuestGiver::SpawnRewards(TArray<uint32> ItemIDs)
 void AQuestGiver::Interact(APlayerCharacter* InteractingPlayer)
 {
 	CHECK_NULLPTR_RET(InteractingPlayer, LogPlayerCharacter, "AQuestGiver:: Interact was not passed a valid PlayerCharacter!");
-
-    HandleInteraction();
     
     Super::Interact(InteractingPlayer);
+
+    HandleInteraction();
 }
 
 void AQuestGiver::OnQuestUpdated(FQuestDetails QuestDetails)
 {
-    UE_LOG(LogTemp, Display, TEXT("QuestGiver:: OnQuestUpdated"));
     if (QuestDetails.QuestID != CurrentQuestID || QuestDetails.ActiveStageIdx < 0) {return;}
     
     while (CurrentStageIdx < (uint32)QuestDetails.ActiveStageIdx)

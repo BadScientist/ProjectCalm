@@ -35,7 +35,7 @@ protected:
 	
 public:	
 	// Sets default values for this actor's properties
-	AInteractableActor(){};
+	AInteractableActor();
 	AInteractableActor(const FObjectInitializer& ObjectInitializer) : AInteractableActor(){};
 
 	// START INTERACTABLEINTERFACE
@@ -44,5 +44,8 @@ public:
 	// END INTERACTABLEINTERFACE
 
 	void SetCollisionEnabled(bool bValue);
+
+protected:
+	void SetCollisionProfile(FName ProfileName);
 
 };

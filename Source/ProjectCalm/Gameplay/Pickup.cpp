@@ -18,20 +18,15 @@ APickup::APickup()
 	ActiveCollisionType = ECollisionEnabled::QueryAndPhysics;
 	InactiveCollisionType = ECollisionEnabled::PhysicsOnly;
 
-    InteractionCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("InteractionCollision"));
     if (InteractionCollision != nullptr)
 	{
-		SetRootComponent(InteractionCollision);
-        InteractionCollision->SetCollisionProfileName("BlockAllDynamic");
+        SetCollisionProfile("BlockAllDynamic");
 		InteractionCollision->SetCollisionEnabled(InactiveCollisionType);
-        InteractionCollision->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel1, ECollisionResponse::ECR_Block);
         InteractionCollision->SetEnableGravity(true);
 	}
 
-    InteractionMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PickupMesh"));
     if (InteractionMesh != nullptr)
 	{
-		InteractionMesh->SetupAttachment(InteractionCollision);
         InteractionMesh->SetCollisionProfileName("NoCollision");
         InteractionMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
         InteractionMesh->SetEnableGravity(false);
@@ -61,7 +56,7 @@ void APickup::Tick(float DeltaTime)
 	}
 	else
 	{
-		if (InteractionCollision != nullptr) {InteractionCollision->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);}
+		if (InteractionCollision != nullptr) {InteractionCollision->SetCollisionEnabled(ActiveCollisionType);}
 
 		SetActorTickEnabled(false);
 	}
@@ -77,6 +72,7 @@ void APickup::Tick(float DeltaTime)
 void APickup::Interact(APlayerCharacter *InteractingPlayer)
 {
 	CHECK_NULLPTR_RET(InteractingPlayer, LogPlayerCharacter, "APickup:: Interact was not passed a valid PlayerCharacter!");
+	Super::Interact(InteractingPlayer);
 
 	if (Items.Num() > InteractingPlayer->GetInventorySlotsRemaining())
 	{

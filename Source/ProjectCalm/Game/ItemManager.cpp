@@ -27,8 +27,10 @@ void UItemManager::BeginPlay()
 
 UItemData* UItemManager::GetItemDataFromID(int32 ItemID)
 {
-	if (UItemData** Data = ItemDictionary.Find(ItemID)) {return *Data;}
-    return nullptr;
+	UItemData** Data = ItemDictionary.Find(ItemID);
+	CHECK_NULLPTR_RETVAL(Data, LogItemData, "ItemManager:: No ItemData found with the given ID!", nullptr);
+
+	return *Data;
 }
 
 APickup* UItemManager::SpawnPickup(int32 ItemID, FVector InLocation, FRotator InRotation)
@@ -41,5 +43,6 @@ APickup* UItemManager::SpawnPickup(UItemData* ItemData, FVector InLocation, FRot
 	CHECK_NULLPTR_RETVAL(ItemData, LogItemData, "ItemManager:: SpawnPickup was not passed valid ItemData!", nullptr);
 	APickup* Pickup = GetWorld()->SpawnActor<APickup>(InLocation, InRotation);
 	if (Pickup != nullptr) {Pickup->Setup(ItemData);}
+	else {UE_LOG(LogInteractable, Warning, TEXT("ItemManager:: SpawnActor failed!"));}
 	return Pickup;
 }

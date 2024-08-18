@@ -4,6 +4,7 @@
 #include "ItemData.h"
 #include "EquipmentInterface.h"
 #include "EquipReply.h"
+#include "ProjectCalm/Utilities/PCGameStatics.h"
 #include "ProjectCalm/Utilities/PCPlayerStatics.h"
 #include "ProjectCalm/Utilities/LogMacros.h"
 
@@ -12,9 +13,15 @@ UItemData::UItemData(const FObjectInitializer &ObjectInitializer)
     
 }
 
-FItemDetails UItemData::GetItemDetails()
+void UItemData::AssignInstanceID(IEquipmentInterface* Equipment)
 {
-    return ItemDetails;
+    CHECK_NULLPTR_RET(Equipment, LogEquipment, "ItemData::AssignInstanceID was passed null Equipment pointer!");
+
+    AProjectCalmGameMode* GameMode = PCGameStatics::GetPCGameMode(Equipment->_getUObject());
+    CHECK_NULLPTR_RET(GameMode, LogGameMode, "UItemData:: Failed to get Game Mode!");
+
+    if (InstanceID == 0) {InstanceID = GameMode->GenerateInstanceID();}
+    Equipment->SetInstanceID(InstanceID);
 }
 
 bool UItemData::GetIsEquipped()
@@ -53,6 +60,8 @@ bool UItemData::Activate(UWorld* InWorld, FString& OutFailureResponse)
                 {
                     bResult = true;
                     EquippedInstance = SpawnedActor;
+
+                    AssignInstanceID(SpawnedInstance);
                 }
                 else {SpawnedActor->Destroy();}
             }

@@ -8,6 +8,18 @@
 #include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
 
+AInteractableActor::AInteractableActor()
+{    
+    InteractionCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("InteractionCollision"));
+    if (InteractionCollision != nullptr)
+    {
+        SetRootComponent(InteractionCollision);
+        SetCollisionProfile("BlockAllDynamic");
+    }
+
+    InteractionMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("InteractionMesh"));
+    if (InteractionMesh != nullptr && InteractionCollision != nullptr) {InteractionMesh->SetupAttachment(InteractionCollision);}
+}
 
 void AInteractableActor::Interact(APlayerCharacter *InteractingPlayer)
 {
@@ -21,4 +33,11 @@ void AInteractableActor::Interact(APlayerCharacter *InteractingPlayer)
 void AInteractableActor::SetCollisionEnabled(bool bValue)
 {
     if (InteractionCollision != nullptr) {InteractionCollision->SetCollisionEnabled(bValue ? ActiveCollisionType : InactiveCollisionType);}
+}
+
+void AInteractableActor::SetCollisionProfile(FName ProfileName)
+{
+    CHECK_NULLPTR_RET(InteractionCollision, LogInteractable, "InteractableActor:: No InteractionCollision!");
+    InteractionCollision->SetCollisionProfileName(ProfileName);
+    InteractionCollision->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel1, ECollisionResponse::ECR_Block);
 }

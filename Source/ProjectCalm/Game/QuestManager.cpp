@@ -29,8 +29,6 @@ void UQuestManager::BeginPlay()
 
 void UQuestManager::OnObjectiveCompleted(AQuestObjective* Objective)
 {
-    UE_LOG(LogTemp, Display, TEXT("QuestManager:: OnObjectiveCompleted"));
-
     uint32 QuestID = Objective->GetQuestID();
     uint32 StageIdx = Objective->GetStageIdx();
     uint32 ObjectiveIdx = Objective->GetObjectiveIdx();
@@ -45,11 +43,8 @@ void UQuestManager::OnObjectiveCompleted(AQuestObjective* Objective)
             }
             if (CheckStageComplete(Quests[QuestID].Stages[StageIdx]))
             {
-                Quests[QuestID].Stages[StageIdx].bIsComplete = true;
-                
-                UE_LOG(LogTemp, Display, TEXT("QuestManager:: ActiveQuest: %i, ActiveStage:%i"), QuestID, Quests[QuestID].ActiveStageIdx);
-                bool bSuccess = SetStage(QuestID, Quests[QuestID].ActiveStageIdx + 1);
-                UE_LOG(LogTemp, Display, TEXT("QuestManager:: ActiveQuest: %i, ActiveStage:%i, %s"), QuestID, Quests[QuestID].ActiveStageIdx, bSuccess ? TEXT("SetStage Succeeded") : TEXT("SetStage Failed"));
+                Quests[QuestID].Stages[StageIdx].bIsComplete = true;                
+                SetStage(QuestID, Quests[QuestID].ActiveStageIdx + 1);
             }
         }
 
@@ -78,8 +73,6 @@ bool UQuestManager::StartQuest(uint32 QuestID)
 
 bool UQuestManager::SetStage(uint32 QuestID, int32 StageIdx)
 {
-    UE_LOG(LogTemp, Display, TEXT("QuestManager:: SetStage: QuestID: %i, StageIdx: %i"), QuestID, StageIdx);
-
     if (Quests.Contains(QuestID))
     {
 
@@ -112,6 +105,17 @@ void UQuestManager::GetActiveQuests(TArray<FQuestDetails>& OutArray, bool bInclu
         if (Quests.Contains(QuestID) && (!Quests[QuestID].bIsHidden || bIncludeHidden))
         {
             OutArray.AddUnique(Quests[QuestID]);
+        }
+    }
+}
+
+void UQuestManager::MarkIntroDialoguePlayed(uint32 QuestID, int32 StageID)
+{
+    if (Quests.Contains(QuestID))
+    {
+        if (StageID >= 0 && StageID < Quests[QuestID].Stages.Num())
+        {
+            Quests[QuestID].Stages[StageID].bIntroPlayed = true;
         }
     }
 }
@@ -183,7 +187,6 @@ AQuestObjective *UQuestManager::SpawnObjective(FObjectiveDetails ObjectiveDetail
 
 bool UQuestManager::CheckStageComplete(FStageDetails Stage)
 {
-    UE_LOG(LogTemp, Display, TEXT("QuestManager:: CheckStageComplete"));
     for (FObjectiveDetails Objective : Stage.Objectives) {if (!Objective.bIsComplete && !Objective.bIsOptional) {return false;}}
     return true;
 }

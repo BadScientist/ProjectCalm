@@ -16,7 +16,7 @@ ACameraFlash::ACameraFlash()
     TargetSocket = SOCKET_CAMERA_FLASH;
 
 	SpotLight = CreateDefaultSubobject<USpotLightComponent>(TEXT("SpotLightComponent"));
-	SpotLight->SetupAttachment(EquipmentMesh, TEXT("SpotLightPoint"));
+	SpotLight->SetupAttachment(GetEquipmentMesh(), TEXT("SpotLightPoint"));
     SpotLight->SetRelativeLocation(FVector(0.0f, 5.0f, 1.25f));
     SpotLight->SetRelativeRotation(FRotator(0.0f, 0.0f, 90.0f));
 }
@@ -30,6 +30,7 @@ void ACameraFlash::BeginPlay()
 EEquipReply ACameraFlash::Equip(APlayerCharacter *OwningCharacter)
 {
     AActor* EquippedItem = Cast<AActor>(OwningCharacter->GetEquippedItem()->_getUObject());
+    OwningPlayerCharacter = OwningCharacter;
     return Super::Equip_Internal(EquippedItem);
 }
 

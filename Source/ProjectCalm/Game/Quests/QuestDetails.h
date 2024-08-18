@@ -62,7 +62,7 @@ struct FObjectiveDetails
 
     // INTERACT OBJECTIVE
     UPROPERTY(EditAnywhere)
-    TSubclassOf<AInteractableActor> TargetClass;
+    TSubclassOf<AInteractableActor> InteractTargetClass;
 
     UPROPERTY(EditAnywhere)
     bool bSpawnNewInteractable{false};
@@ -76,7 +76,7 @@ struct FObjectiveDetails
 
     // PHOTO OBJECTIVE
     UPROPERTY(EditAnywhere)
-    TArray<FSubjectBehaviorPair> Targets;
+    TArray<FSubjectBehaviorPair> PhotoTargets;
 
     UPROPERTY(EditAnywhere)
     float Score;
@@ -106,6 +106,7 @@ struct FStageDetails
     UPROPERTY(EditDefaultsOnly)
     TArray<uint32> EquipmentRewards;
 
+    bool bIntroPlayed{false};
     bool bIsComplete{false};
 };
 

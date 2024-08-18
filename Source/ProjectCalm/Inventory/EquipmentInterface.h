@@ -23,4 +23,6 @@ class PROJECTCALM_API IEquipmentInterface
 public:
 	virtual EEquipReply Equip(APlayerCharacter* OwningCharacter) = 0;
 	virtual void Unequip() = 0;
+	virtual void SetInstanceID(int32 InID) = 0;
+	virtual int32 GetInstanceID() = 0;
 };

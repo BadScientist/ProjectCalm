@@ -29,19 +29,16 @@ APhotoShack::APhotoShack()
         SetupMeshCollisionAndPhysics(ShackMesh);
     }
 
-    InteractionMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("WindowMesh"));
     if (InteractionMesh != nullptr)
     {
         InteractionMesh->SetupAttachment(ShackMesh);
         SetupMeshCollisionAndPhysics(InteractionMesh);
     }
 
-    InteractionCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("InteractionCollision"));
     if (InteractionCollision != nullptr)
     {
         InteractionCollision->SetupAttachment(InteractionMesh);
-        InteractionCollision->SetCollisionProfileName("OverlapAllDynamic");
-        InteractionCollision->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel1, ECollisionResponse::ECR_Block);
+        SetCollisionProfile("OverlapAllDynamic");
         InteractionCollision->SetEnableGravity(false);
     }
 
@@ -64,7 +61,7 @@ void APhotoShack::BeginPlay()
         ProprietorActiveLocation = GetActorLocation() + ProprietorActiveOffset.Vector.RotateAngleAxis(GetActorRotation().Yaw, FVector::UpVector);
     }
 
-	WindowClosedPosition = WindowMesh->GetRelativeLocation();
+	if (InteractionMesh != nullptr) {WindowClosedPosition = InteractionMesh->GetRelativeLocation();}
     WindowOpenPosition = FVector(WindowClosedPosition.X, WindowClosedPosition.Y, WindowClosedPosition.Z + 55);
 }
 
@@ -166,14 +163,14 @@ void APhotoShack::MoveProprietor(float DeltaTime)
 
 void APhotoShack::MoveWindow(float DeltaTime)
 {
-    CHECK_NULLPTR_RET(WindowMesh, LogInteractable, "PhotoShack:: WindowMesh not found!");
+    CHECK_NULLPTR_RET(InteractionMesh, LogInteractable, "PhotoShack:: WindowMesh not found!");
 
     float MoveDistance = WindowMoveSpeed * DeltaTime;
-    FVector NewPosition = WindowMesh->GetRelativeLocation();
+    FVector NewPosition = InteractionMesh->GetRelativeLocation();
 
     if (ShackState == EShackState::WINDOW_OPENING) {NewPosition.Z = FMath::Min(NewPosition.Z + MoveDistance, WindowOpenPosition.Z);}
     else {NewPosition.Z = FMath::Max(NewPosition.Z - MoveDistance, WindowClosedPosition.Z);}
-    WindowMesh->SetRelativeLocation(NewPosition);
+    InteractionMesh->SetRelativeLocation(NewPosition);
 
     if (ShackState == EShackState::WINDOW_OPENING && FMath::IsNearlyZero(WindowOpenPosition.Z - NewPosition.Z))
     {

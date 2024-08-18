@@ -94,16 +94,12 @@ void USpawnerComponent::CleanupSpawns()
 
 TArray<AActor*> USpawnerComponent::GetAllPhotoSubjects()
 {
-	if (SpawnRegions.IsEmpty()) {UE_LOG(LogTemp, Error, TEXT("SpawnerComponent:: No SpawnRegions!"));}
-	
 	TArray<AActor*> Spawns;
 	for (APhotoSubjectSpawnRegion* SpawnRegion : SpawnRegions)
 	{
 		if (SpawnRegion == nullptr) {continue;}
 		Spawns.Append(SpawnRegion->GetSpawnedSubjects());
 	}
-
-	if (Spawns.IsEmpty()) {UE_LOG(LogTemp, Error, TEXT("SpawnerComponent:: No Spawns!"));}
 
     return Spawns;
 }

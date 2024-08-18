@@ -19,19 +19,14 @@ AProprietor::AProprietor()
     DisplayName = FName("Suzanne the Proprietor");
     DefaultDialogue.Add(FString("I have nothing for you. Begone!"));
 
-    InteractionCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("InteractionCollision"));
     if (InteractionCollision != nullptr)
     {
-        SetRootComponent(InteractionCollision);
-        InteractionCollision->SetCollisionProfileName("OverlapAllDynamic");
-        InteractionCollision->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel1, ECollisionResponse::ECR_Block);
+        SetCollisionProfile("OverlapAllDynamic");
         InteractionCollision->SetEnableGravity(false);
     }
 
-    InteractionMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ProprietorMesh"));
     if (InteractionMesh != nullptr)
     {
-        InteractionMesh->SetupAttachment(InteractionCollision);
         InteractionMesh->SetCollisionProfileName("BlockAllDynamic");
         InteractionMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
         InteractionMesh->SetEnableGravity(false);
@@ -49,8 +44,5 @@ void AProprietor::BeginPlay()
 void AProprietor::Interact(APlayerCharacter* InteractingPlayer)
 {
     Super::Interact(InteractingPlayer);
-
-	CHECK_NULLPTR_RET(InteractingPlayer, LogPlayerCharacter, "AProprietor:: Interact was not passed a valid PlayerCharacter!");
-
-    InteractingPlayer->NotifyPlayer(FString("Suzanne the Proprietor: All your base are belong to us!"));    
+    
 }

@@ -65,6 +65,8 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* OpenQuestLogAction;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* OpenPhotoLogAction;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* InteractAction;
 
 	UPROPERTY(EditDefaultsOnly, Category = HUD)
@@ -75,6 +77,7 @@ private:
 	UEnhancedInputLocalPlayerSubsystem* Subsystem;
 
 	bool bIsMenuOpen{false};
+	bool bIsMovementRestricted{false};
 
 public:
 	// Default constructor
@@ -90,6 +93,7 @@ protected:
 	void Pause(const FInputActionValue& Value);
 	void OpenInventory(const FInputActionValue& Value);
 	void OpenQuestLog(const FInputActionValue& Value);
+	void OpenPhotoLog(const FInputActionValue& Value);
 	void Interact(const FInputActionValue& Value);
 
 	// START IEQUIPPERINTERFACE
@@ -123,5 +127,8 @@ public:
 	
 	void ShowHUD();
 	void HideHUD();
+
+	// Disable Jumping and halve maximum walking speed
+	void RestrictMovement(bool bValue);
 
 };

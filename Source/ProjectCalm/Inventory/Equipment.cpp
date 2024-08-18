@@ -18,7 +18,12 @@ AEquipment::AEquipment()
 	PrimaryActorTick.bCanEverTick = false;
 
 	EquipmentMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("EquipmentMesh"));
-	RootComponent = EquipmentMesh;
+	EquipmentSkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("EquipmentSkeletalMesh"));
+	if (EquipmentMesh != nullptr)
+	{
+		SetRootComponent(EquipmentMesh);
+		if (EquipmentSkeletalMesh != nullptr) {EquipmentSkeletalMesh->SetupAttachment(EquipmentMesh);}
+	}
 }
 
 EEquipReply AEquipment::Equip_Internal(AActor* OwningActor)
@@ -43,6 +48,7 @@ EEquipReply AEquipment::Equip_Internal(AActor* OwningActor)
 EEquipReply AEquipment::Equip(APlayerCharacter *OwningCharacter)
 {
 	if (IEquipmentInterface* EquippedItem = OwningCharacter->GetEquippedItem()) {EquippedItem->Unequip();}
+	OwningPlayerCharacter = OwningCharacter;
 	return Equip_Internal(OwningCharacter);
 }
 
@@ -120,11 +126,17 @@ void AEquipment::ResetPlayerControls()
 
 bool AEquipment::GetPlayerFlag(FName FlagName)
 {
-	if (APlayerCharacter* OwningCharacter = PCPlayerStatics::GetPlayerCharacter(this)) {return OwningCharacter->GetFlag(FlagName);}
+	if (OwningPlayerCharacter != nullptr) {return OwningPlayerCharacter->GetFlag(FlagName);}
     return false;
 }
 
 void AEquipment::SetPlayerFlag(FName FlagName, bool Value)
 {
-	if (APlayerCharacter* OwningCharacter = PCPlayerStatics::GetPlayerCharacter(this)) {OwningCharacter->SetFlag(FlagName, Value);}
+	if (OwningPlayerCharacter != nullptr) {OwningPlayerCharacter->SetFlag(FlagName, Value);}
+}
+
+UMeshComponent* AEquipment::GetEquipmentMesh()
+{
+    if (EquipmentSkeletalMesh != nullptr && EquipmentSkeletalMesh->GetSkeletalMeshAsset() != nullptr) {return EquipmentSkeletalMesh;}
+	return EquipmentMesh;
 }

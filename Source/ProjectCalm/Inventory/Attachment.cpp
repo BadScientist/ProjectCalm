@@ -9,6 +9,7 @@
 
 EEquipReply AAttachment::Equip(APlayerCharacter *OwningCharacter)
 {
+    OwningPlayerCharacter = OwningCharacter;
     return Equip_Internal(OwningCharacter);
 }
 

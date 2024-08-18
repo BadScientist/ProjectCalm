@@ -38,11 +38,14 @@ private:
     TSubclassOf<AActor> ItemBPClass{nullptr};
 
     AActor* EquippedInstance;
+    int32 InstanceID{0};
+
+    void AssignInstanceID(IEquipmentInterface* Equipment);
 
 public:
     int32 GetID() {return ItemID;};
     UTexture2D* GetInventoryIcon() {return Icon;};
-    FItemDetails GetItemDetails();
+    FItemDetails GetItemDetails() {return ItemDetails;}
     UStaticMesh* GetMesh() {return Mesh;}
 
     bool GetIsEquipped();

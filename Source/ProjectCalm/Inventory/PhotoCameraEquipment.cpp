@@ -93,9 +93,11 @@ void APhotoCameraEquipment::RemoveEquipment(IEquipmentInterface *Equipment)
 
 void APhotoCameraEquipment::OnSecondaryButtonDown()
 {
-	UE_LOG(LogTemp, Warning, TEXT("PhotoCameraEquipment:: OnSecondaryButtonDown()"));
-
-	if (APlayerCharacter* PlayerCharacter = PCPlayerStatics::GetPlayerCharacter(this)) {PlayerCharacter->HideHUD();}
+	if (OwningPlayerCharacter != nullptr)
+	{
+		OwningPlayerCharacter->HideHUD();
+		OwningPlayerCharacter->RestrictMovement(true);
+	}
 
 	GetWorldTimerManager().PauseTimer(BlendViewTimerHandle);
 
@@ -181,7 +183,6 @@ void APhotoCameraEquipment::OnSecondaryButtonUp()
 
 void APhotoCameraEquipment::OnAnimationEnded()
 {
-	UE_LOG(LogTemp, Warning, TEXT("PhotoCameraEquipment:: OnAnimationEnded()"));
 	switch (CameraState)
 	{
 	case ECameraState::RAISING:
@@ -230,23 +231,18 @@ void APhotoCameraEquipment::LowerCamera()
 
 void APhotoCameraEquipment::EnterDefaultState()
 {
-	UE_LOG(LogTemp, Warning, TEXT("PhotoCameraEquipment:: EnterDefaultState()"));
-	if (APlayerCharacter* PlayerCharacter = PCPlayerStatics::GetPlayerCharacter(this)) {PlayerCharacter->ShowHUD();}
+	if (OwningPlayerCharacter != nullptr)
+	{
+		OwningPlayerCharacter->ShowHUD();
+		OwningPlayerCharacter->RestrictMovement(false);
+	}
 	SetCameraState(ECameraState::DEFAULT);
 }
 
 void APhotoCameraEquipment::SetCameraState(ECameraState InState)
 {
-	FString StateString = InState == ECameraState::DEFAULT ? FString("Default") : \
-		InState == ECameraState::RAISING ? FString("Raising") : \
-		InState == ECameraState::BLENDING_IN ? FString("Blending In") : \
-		InState == ECameraState::READY ? FString("Ready") : \
-		InState == ECameraState::BLENDING_OUT ? FString("Blending Out") : \
-		InState == ECameraState::LOWERING ? FString("Lowering") : FString("Error");
-	UE_LOG(LogTemp, Warning, TEXT("CameraState = %s"), *StateString);
-
 	SetPlayerFlag(FLAG_CAMERA_VIEW_ACTIVE, InState == ECameraState::READY);
-	SetPlayerFlag(FLAG_CAMERA_RAISED,
+	SetPlayerFlag(FLAG_EQUIPMENT_RAISED,
 		InState == ECameraState::RAISING ||
 		InState == ECameraState::BLENDING_IN ||
 		InState == ECameraState::READY);
@@ -264,15 +260,17 @@ void APhotoCameraEquipment::TakePhoto()
 {
 	if (AttachedCameraLens == nullptr)
 	{
-		APlayerCharacter* PlayerCharacter = PCPlayerStatics::GetPlayerCharacter(this);
-		CHECK_NULLPTR_RET(PlayerCharacter, LogEquipment, "PhotoCameraEquipment::No PlayerCharacter found!");
-		PlayerCharacter->NotifyPlayer(FString("The camera requires a lens!"));
+		CHECK_NULLPTR_RET(OwningPlayerCharacter, LogEquipment, "PhotoCameraEquipment::No PlayerCharacter found!");
+		OwningPlayerCharacter->NotifyPlayer(FString("The camera requires a lens!"));
 		return;
 	}
-	if (Photos.Num() >= MaxPhotos) {return;}
+
+	AProjectCalmGameMode* GameMode = PCGameStatics::GetPCGameMode(this);
+	CHECK_NULLPTR_RET(GameMode, LogGameMode, "PhotoCameraEquipment:: Could not find Game Mode!");
+	if (GameMode->GetNumPhotos(GetInstanceID()) >= MaxPhotos) {return;}
 	
 	FPhotoData NewPhoto = AttachedCameraLens->CapturePhoto();
-	Photos.Add(NewPhoto);
+	GameMode->AddPhoto(GetInstanceID(), NewPhoto);
 
 	UpdateHUDOverlay();
 }
@@ -298,22 +296,16 @@ void APhotoCameraEquipment::SecondaryAction(const FInputActionValue& Value)
 {
 	bool bValue = Value.Get<bool>();
 
-	if (bValue)
-	{
-		UE_LOG(LogInput, Display, TEXT("------------------------------------------------------------RMB DOWN------------------------------------------------------------"));
-		OnSecondaryButtonDown();
-	}
-	else
-	{
-		UE_LOG(LogInput, Display, TEXT("-------------------------------------------------------------RMB UP-------------------------------------------------------------"));
-		OnSecondaryButtonUp();
-	}
+	if (bValue) {OnSecondaryButtonDown();}
+	else {OnSecondaryButtonUp();}
 }
 
 FPhotoData APhotoCameraEquipment::GetLastPhoto()
 {
-	if (Photos.IsEmpty()) {return FPhotoData();}
-	return Photos[Photos.Num() - 1];
+	AProjectCalmGameMode* GameMode = PCGameStatics::GetPCGameMode(this);
+	CHECK_NULLPTR_RETVAL(GameMode, LogGameMode, "PhotoCameraEquipment:: Could not find Game Mode!", FPhotoData());
+	uint32 PhotoIdx = FMath::Max((uint32)0, GameMode->GetNumPhotos(GetInstanceID()) - 1);
+	return GameMode->GetPhoto(GetInstanceID(), PhotoIdx);
 }
 
 float APhotoCameraEquipment::BlendViewToPhotoCamera()
@@ -321,26 +313,22 @@ float APhotoCameraEquipment::BlendViewToPhotoCamera()
 	SetCameraState(ECameraState::BLENDING_IN);
 	if (AttachedCameraLens == nullptr)
 	{
-		APlayerCharacter* PlayerCharacter = PCPlayerStatics::GetPlayerCharacter(this);
-		CHECK_NULLPTR_RETVAL(PlayerCharacter, LogEquipment, "PhotoCameraEquipment::No PlayerCharacter found!", 0.0f);
-		PlayerCharacter->NotifyPlayer(FString("The camera requires a lens!"));
+		CHECK_NULLPTR_RETVAL(OwningPlayerCharacter, LogEquipment, "PhotoCameraEquipment::No PlayerCharacter found!", 0.0f);
+		OwningPlayerCharacter->NotifyPlayer(FString("The camera requires a lens!"));
 		return 0.0f;
 	}
 
 	USceneCaptureComponent2D* LensCaptureComp = AttachedCameraLens->GetSceneCaptureComponent();
 	if (LensCaptureComp == nullptr) {return 0.0f;}
 
-	if (APlayerCharacter* PlayerCharacter = PCPlayerStatics::GetPlayerCharacter(this))
-	{
-		return PlayerCharacter->BlendViewToSceneCaptureComponent(LensCaptureComp);
-	}
+	if (OwningPlayerCharacter != nullptr) {return OwningPlayerCharacter->BlendViewToSceneCaptureComponent(LensCaptureComp);}
 
 	return 0.0f;
 }
 
 float APhotoCameraEquipment::BlendViewToPlayerCharacter()
 {
-	if (APlayerCharacter* PlayerCharacter = PCPlayerStatics::GetPlayerCharacter(this)) {return PlayerCharacter->ResetCameraLocation();}
+	if (OwningPlayerCharacter != nullptr) {return OwningPlayerCharacter->ResetCameraLocation();}
 
 	return 0.0f;
 }
@@ -373,7 +361,9 @@ void APhotoCameraEquipment::UpdateHUDOverlay()
 {
 	if (FilmTextWidget != nullptr)
 	{
-		FString FilmString = FString::Printf(TEXT("%i/%i"), Photos.Num(), MaxPhotos);
+		AProjectCalmGameMode* GameMode = PCGameStatics::GetPCGameMode(this);
+		CHECK_NULLPTR_RET(GameMode, LogGameMode, "PhotoCameraEquipment:: Could not find Game Mode!");
+		FString FilmString = FString::Printf(TEXT("%i/%i"), GameMode->GetNumPhotos(GetInstanceID()), MaxPhotos);
 		FilmTextWidget->SetText(FText::FromString(FilmString));
 	}
 	DisplayLastPhoto();
@@ -381,7 +371,9 @@ void APhotoCameraEquipment::UpdateHUDOverlay()
 
 void APhotoCameraEquipment::DisplayLastPhoto()
 {
-	if (Photos.IsEmpty()) {return;}
+	AProjectCalmGameMode* GameMode = PCGameStatics::GetPCGameMode(this);
+	CHECK_NULLPTR_RET(GameMode, LogGameMode, "PhotoCameraEquipment:: Could not find Game Mode!");
+	if (GameMode->GetNumPhotos(GetInstanceID()) == 0) {return;}
 
 	CHECK_NULLPTR_RET(LastPhotoImageWidget, LogEquipment, "PhotoCameraEquipment:: No LastPhotoImageWidget set!");
 

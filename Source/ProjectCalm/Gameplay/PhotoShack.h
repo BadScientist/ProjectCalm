@@ -33,13 +33,13 @@ class PROJECTCALM_API APhotoShack : public AInteractableActor
 
 	UPROPERTY(EditDefaultsOnly)
 	UArrowComponent* Arrow{nullptr};
-	UPROPERTY(EditDefaultsOnly)
-	UBoxComponent* WindowCollision{nullptr};
+	// UPROPERTY(EditDefaultsOnly)
+	// UBoxComponent* WindowCollision{nullptr};
 
 	UPROPERTY(EditDefaultsOnly, Category = Mesh)
 	UStaticMeshComponent* ShackMesh{nullptr};
-	UPROPERTY(EditDefaultsOnly, Category = Mesh)
-	UStaticMeshComponent* WindowMesh{nullptr};
+	// UPROPERTY(EditDefaultsOnly, Category = Mesh)
+	// UStaticMeshComponent* WindowMesh{nullptr};
 	UPROPERTY(EditDefaultsOnly, Category = Mesh)
 	UStaticMeshComponent* PlanksMesh{nullptr};
 

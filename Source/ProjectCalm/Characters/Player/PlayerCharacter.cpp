@@ -17,6 +17,7 @@
 #include "ProjectCalm/Utilities/PCGameStatics.h"
 
 #include "Camera/CameraComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
@@ -81,19 +82,14 @@ void APlayerCharacter::BeginPlay()
 	}
 
 	if (PlayerHUDClass != nullptr) {PlayerHUD = CreateWidget<UPlayerHUD>(PlayerController, PlayerHUDClass.Get());}
-	else {UE_LOG(LogTemp, Error, TEXT("PlayerCharacter:: PlayerHUDClass not set!"));}
 
 	if (PlayerHUD != nullptr) 
 	{
 		PlayerHUD->AddToViewport();
 		
 		if (NotificationComponent != nullptr) {NotificationComponent->SetActiveWidget(PlayerHUD->GetNotificationWidget());}
-		else {UE_LOG(LogTemp, Error, TEXT("PlayerCharacter:: NotificationComponent not found!"));}
-
 		if (InteractionComponent != nullptr) {InteractionComponent->SetInteractionLabelText(PlayerHUD->GetInteractionLabelText());}
-		else {UE_LOG(LogTemp, Error, TEXT("PlayerCharacter:: InteractionComponent not found!"));}
 	}
-	else {UE_LOG(LogTemp, Error, TEXT("PlayerCharacter:: Failed to create PlayerHUD!"));}
 
 }
 
@@ -111,6 +107,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		EnhancedInputComponent->BindAction(PauseAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Pause);
 		EnhancedInputComponent->BindAction(OpenInventoryAction, ETriggerEvent::Triggered, this, &APlayerCharacter::OpenInventory);
 		EnhancedInputComponent->BindAction(OpenQuestLogAction, ETriggerEvent::Triggered, this, &APlayerCharacter::OpenQuestLog);
+		EnhancedInputComponent->BindAction(OpenPhotoLogAction, ETriggerEvent::Triggered, this, &APlayerCharacter::OpenPhotoLog);
 		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Interact);
 	}
 }
@@ -141,6 +138,18 @@ void APlayerCharacter::ShowHUD()
 void APlayerCharacter::HideHUD()
 {
 	if (PlayerHUD != nullptr) {PlayerHUD->Hide();}
+}
+
+void APlayerCharacter::RestrictMovement(bool bValue)
+{
+	if (bIsMovementRestricted == bValue) {return;}
+
+	UCharacterMovementComponent* MovementComp = GetCharacterMovement();
+	CHECK_NULLPTR_RET(MovementComp, LogPlayerCharacter, "PlayerCharacter:: No CharacterMovementComponent!");
+	
+	MovementComp->SetJumpAllowed(!bValue);
+	MovementComp->MaxWalkSpeed *= bValue ? 0.5f : 2.0f;
+	bIsMovementRestricted = bValue;
 }
 
 void APlayerCharacter::Move(const FInputActionValue& Value)  // Automatically applied. Do not call in Tick.
@@ -180,6 +189,13 @@ void APlayerCharacter::OpenQuestLog(const FInputActionValue &Value)
 	UProjectCalmGameInstance* GameInstance = PCGameStatics::GetPCGameInstance(this);
 	CHECK_NULLPTR_RET(GameInstance, LogPlayerCharacter, "PlayerCharacter:: Could not get ProjectCalmGameInstance!");
 	GameInstance->LoadQuestLog();
+}
+
+void APlayerCharacter::OpenPhotoLog(const FInputActionValue &Value)
+{
+	UProjectCalmGameInstance* GameInstance = PCGameStatics::GetPCGameInstance(this);
+	CHECK_NULLPTR_RET(GameInstance, LogPlayerCharacter, "PlayerCharacter:: Could not get ProjectCalmGameInstance!");
+	GameInstance->LoadPhotoLog(EquippedItem != nullptr ? EquippedItem->GetInstanceID() : 0);
 }
 
 void APlayerCharacter::Interact(const FInputActionValue &Value)

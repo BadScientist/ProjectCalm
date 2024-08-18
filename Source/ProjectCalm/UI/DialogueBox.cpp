@@ -14,7 +14,7 @@ void UDialogueBox::SetDialogue(FDialogue InDialogue)
     TArray<FString> ConstructedStrings;
     for (FString InString : InDialogue.Strings)
     {
-        ConstructedStrings.Add("{header}" + InDialogue.Speaker.ToString() + ": {/header}" + InString);
+        ConstructedStrings.Add("{header}" + InDialogue.Speaker.ToString() + ":{/header}\n" + InString);
     }
 
     SetStringsToDisplay(ConstructedStrings);
