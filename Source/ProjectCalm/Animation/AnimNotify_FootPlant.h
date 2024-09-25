@@ -37,5 +37,8 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = SFX)
 	TMap<TEnumAsByte<EPhysicalSurface>, USoundCue*> SoundMap;
+
+	void ReportNoiseEvent(AActor* OwningActor);
+	void PlayFootstepSound(AActor* OwningActor);
 	
 };

@@ -103,8 +103,19 @@ void AInteractObjective::Setup(FObjectiveDetails ObjectiveDetails, uint32 InQues
 
 void AInteractObjective::OnInteract(AInteractableActor* Interactable)
 {
-    if (InteractTarget != nullptr) {if(Interactable != InteractTarget) {return;}}
-    else if (Interactable->GetClass() != InteractTargetClass.Get()) {return;}
+    if (InteractTarget != nullptr) 
+    {
+        if(Interactable != InteractTarget)
+        {
+            UE_LOG(LogTemp, Warning, TEXT("QuestObjective::OnInteract: Interactable is not InteractTarget"));
+            return;
+        }
+    }
+    else if (Interactable->GetClass() != InteractTargetClass.Get())
+    {
+        UE_LOG(LogTemp, Warning, TEXT("QuestObjective::OnInteract: Interactable class is not InteractTargetClass"));
+        return;
+    }
     CompleteObjective();
 }
 

@@ -1,6 +1,7 @@
 #include "LogMacros.h"
 
 DEFINE_LOG_CATEGORY(LogPlayerCharacter)
+DEFINE_LOG_CATEGORY(LogPhotoSubjectAI)
 DEFINE_LOG_CATEGORY(LogUserWidget)
 DEFINE_LOG_CATEGORY(LogEquipment)
 DEFINE_LOG_CATEGORY(LogInteractable)

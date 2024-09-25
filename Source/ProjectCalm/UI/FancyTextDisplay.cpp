@@ -173,9 +173,9 @@ void UFancyTextDisplay::DisplayNextString()
 		{
 			i = ReadAndSetStyle(CurrentString, i);
 		}
+		CurrentCharacterIdx = i;
 		if (i >= CurrentString.Len()) {break;}
 		if (CurrentString[i] == WORD_DELIMITER) {LastSpace = i;}
-		CurrentCharacterIdx = i;
 
 		UFancyText* NewFancyText{nullptr};
 		UWrapBoxSlot* NewSlot{nullptr};

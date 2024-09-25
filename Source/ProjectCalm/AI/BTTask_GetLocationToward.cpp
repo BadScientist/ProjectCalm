@@ -3,6 +3,7 @@
 
 #include "BTTask_GetLocationToward.h"
 #include "PhotoSubjectAIController.h"
+#include "ProjectCalm/Utilities/LogMacros.h"
 
 #include "BehaviorTree/BlackboardComponent.h"
 #include "BehaviorTree/Blackboard/BlackboardKeyType_Object.h"
@@ -41,35 +42,27 @@ void UBTTask_GetLocationToward::InitializeFromAsset(UBehaviorTree &Asset)
 EBTNodeResult::Type UBTTask_GetLocationToward::ExecuteTask(UBehaviorTreeComponent &OwnerComp, uint8 *NodeMemory)
 {
     APhotoSubjectAIController* AIController = Cast<APhotoSubjectAIController>(OwnerComp.GetAIOwner());
-    if (AIController == nullptr)
-    {
-        UE_LOG(LogBehaviorTree, Error, TEXT("BTTask::GetLocationToward:: AI CONTROLLER NOT FOUND!"));
-        return EBTNodeResult::Failed;
-    }
+    CHECK_NULLPTR_RETVAL(AIController, LogBehaviorTree, "BTTask_GetLocationToward:: AI CONTROLLER NOT FOUND!", EBTNodeResult::Failed);
 
     APawn* AIPawn = AIController->GetPawn();
-    if (AIPawn == nullptr) 
-    {
-        UE_LOG(LogBehaviorTree, Error, TEXT("BTTask::GetLocationToward:: PAWN NOT FOUND!"));
-        return EBTNodeResult::Failed;
-    }
+    CHECK_NULLPTR_RETVAL(AIPawn, LogBehaviorTree, "BTTask_GetLocationToward:: PAWN NOT FOUND!", EBTNodeResult::Failed);
 
     UBlackboardComponent* BlackboardComponent = OwnerComp.GetBlackboardComponent();
-    if (BlackboardComponent == nullptr)
-    {
-        UE_LOG(LogBehaviorTree, Error, TEXT("BTTask::GetLocationToward:: BLACKBOARD COMPONENT NOT FOUND!"));
-        return EBTNodeResult::Failed;
-    }
+    CHECK_NULLPTR_RETVAL(BlackboardComponent, LogBehaviorTree, "BTTask_GetLocationToward:: BLACKBOARD COMPONENT NOT FOUND!", EBTNodeResult::Failed);
 
     if (DestinationKey.SelectedKeyType.Get() != UBlackboardKeyType_Vector::StaticClass())
     {
-        UE_LOG(LogBehaviorTree, Error, TEXT("BTTask::GetLocationToward:: INVALID DESTINATIONKEY TYPE!"));
+        UE_LOG(LogBehaviorTree, Error, TEXT("BTTask_GetLocationToward:: INVALID DESTINATIONKEY TYPE!"));
         return EBTNodeResult::Failed;
     }
 
     FVector ReferenceLocation;
     bool bLocationFound = GetReferenceLocation(BlackboardComponent, ReferenceLocation);
-    if (!bLocationFound) {return EBTNodeResult::Aborted;}
+    if (!bLocationFound)
+    {
+        UE_LOG(LogBehaviorTree, Error, TEXT("BTTask_GetLocationToward:: COULD NOT FIND LOCATION OF REFERENCE!"));
+        return EBTNodeResult::Failed;
+    }
 
     FVector PawnLocation = AIPawn->GetActorLocation();
     FVector ReferenceDirection = CalculateReferenceDirection(PawnLocation, ReferenceLocation);
@@ -88,7 +81,11 @@ EBTNodeResult::Type UBTTask_GetLocationToward::ExecuteTask(UBehaviorTreeComponen
     if (bFindPointOnGround)
     {
         bLocationFound = ProjectLocationToSurface(TravelLocation2D, TravelLocation);
-        if (!bLocationFound) {return EBTNodeResult::Failed;}
+        if (!bLocationFound)
+        {
+            UE_LOG(LogBehaviorTree, Error, TEXT("BTTask_GetLocationToward:: COULD NOT FIND VALID DESTINATION!"));
+            return EBTNodeResult::Failed;
+        }
     }
     else {TravelLocation = TranslateToRandomElevation(TravelLocation2D);}
     
@@ -96,21 +93,17 @@ EBTNodeResult::Type UBTTask_GetLocationToward::ExecuteTask(UBehaviorTreeComponen
     return EBTNodeResult::Succeeded;
 }
 
-bool UBTTask_GetLocationToward::GetReferenceLocation(UBlackboardComponent *BlackboardComponent, FVector &OutLocation)
+bool UBTTask_GetLocationToward::GetReferenceLocation(UBlackboardComponent* BlackboardComponent, FVector& OutLocation)
 {
     if (ReferenceKey.SelectedKeyType.Get() == UBlackboardKeyType_Object::StaticClass())
     {
         AActor* ReferenceActor = Cast<AActor>(BlackboardComponent->GetValueAsObject(ReferenceKey.SelectedKeyName));
-        if (ReferenceActor == nullptr)
-        {
-            UE_LOG(LogBehaviorTree, Error, TEXT("BTTask::GetLocationToward:: REFERENCE OBJECT NOT AN ACTOR!"));
-            return false;
-        }
+        CHECK_NULLPTR_RETVAL(ReferenceActor, LogBehaviorTree, "BTTask_GetLocationToward:: REFERENCE OBJECT NOT AN ACTOR!", false);
 
         OutLocation = ReferenceActor->GetActorLocation();
         return true;
     }
-    else if (ReferenceKey.SelectedKeyType.Get() == UBlackboardKeyType_Object::StaticClass())
+    else if (ReferenceKey.SelectedKeyType.Get() == UBlackboardKeyType_Vector::StaticClass())
     {
         OutLocation = BlackboardComponent->GetValueAsVector(ReferenceKey.SelectedKeyName);
         return true;

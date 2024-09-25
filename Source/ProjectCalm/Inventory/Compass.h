@@ -17,14 +17,17 @@ class PROJECTCALM_API ACompass : public AEquipment
 
 	// Degrees/sec/sec
 	UPROPERTY(EditDefaultsOnly, Category = Tracking)
-	float MaxNeedleAcceleration{5.0f};
+	float MaxNeedleAcceleration{6.0f};
 
 	// Degrees/sec
 	UPROPERTY(EditDefaultsOnly, Category = Tracking)
-	float MaxNeedleRotationRate{15.0f};
+	float MaxNeedleRotationRate{60.0f};
 
 	UPROPERTY(EditDefaultsOnly, Category = Tracking)
-	float MaxAccelerationAngleOffset{30.0f};
+	float MaxAccelerationAngleOffset{60.0f};
+
+	UPROPERTY(EditDefaultsOnly, Category = Tracking)
+	float NeedleDrag{1.0f};
 	
 	UPROPERTY(VisibleAnywhere, Category = Tracking, BlueprintGetter = GetNeedleTargetLocation, BlueprintSetter = SetNeedleTargetLocation, meta = (AllowPrivateAccess = "true"))
 	FVector NeedleTargetLocation{FVector::ZeroVector};
@@ -79,6 +82,8 @@ public:
 
 	UFUNCTION(BlueprintPure)
 	float CalculateOffsetAngle() const;
+
+	void ApplyDrag();
 
 	virtual void Tick(float DeltaTime) override;
 	

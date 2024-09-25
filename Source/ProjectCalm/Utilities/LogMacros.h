@@ -8,7 +8,13 @@
 #define CHECK_SOFTPTR_RET(Pointer, LogCategory, ErrorMsg) {if (Pointer.Get() == nullptr){UE_LOG(LogCategory, Error, TEXT(ErrorMsg)); return;}}
 #define CHECK_SOFTPTR_RETVAL(Pointer, LogCategory, ErrorMsg, RetVal) {if (Pointer.Get() == nullptr){UE_LOG(LogCategory, Error, TEXT(ErrorMsg)); return RetVal;}}
 
+#if WITH_EDITORONLY_DATA
+    // #define PC_DEBUG_DRAW_SHAPES
+    #define PC_DEBUG_LOGS
+#endif
+
 DECLARE_LOG_CATEGORY_EXTERN(LogPlayerCharacter, All, All)
+DECLARE_LOG_CATEGORY_EXTERN(LogPhotoSubjectAI, All, All)
 DECLARE_LOG_CATEGORY_EXTERN(LogUserWidget, All, All)
 DECLARE_LOG_CATEGORY_EXTERN(LogEquipment, All, All)
 DECLARE_LOG_CATEGORY_EXTERN(LogInteractable, All, All)

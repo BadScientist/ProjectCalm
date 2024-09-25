@@ -20,6 +20,14 @@ UPhotoSubjectDataComponent::UPhotoSubjectDataComponent()
 void UPhotoSubjectDataComponent::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (ACharacter* Owner = Cast<ACharacter>(GetOwner()))
+	{
+		if (APhotoSubjectAIController* OwnerController = Cast<APhotoSubjectAIController>(Owner->GetController()))
+		{
+			OwnerController->SetSelfSpecies(SubjectName);
+		}
+	}
 	
 }
 

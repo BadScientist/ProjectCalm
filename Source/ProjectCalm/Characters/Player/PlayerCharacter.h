@@ -16,6 +16,7 @@ class UViewBlenderComponent;
 class UFlagManagerComponent;
 class UNotificationComponent;
 class UNoiseMakerComponent;
+class UPCPerceptionStimulusComponent;
 class UPlayerHUD;
 class UEnhancedInputLocalPlayerSubsystem;
 class UInputAction;
@@ -47,6 +48,8 @@ private:
 	UInventoryComponent* InventoryComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Gameplay, meta = (AllowPrivateAccess = "true"))
 	UNoiseMakerComponent* NoiseMakerComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Gameplay, meta = (AllowPrivateAccess = "true"))
+	UPCPerceptionStimulusComponent* StimulusSourceComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Gameplay, meta = (AllowPrivateAccess = "true"))
 	UInteractionComponent* InteractionComponent;
 	

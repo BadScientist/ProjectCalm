@@ -92,6 +92,13 @@ float ACompass::CalculateOffsetAngle() const
     return FMath::Abs(ClockwiseOffset) <= FMath::Abs(CounterClockwiseOffset) ? ClockwiseOffset : CounterClockwiseOffset;
 }
 
+void ACompass::ApplyDrag()
+{
+	float LerpAlpha = FMath::Abs(CurrentRotationRate/MaxNeedleRotationRate);
+	float AppliedDrag = FMath::Lerp(0, NeedleDrag, LerpAlpha) * FMath::Sign(CurrentRotationRate) * -1;
+    CurrentRotationRate += AppliedDrag;
+}
+
 void ACompass::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -101,8 +108,9 @@ void ACompass::Tick(float DeltaTime)
 	float OffsetAngle = CalculateOffsetAngle();
 
 	float LerpAlpha = FMath::Clamp(FMath::Abs(OffsetAngle) / MaxAccelerationAngleOffset, 0, 1);
-	float Acceleration = FMath::Lerp(0, MaxNeedleAcceleration, LerpAlpha) * FMath::Sign(OffsetAngle);
+	float Acceleration = (FMath::Lerp(0, MaxNeedleAcceleration, LerpAlpha)) * FMath::Sign(OffsetAngle);
 
 	SetCurrentRotationRate(CurrentRotationRate + Acceleration);
+	ApplyDrag();
 	SetCurrentNeedleAngle(CurrentNeedleAngle + CurrentRotationRate * DeltaTime);
 }

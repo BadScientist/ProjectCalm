@@ -404,7 +404,7 @@ void APhotoCameraEquipment::LogPhotoData(FPhotoData Photo)
 	float Score = 0;
 	for (FPhotoSubjectData Subject : Photo.Subjects)
 	{
-		PhotoString.Append(SubjectName::SubjectNameEnumToString(Subject.Name));
+		PhotoString.Append(PCSubjectName::EnumToString(Subject.Name));
 		PhotoString.Append(FString(" | "));
 		
 		for (FPhotoSubjectPointOfInterest PointOfInterest : Subject.PointsOfInterest)

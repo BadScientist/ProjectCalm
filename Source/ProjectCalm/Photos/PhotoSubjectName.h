@@ -13,10 +13,10 @@ enum ESubjectName
     CROW UMETA (DisplayName = "Crow")
 };
 
-class SubjectName
+class PCSubjectName
 {
 public:
-    static const FString SubjectNameEnumToString(ESubjectName InEnum)
+    static const FString EnumToString(ESubjectName InEnum)
     {
         switch (InEnum)
         {

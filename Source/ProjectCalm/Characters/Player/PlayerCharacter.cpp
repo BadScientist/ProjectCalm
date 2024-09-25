@@ -15,6 +15,7 @@
 #include "ProjectCalm/UI/PlayerHUD.h"
 #include "ProjectCalm/Utilities/LogMacros.h"
 #include "ProjectCalm/Utilities/PCGameStatics.h"
+#include "ProjectCalm/AI/PCPerceptionStimulusComponent.h"
 
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -63,6 +64,8 @@ APlayerCharacter::APlayerCharacter()
 	NotificationComponent = CreateDefaultSubobject<UNotificationComponent>(TEXT("NotificationComponent"));
 	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
 	NoiseMakerComponent = CreateDefaultSubobject<UNoiseMakerComponent>(TEXT("NoiseMakerComponent"));
+	StimulusSourceComponent = CreateDefaultSubobject<UPCPerceptionStimulusComponent>(TEXT("StimulusSourceComponent"));
+	
 
 	SpawnerComponent = CreateDefaultSubobject<USpawnerComponent>(TEXT("SpawnerComponent"));
 	if (SpawnerComponent != nullptr) {SpawnerComponent->SetupAttachment(RootComponent);}
