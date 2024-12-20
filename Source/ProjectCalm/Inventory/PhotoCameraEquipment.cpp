@@ -24,6 +24,10 @@
 #include "Blueprint/UserWidget.h"
 #include "Kismet/GameplayStatics.h"
 
+#ifdef PC_DEBUG_LOGS
+	// #define LOCAL_DEBUG_LOGS
+#endif
+
 
 APhotoCameraEquipment::APhotoCameraEquipment()
 {
@@ -268,6 +272,8 @@ void APhotoCameraEquipment::TakePhoto()
 	AProjectCalmGameMode* GameMode = PCGameStatics::GetPCGameMode(this);
 	CHECK_NULLPTR_RET(GameMode, LogGameMode, "PhotoCameraEquipment:: Could not find Game Mode!");
 	if (GameMode->GetNumPhotos(GetInstanceID()) >= MaxPhotos) {return;}
+
+	PlayPrimaryActionSound();
 	
 	FPhotoData NewPhoto = AttachedCameraLens->CapturePhoto();
 	GameMode->AddPhoto(GetInstanceID(), NewPhoto);
@@ -395,7 +401,9 @@ void APhotoCameraEquipment::DisplayLastPhoto()
 	LastPhotoImageWidget->SetDesiredSizeOverride(DisplaySize);
 	LastPhotoImageWidget->SetVisibility(ESlateVisibility::Visible);
 
+#ifdef LOCAL_DEBUG_LOGS
 	LogPhotoData(LastPhoto);
+#endif
 }
 
 void APhotoCameraEquipment::LogPhotoData(FPhotoData Photo)

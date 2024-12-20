@@ -66,5 +66,5 @@ void UNoiseListenerComponent::ReactToNoise(AActor *SourceActor, EAlertLevel Aler
 	if (OwnerController == nullptr) {return;}
 
 	// UE_LOG(LogTemp, Warning, TEXT("NoiseListenerComponent::%s reacting to %s."), *GetOwner()->GetActorNameOrLabel(), *SourceActor->GetActorNameOrLabel());
-	OwnerController->DetermineReaction(AlertLevel, SourceActor);
+	// OwnerController->DetermineReaction(AlertLevel, SourceActor);
 }

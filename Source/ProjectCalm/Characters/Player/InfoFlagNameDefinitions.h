@@ -1,6 +1,7 @@
 #pragma once
 
 
+#define FLAG_PLAYER_IS_DEAD TEXT("IsDead")
 #define FLAG_PLAYER_HAS_CAMERA TEXT("HasCamera")
 #define FLAG_PLAYER_HAS_COMPASS TEXT("HasCompass")
 

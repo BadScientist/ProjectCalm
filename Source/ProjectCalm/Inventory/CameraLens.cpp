@@ -174,7 +174,7 @@ FPhotoData ACameraLens::CapturePhoto()
     {
         FConvexVolume ViewFrustum = GetViewFrustum();
         FVector ViewLocation = SceneCaptureComponent->GetComponentLocation();
-        PhotoData = PhotoDataCollector->CollectPhotoData(ViewFrustum, ViewLocation);
+        PhotoData = PhotoDataCollector->CollectPhotoData(ViewFrustum, ViewLocation, GetActorForwardVector());
     }
     PhotoData.Image = TempRenderTarget;
 

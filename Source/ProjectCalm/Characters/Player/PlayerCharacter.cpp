@@ -5,8 +5,11 @@
 #include "InteractionComponent.h"
 #include "ViewBlenderComponent.h"
 #include "FlagManagerComponent.h"
+#include "InfoFlagNameDefinitions.h"
 #include "NotificationComponent.h"
 #include "SpawnerComponent.h"
+#include "PlayerCharacterMovementComponent.h"
+#include "ProjectCalm/Characters/HealthComponent.h"
 #include "ProjectCalm/Gameplay/NoiseMakerComponent.h"
 #include "ProjectCalm/Game/ProjectCalmGameInstance.h"
 #include "ProjectCalm/Inventory/InventoryComponent.h"
@@ -23,38 +26,53 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 
+#ifdef PC_DEBUG_LOGS
+	// #define LOCAL_DEBUG_LOGS
+#endif
+
+#define EYE_VERTICAL_DEPTH 36.0f
+
 
 // Sets default values
-APlayerCharacter::APlayerCharacter()
+APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer) :
+	Super(ObjectInitializer.SetDefaultSubobjectClass<UPlayerCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	
 	// Set size for collision capsule
-	GetCapsuleComponent()->InitCapsuleSize(55.f, 96.f);
+	UCapsuleComponent* CapsuleComp = GetCapsuleComponent();
+	CHECK_NULLPTR_RET(CapsuleComp, LogPlayerCharacter, "PlayerCharacter:: Failed to get Capsule Component!");
 
-	//Setup first person camera
-	FirstPersonCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FirstPersonCamera"));
-	CHECK_NULLPTR_RET(FirstPersonCamera, LogPlayerCharacter, "PlayerCharacter:: Failed to create camera component!");
-	
-	FirstPersonCamera->SetupAttachment(GetCapsuleComponent());
-	FirstPersonCamera->SetRelativeLocation(FVector(-6.0f, 0.0f, 75.0f));
-	FirstPersonCamera->bUsePawnControlRotation = true;
+	CapsuleComp->InitCapsuleSize(55.f, 96.f);
 
-	InteractionComponent = CreateDefaultSubobject<UInteractionComponent>(TEXT("InteractionComponent"));
-	if (InteractionComponent != nullptr) {InteractionComponent->SetupAttachment(FirstPersonCamera);}
+	ViewPivotComponent = CreateDefaultSubobject<USceneComponent>(TEXT("ViewPivotComponent"));
+	CHECK_NULLPTR_RET(ViewPivotComponent, LogPlayerCharacter, "PlayerCharacter:: Failed to create View Pivot Component!");
+
+	ViewPivotComponent->SetupAttachment(CapsuleComp);
+	float CapsuleHalfHeight = CapsuleComp->GetScaledCapsuleHalfHeight();
+	ViewPivotComponent->SetRelativeLocation(FVector(0.0f, 0.0f, CapsuleHalfHeight - EYE_VERTICAL_DEPTH));
 	
 	// Setup player mesh
 	USkeletalMeshComponent* CharacterMesh = GetMesh();
-	if (CharacterMesh != nullptr)
-	{
-		CharacterMesh->SetupAttachment(FirstPersonCamera);
-		CharacterMesh->SetOnlyOwnerSee(true);
-		CharacterMesh->bCastDynamicShadow = false;
-		CharacterMesh->CastShadow = false;
-		CharacterMesh->SetRelativeRotation(FRotator(0.0f, 270.0f, 0.0f));
-		CharacterMesh->SetRelativeLocation(FVector(15.0f, 0.0f, -160.0f));
-	}
+	CHECK_NULLPTR_RET(CharacterMesh, LogPlayerCharacter, "PlayerCharacter:: Failed to get Skeletal Mesh Component!");
+
+	CharacterMesh->SetupAttachment(ViewPivotComponent);
+	CharacterMesh->SetOnlyOwnerSee(true);
+	CharacterMesh->bCastDynamicShadow = false;
+	CharacterMesh->CastShadow = false;
+	CharacterMesh->SetRelativeLocation(FVector(15.0f, 0.0f, -2 * CapsuleHalfHeight + EYE_VERTICAL_DEPTH));
+	CharacterMesh->SetRelativeRotation(FRotator(0.0f, 270.0f, 0.0f));
+
+	//Setup first person camera
+	FirstPersonCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FirstPersonCamera"));
+	CHECK_NULLPTR_RET(FirstPersonCamera, LogPlayerCharacter, "PlayerCharacter:: Failed to create Camera Component!");	
+
+	FirstPersonCamera->SetupAttachment(CharacterMesh, SOCKET_PLAYER_CAMERA);
+	FirstPersonCamera->bUsePawnControlRotation = false;
+
+	InteractionComponent = CreateDefaultSubobject<UInteractionComponent>(TEXT("InteractionComponent"));
+	if (InteractionComponent != nullptr) {InteractionComponent->SetupAttachment(FirstPersonCamera);}
 	
 	// Setup Actor Components
 	ViewBlenderComponent = CreateDefaultSubobject<UViewBlenderComponent>(TEXT("ViewBlenderComponent"));
@@ -63,7 +81,7 @@ APlayerCharacter::APlayerCharacter()
 	FlagManagerComponent = CreateDefaultSubobject<UFlagManagerComponent>(TEXT("FlagManagerComponent"));
 	NotificationComponent = CreateDefaultSubobject<UNotificationComponent>(TEXT("NotificationComponent"));
 	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
-	NoiseMakerComponent = CreateDefaultSubobject<UNoiseMakerComponent>(TEXT("NoiseMakerComponent"));
+	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 	StimulusSourceComponent = CreateDefaultSubobject<UPCPerceptionStimulusComponent>(TEXT("StimulusSourceComponent"));
 	
 
@@ -94,6 +112,21 @@ void APlayerCharacter::BeginPlay()
 		if (InteractionComponent != nullptr) {InteractionComponent->SetInteractionLabelText(PlayerHUD->GetInteractionLabelText());}
 	}
 
+	if (HealthComponent != nullptr) {HealthComponent->OnDeath.AddDynamic(this, &APlayerCharacter::HandleDeath);}
+
+	if (AProjectCalmGameMode* GameMode = PCGameStatics::GetPCGameMode(this))
+	{
+		GameMode->OnPlayerRespawn.AddDynamic(this, &APlayerCharacter::Respawn);
+	}
+
+	SetRespawnPoint(GetActorLocation());
+
+	if (ViewPivotComponent != nullptr) {ViewAdjustmentLocation = ViewPivotComponent->GetRelativeLocation();}
+}
+
+void APlayerCharacter::Tick(float DeltaSeconds)
+{
+	AdjustViewToHalfHeight(DeltaSeconds);
 }
 
 // Called to bind functionality to input
@@ -107,12 +140,43 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Move);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACharacter::Jump);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
+		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Triggered, this, &APlayerCharacter::StartCrouching);
+		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Completed, this, &APlayerCharacter::StopCrouching);
+		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Triggered, this, &APlayerCharacter::StartSprinting);
+		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &APlayerCharacter::StopSprinting);
 		EnhancedInputComponent->BindAction(PauseAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Pause);
 		EnhancedInputComponent->BindAction(OpenInventoryAction, ETriggerEvent::Triggered, this, &APlayerCharacter::OpenInventory);
 		EnhancedInputComponent->BindAction(OpenQuestLogAction, ETriggerEvent::Triggered, this, &APlayerCharacter::OpenQuestLog);
 		EnhancedInputComponent->BindAction(OpenPhotoLogAction, ETriggerEvent::Triggered, this, &APlayerCharacter::OpenPhotoLog);
 		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Interact);
 	}
+}
+
+void APlayerCharacter::OnStartCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust)
+{
+	// RecalculateBaseEyeHeight();
+	if (ViewPivotComponent)
+	{
+		ViewPivotComponent->SetRelativeLocation(ViewPivotComponent->GetRelativeLocation() + FVector(0.0f, 0.0f, 2 * HalfHeightAdjust - EYE_VERTICAL_DEPTH));
+	}
+
+	ViewAdjustmentLocation -= FVector(0.0f, 0.0f, HalfHeightAdjust);
+
+	bIsCrouching = true;
+
+	K2_OnStartCrouch(HalfHeightAdjust, ScaledHalfHeightAdjust);
+}
+
+void APlayerCharacter::OnEndCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust)
+{
+	// RecalculateBaseEyeHeight();
+	if (ViewPivotComponent) {ViewPivotComponent->SetRelativeLocation(ViewPivotComponent->GetRelativeLocation() - FVector(0.0f, 0.0f, HalfHeightAdjust));}
+
+	ViewAdjustmentLocation += FVector(0.0f, 0.0f, HalfHeightAdjust);
+
+	bIsCrouching = false;
+
+	K2_OnEndCrouch(HalfHeightAdjust, ScaledHalfHeightAdjust);
 }
 
 bool APlayerCharacter::GetFlag(FName FlagName) const
@@ -145,14 +209,9 @@ void APlayerCharacter::HideHUD()
 
 void APlayerCharacter::RestrictMovement(bool bValue)
 {
-	if (bIsMovementRestricted == bValue) {return;}
-
-	UCharacterMovementComponent* MovementComp = GetCharacterMovement();
-	CHECK_NULLPTR_RET(MovementComp, LogPlayerCharacter, "PlayerCharacter:: No CharacterMovementComponent!");
-	
-	MovementComp->SetJumpAllowed(!bValue);
-	MovementComp->MaxWalkSpeed *= bValue ? 0.5f : 2.0f;
-	bIsMovementRestricted = bValue;
+	UPlayerCharacterMovementComponent* MovementComp = Cast<UPlayerCharacterMovementComponent>(GetMovementComponent());
+	CHECK_NULLPTR_RET(MovementComp, LogPlayerCharacter, "PlayerCharacter:: No Movement Component!");
+	MovementComp->SetWantsToRestrict(bValue);
 }
 
 void APlayerCharacter::Move(const FInputActionValue& Value)  // Automatically applied. Do not call in Tick.
@@ -171,6 +230,53 @@ void APlayerCharacter::Look(const FInputActionValue& Value)  // Automatically ap
 	FVector2D Direction = Value.Get<FVector2D>();
 	AddControllerYawInput(Direction.X);
 	AddControllerPitchInput(Direction.Y);
+
+	const FRotator ViewRotation = GetViewRotation();
+	const FRotator NewViewRotation = FRotator(ViewRotation.Pitch, ViewRotation.Yaw, 0.0f);
+	if (ViewPivotComponent != nullptr && !NewViewRotation.Equals(ViewPivotComponent->GetComponentRotation()))
+	{
+		ViewPivotComponent->SetWorldRotation(NewViewRotation);
+	}
+}
+
+void APlayerCharacter::StartCrouching()
+{
+#ifdef LOCAL_DEBUG_LOGS
+	UE_LOG(LogPlayerCharacter, Warning, TEXT("PlayerCharacterMovementComponent:: StartCrouching"));
+#endif
+
+	Crouch(false);
+}
+
+void APlayerCharacter::StopCrouching()
+{
+#ifdef LOCAL_DEBUG_LOGS
+	UE_LOG(LogPlayerCharacter, Warning, TEXT("PlayerCharacterMovementComponent:: StopCrouching"));
+#endif
+
+	UnCrouch(false);
+}
+
+void APlayerCharacter::StartSprinting()
+{
+#ifdef LOCAL_DEBUG_LOGS
+	UE_LOG(LogPlayerCharacter, Warning, TEXT("PlayerCharacterMovementComponent:: StartSprinting"));
+#endif
+
+	UPlayerCharacterMovementComponent* MovementComp = Cast<UPlayerCharacterMovementComponent>(GetMovementComponent());
+	CHECK_NULLPTR_RET(MovementComp, LogPlayerCharacter, "PlayerCharacter:: No Movement Component!");
+	MovementComp->SetWantsToSprint(true);
+}
+
+void APlayerCharacter::StopSprinting()
+{
+#ifdef LOCAL_DEBUG_LOGS
+	UE_LOG(LogPlayerCharacter, Warning, TEXT("PlayerCharacterMovementComponent:: StopSprinting"));
+#endif
+
+	UPlayerCharacterMovementComponent* MovementComp = Cast<UPlayerCharacterMovementComponent>(GetMovementComponent());
+	CHECK_NULLPTR_RET(MovementComp, LogPlayerCharacter, "PlayerCharacter:: No Movement Component!");
+	MovementComp->SetWantsToSprint(false);
 }
 
 void APlayerCharacter::Pause(const FInputActionValue &Value)
@@ -217,6 +323,47 @@ bool APlayerCharacter::AttachEquipment(IEquipmentInterface *Equipment, FName Soc
 		return true;
 	}
 	return false;
+}
+
+void APlayerCharacter::HandleDeath(FString DamageMessage)
+{
+	SetFlag(FLAG_PLAYER_IS_DEAD, true);
+	DisplayDeathScreen(DamageMessage);
+}
+
+void APlayerCharacter::Respawn()
+{
+	SetFlag(FLAG_PLAYER_IS_DEAD, false);
+	TeleportTo(RespawnPoint, FRotator::ZeroRotator);
+	if (HealthComponent != nullptr) {HealthComponent->Reset();}
+}
+
+void APlayerCharacter::DisplayDeathScreen(FString DamageMessage)
+{
+	UProjectCalmGameInstance* GameInstance = PCGameStatics::GetPCGameInstance(this);
+	CHECK_NULLPTR_RET(GameInstance, LogPlayerCharacter, "PlayerCharacter:: Could not get ProjectCalmGameInstance!");
+	GameInstance->LoadDeathScreen(DamageMessage);
+}
+
+void APlayerCharacter::AdjustViewToHalfHeight(float DeltaTime)
+{
+	CHECK_NULLPTR_RET(ViewPivotComponent, LogPlayerCharacter, "PlayerCharacter:: No ViewPivotComponent!");
+
+	FVector CurrentLocation = ViewPivotComponent->GetRelativeLocation();
+	if (CurrentLocation == ViewAdjustmentLocation) {return;}
+
+	if (bIsCrouching && (CurrentLocation.Z < ViewAdjustmentLocation.Z || FMath::IsNearlyEqual(CurrentLocation.Z, ViewAdjustmentLocation.Z)) \
+	|| !bIsCrouching && (CurrentLocation.Z > ViewAdjustmentLocation.Z || FMath::IsNearlyEqual(CurrentLocation.Z, ViewAdjustmentLocation.Z)))
+	{
+		ViewPivotComponent->SetRelativeLocation(ViewAdjustmentLocation);
+		return;
+	}
+
+	if (ViewPivotComponent)
+	{
+		float Adjustment = 500.0f * DeltaTime * (bIsCrouching ? -1.0f : 1.0f);
+		ViewPivotComponent->SetRelativeLocation(CurrentLocation + FVector(0.0f, 0.0f, Adjustment));
+	}
 }
 
 void APlayerCharacter::GetInventory(TArray<UItemData*>& OutInventory)

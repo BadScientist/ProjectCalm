@@ -20,7 +20,11 @@ void UInteractionComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
         if (TargetedInteractable != nullptr) {LabelText = FText::FromString(TargetedInteractable->GetInteractionLabel());}
         else {LabelText = FText::GetEmpty();}
     }
-    else {LabelText = FText::GetEmpty();}
+    else
+    {
+        TargetedInteractable = nullptr;
+        LabelText = FText::GetEmpty();
+    }
 
     if (InteractionLabelText != nullptr) {InteractionLabelText->SetText(LabelText);}
 }

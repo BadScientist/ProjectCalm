@@ -10,6 +10,8 @@
 
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
+#include "Sound/SoundCue.h"
+#include "Kismet/GameplayStatics.h"
 
 
 // Sets default values
@@ -122,6 +124,16 @@ void AEquipment::ResetPlayerControls()
 			SecondaryInputCompletedBinding = nullptr;
 		}
 	}
+}
+
+void AEquipment::PlayPrimaryActionSound()
+{
+    if (PrimaryActionSound != nullptr) {UGameplayStatics::PlaySoundAtLocation(this, PrimaryActionSound, GetActorLocation());}
+}
+
+void AEquipment::PlaySecondaryActionSound()
+{
+    if (SecondaryActionSound != nullptr) {UGameplayStatics::PlaySoundAtLocation(this, SecondaryActionSound, GetActorLocation());}
 }
 
 bool AEquipment::GetPlayerFlag(FName FlagName)

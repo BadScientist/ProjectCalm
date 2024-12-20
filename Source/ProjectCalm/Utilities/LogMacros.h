@@ -9,7 +9,7 @@
 #define CHECK_SOFTPTR_RETVAL(Pointer, LogCategory, ErrorMsg, RetVal) {if (Pointer.Get() == nullptr){UE_LOG(LogCategory, Error, TEXT(ErrorMsg)); return RetVal;}}
 
 #if WITH_EDITORONLY_DATA
-    // #define PC_DEBUG_DRAW_SHAPES
+    #define PC_DEBUG_DRAW_SHAPES
     #define PC_DEBUG_LOGS
 #endif
 

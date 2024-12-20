@@ -14,6 +14,7 @@
 #define BBKEY_ALERT_LEVEL       TEXT("AlertLevel")
 #define BBKEY_ACTIVE_BEHAVIOR   TEXT("ActiveBehavior")
 #define BBKEY_REACTION_TARGET 	TEXT("ReactionTarget")
+#define BBKEY_IS_DEAD		 	TEXT("bIsDead")
 
 enum ESubjectName;
 struct FActorPerceptionUpdateInfo;
@@ -61,9 +62,14 @@ private:
 	UPROPERTY(EditAnywhere, Category = Behavior)
 	float AggressionThreshold{100.0f};
 	UPROPERTY(EditAnywhere, Category = Behavior)
-	float AggressionIncrement{65.0f};
+	float AggressionIncrement{60.0f};
 	UPROPERTY(EditAnywhere, Category = Behavior)
-	float AggressionDecay{6.667f};
+	float AggressionDecay{30.0f};
+
+	/*If negative, cannot attack.*/
+	UPROPERTY(EditAnywhere, Category = Behavior)
+	float AttackCooldown{-1.0f};
+	float LastAttackTime{0.0f};
 
 	ESubjectName SelfSpecies;
 	float LastBehaviorUpdateTime{0.0f};
@@ -75,9 +81,9 @@ private:
 	float Alarm{0.0f};
 	float Aggression{0.0f};
 
-	bool ActiveAlertStimuli{false};
-	bool ActiveAlarmStimuli{false};
-	bool ActiveAggressionStimuli{false};
+	bool ActiveAlertStimulus{false};
+	bool ActiveAlarmStimulus{false};
+	bool ActiveAggressionStimulus{false};
 	
 	EAlertLevel AlertLevel{EAlertLevel::CALM};
 	EPhotoSubjectBehavior ActiveBehavior{EPhotoSubjectBehavior::NONE};
@@ -98,14 +104,25 @@ private:
 	bool CheckCurrentBehavior();
 	ESubjectName GetTargetSpecies(const FActorPerceptionUpdateInfo& UpdateInfo);
 	float GetDistanceFromTarget(AActor* TargetActor);
+	bool IsTargetDead(AActor* TargetActor) const;
+
+protected:
+	UFUNCTION()
+	virtual void HandleDeath(FString DamageMessage);
 
 public:
-	UFUNCTION(BlueprintCallable)
-	EAlertLevel GetAlertLevel(){return AlertLevel;}
-	UFUNCTION(BlueprintCallable)
-	EPhotoSubjectBehavior GetActiveBehavior(){return ActiveBehavior;}
-	UFUNCTION(BlueprintCallable)
-	FVector GetHomeLocation(){return HomeLocation;}
+	UFUNCTION(BlueprintPure)
+	EAlertLevel GetAlertLevel() const {return AlertLevel;}
+	UFUNCTION(BlueprintPure)
+	EPhotoSubjectBehavior GetActiveBehavior() const {return ActiveBehavior;}
+	UFUNCTION(BlueprintPure)
+	FVector GetHomeLocation() const {return HomeLocation;}
+	UFUNCTION(BlueprintPure)
+	AActor* GetCurrentTarget() const;
+	UFUNCTION(BlueprintPure)
+	bool CanAttack() const;
+
+	void ActivateAttackCooldown();
 
 	void SetSelfSpecies(ESubjectName InSpecies) {SelfSpecies = InSpecies;}
 
@@ -114,8 +131,6 @@ public:
 	void SetVectorKeyValue(const FName& KeyName, FVector InVector);
 	void SetBoolKeyValue(const FName& KeyName, bool bInValue);
 	void SetObjectKeyValue(const FName& KeyName, UObject* InObject);
-	
-	void DetermineReaction(EAlertLevel InAlertLevel, AActor* ReactionSource);
 
 	UFUNCTION()
 	void OnPerceptionInfoUpdated(const FActorPerceptionUpdateInfo& UpdateInfo);

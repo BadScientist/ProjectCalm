@@ -4,6 +4,7 @@
 #include "PhotoSubjectAIController.h"
 #include "PCPerceptionComponent.h"
 #include "ProjectCalm/Photos/PhotoSubjectDataComponent.h"
+#include "ProjectCalm/Characters/HealthComponent.h"
 #include "ProjectCalm/Characters/Player/PlayerCharacter.h"
 #include "ProjectCalm/Photos/PhotoSubjectName.h"
 #include "ProjectCalm/Utilities/LogMacros.h"
@@ -12,6 +13,10 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Perception/AISense_Hearing.h"
 #include "Perception/AISense_Sight.h"
+
+#ifdef PC_DEBUG_LOGS
+	// #define LOCAL_DEBUG_LOGS
+#endif
 
 
 APhotoSubjectAIController::APhotoSubjectAIController()
@@ -29,7 +34,7 @@ void APhotoSubjectAIController::Tick(float DeltaSeconds)
     UpdateMoods(DeltaSeconds);
     TryUpdateBehavior();
 
-#ifdef PC_DEBUG_LOGS
+#ifdef LOCAL_DEBUG_LOGS
     FString NewLogString = FString::Printf(
         TEXT("PhotoSubjectAIController:: AlertLevel: %s, CurrentBehavior: %s, Alertness: %.00f/%.00f, Alarm: %.00f/%.00f, Aggression: %.00f/%.00f, AlertStimuli: %i, AlarmStimuli: %i, AggroStimuli: %i"),
         *(PCAlertLevel::EnumToString(AlertLevel)),
@@ -37,7 +42,7 @@ void APhotoSubjectAIController::Tick(float DeltaSeconds)
         Alertness, AlertnessThreshold,
         Alarm, AlarmThreshold,
         Aggression, AggressionThreshold,
-        ActiveAlertStimuli, ActiveAlarmStimuli, ActiveAggressionStimuli);
+        ActiveAlertStimulus, ActiveAlarmStimulus, ActiveAggressionStimulus);
 
     if (NewLogString != LogString)
     {
@@ -57,6 +62,14 @@ void APhotoSubjectAIController::BeginPlay()
         PerceptionComponent->OnTargetPerceptionInfoUpdated.AddDynamic(this, &APhotoSubjectAIController::OnPerceptionInfoUpdated);
     }
 
+    if (ACharacter* ControlledCharacter = GetCharacter())
+    {
+        if (UHealthComponent* HealthComponent = ControlledCharacter->FindComponentByClass<UHealthComponent>())
+        {
+            HealthComponent->OnDeath.AddDynamic(this, &APhotoSubjectAIController::HandleDeath);
+        }
+    }
+
     SetAlertLevelKeyValue(BBKEY_ALERT_LEVEL, EAlertLevel::CALM);
     SetBehaviorKeyValue(BBKEY_ACTIVE_BEHAVIOR, EPhotoSubjectBehavior::IDLE);
 }
@@ -64,13 +77,13 @@ void APhotoSubjectAIController::BeginPlay()
 void APhotoSubjectAIController::HandleHearingStimulus(const FActorPerceptionUpdateInfo& UpdateInfo)
 {
     if (GetTargetSpecies(UpdateInfo) == SelfSpecies){return;}
-    if (UpdateInfo.Stimulus.IsExpired()) {ActiveAlertStimuli = false;}
+    if (UpdateInfo.Stimulus.IsExpired()) {ActiveAlertStimulus = false;}
     else if (UpdateInfo.Stimulus.IsActive())
     {
         float DistanceFromStimulus = FVector::Distance(UpdateInfo.Stimulus.ReceiverLocation, UpdateInfo.Stimulus.StimulusLocation);
         float AttenuatedStrength = FMath::Max(UpdateInfo.Stimulus.Strength - 20 * log10f(DistanceFromStimulus/100), 0.0f);
 
-#ifdef PC_DEBUG_LOGS
+#ifdef LOCAL_DEBUG_LOGS
         UE_LOG(LogTemp, Display, TEXT("PhotoSubjectAIController:: HearingStimulus: Receiver: %s, Instigator: %s, Strength: %.00f, Attenuated: %.00f, Noticed: %s"),
             *(GetCharacter() == nullptr ? FString("Error") : GetCharacter()->GetActorNameOrLabel()),
             *((UpdateInfo.Target == nullptr) ? FString("Error") : UpdateInfo.Target->GetActorNameOrLabel()),
@@ -80,7 +93,7 @@ void APhotoSubjectAIController::HandleHearingStimulus(const FActorPerceptionUpda
 #endif
 
         if (AttenuatedStrength < NoticeSoundThreshold) {return;}
-        ActiveAlertStimuli = true;
+        ActiveAlertStimulus = true;
 
         AActor* SourceActor = UpdateInfo.Target.Get();
         CHECK_NULLPTR_RET(SourceActor, LogAIPerception, "PhotoSubjectAIController:: Stimulus Target is null!");
@@ -94,7 +107,7 @@ void APhotoSubjectAIController::HandleSightStimulus(const FActorPerceptionUpdate
     UE_LOG(LogTemp, Display, TEXT("PhotoSubjectAIController:: HandleSightStimulus"));
     bool bIsActiveStimulus = UpdateInfo.Stimulus.IsActive() && !UpdateInfo.Stimulus.IsExpired();
 
-    if (UpdateInfo.Target != nullptr)
+    if (UpdateInfo.Target.Get() != nullptr)
     {
         ESubjectName TargetSpecies = GetTargetSpecies(UpdateInfo);
         if (TargetSpecies == SelfSpecies) {return;}
@@ -102,34 +115,37 @@ void APhotoSubjectAIController::HandleSightStimulus(const FActorPerceptionUpdate
         APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(UpdateInfo.Target);
         if (Predators.Contains(TargetSpecies) || (PlayerCharacter != nullptr && ReactionToPlayer == EAlertLevel::ALARMED))
         {
-            ActiveAlarmStimuli = bIsActiveStimulus;
-            LastSeenPredator = UpdateInfo.Target.Get();
+            ActiveAlarmStimulus = bIsActiveStimulus && !IsTargetDead(UpdateInfo.Target.Get());
+            if (ActiveAlarmStimulus) {LastSeenPredator = UpdateInfo.Target.Get();}
         }
         else if (Prey.Contains(TargetSpecies) || (PlayerCharacter != nullptr && ReactionToPlayer == EAlertLevel::AGGRO))
         {
-            ActiveAggressionStimuli = bIsActiveStimulus;
-            LastSeenPrey = UpdateInfo.Target.Get();
+            ActiveAggressionStimulus = bIsActiveStimulus && !IsTargetDead(UpdateInfo.Target.Get());
+            if (ActiveAggressionStimulus) {LastSeenPrey = UpdateInfo.Target.Get();}
         }
     }
 }
 
 void APhotoSubjectAIController::UpdateMoods(float DeltaSeconds)
 {
-    if (!ActiveAlertStimuli)
+    if (LastSeenPredator != nullptr) {ActiveAlarmStimulus = ActiveAlarmStimulus && !IsTargetDead(LastSeenPredator);}
+    if (LastSeenPrey != nullptr) {ActiveAggressionStimulus = ActiveAggressionStimulus && !IsTargetDead(LastSeenPrey);}
+
+    if (!ActiveAlertStimulus)
     {
         SetAlertness(Alertness - AlertnessDecay * DeltaSeconds);
-        if (!ActiveAlarmStimuli) {SetAlarm(Alarm - AlarmDecay * DeltaSeconds);}
-        if (!ActiveAggressionStimuli) {SetAggression(Aggression - AggressionDecay * DeltaSeconds);}
+        if (!ActiveAlarmStimulus) {SetAlarm(Alarm - AlarmDecay * DeltaSeconds);}
+        if (!ActiveAggressionStimulus) {SetAggression(Aggression - AggressionDecay * DeltaSeconds);}
     }
 
-    if (ActiveAlarmStimuli)
+    if (ActiveAlarmStimulus)
     {
         float DistanceFromTarget = GetDistanceFromTarget(LastSeenPredator);
         float DistanceFactor = FMath::Clamp((1.25 - DistanceFromTarget / 4000), 0.5, 1.0);
         SetAlarm(Alarm + AlarmIncrement * DeltaSeconds * DistanceFactor);
     }
     
-    if (ActiveAggressionStimuli)
+    if (ActiveAggressionStimulus)
     {
         float DistanceFromTarget = GetDistanceFromTarget(LastSeenPrey);
         float DistanceFactor = FMath::Clamp((1.25 - DistanceFromTarget / 4000), 0.5, 1.0);
@@ -139,7 +155,7 @@ void APhotoSubjectAIController::UpdateMoods(float DeltaSeconds)
 
 void APhotoSubjectAIController::UpdateBehavior()
 {
-#ifdef PC_DEBUG_LOGS
+#ifdef LOCAL_DEBUG_LOGS
     UE_LOG(LogPhotoSubjectAI, Warning, TEXT("PhotoSubjectAIController:: UpdateBehavior()"));
 #endif
 
@@ -211,6 +227,39 @@ float APhotoSubjectAIController::GetDistanceFromTarget(AActor* TargetActor)
     return FVector::Distance(TargetActor->GetActorLocation(), ControlledCharacter->GetActorLocation());
 }
 
+bool APhotoSubjectAIController::IsTargetDead(AActor* TargetActor) const
+{
+    if (TargetActor == nullptr) {return true;}
+
+    UHealthComponent* TargetHealth = TargetActor->FindComponentByClass<UHealthComponent>();
+    if (TargetHealth == nullptr) {return true;}
+
+    return TargetHealth->IsDead();
+}
+
+void APhotoSubjectAIController::HandleDeath(FString DamageMessage)
+{
+    SetBoolKeyValue(BBKEY_IS_DEAD, true);
+}
+
+AActor* APhotoSubjectAIController::GetCurrentTarget() const
+{
+    const UBlackboardComponent* BlackboardComponent = GetBlackboardComponent();
+    CHECK_NULLPTR_RETVAL(BlackboardComponent, LogController, "PhotoSubjectAIController:: No BlackboardComp found!", nullptr);
+
+    return Cast<AActor>(BlackboardComponent->GetValueAsObject(BBKEY_REACTION_TARGET));
+}
+
+bool APhotoSubjectAIController::CanAttack() const
+{
+    return AttackCooldown >= 0 && GetWorld()->GetTimeSeconds() - LastAttackTime >= AttackCooldown && !IsTargetDead(LastSeenPrey);
+}
+
+void APhotoSubjectAIController::ActivateAttackCooldown()
+{
+    LastAttackTime = GetWorld()->GetTimeSeconds();
+}
+
 void APhotoSubjectAIController::SetAlertLevelKeyValue(const FName &KeyName, EAlertLevel InAlertLevel)
 {
     if (KeyName == BBKEY_ALERT_LEVEL)
@@ -227,20 +276,9 @@ void APhotoSubjectAIController::SetAlertLevelKeyValue(const FName &KeyName, EAle
 
 void APhotoSubjectAIController::SetBehaviorKeyValue(const FName& KeyName, EPhotoSubjectBehavior InBehavior)
 {
-#ifdef PC_DEBUG_LOGS
-    UE_LOG(LogTemp, Error, TEXT("PhotoSubjectAIController:: SetBehaviorKeyValue: InBehavior: %s"), *(PCPhotoSubjectBehavior::EnumToString(InBehavior)));
-#endif
-
     EPhotoSubjectBehavior NewBehavior = InBehavior;
-    if (KeyName == BBKEY_ACTIVE_BEHAVIOR)
-    {
-        // if (ActiveBehavior == EPhotoSubjectBehavior::RESTART_LAST)
-        // {
-        //     NewBehavior = LastBehavior;
-        //     LastBehavior = EPhotoSubjectBehavior::NONE;
-        // }
-        ActiveBehavior = NewBehavior;
-    }
+    if (KeyName == BBKEY_ACTIVE_BEHAVIOR) {ActiveBehavior = NewBehavior;}
+
     GetBlackboardComponent()->SetValueAsEnum(KeyName, NewBehavior);
 }
 
@@ -259,37 +297,6 @@ void APhotoSubjectAIController::SetBoolKeyValue(const FName &KeyName, bool bInVa
 void APhotoSubjectAIController::SetObjectKeyValue(const FName &KeyName, UObject *InObject)
 {
     GetBlackboardComponent()->SetValueAsObject(KeyName, InObject);
-}
-
-void APhotoSubjectAIController::DetermineReaction(EAlertLevel InAlertLevel, AActor* ReactionSource)
-{
-    // if (AlertLevel > InAlertLevel) {return;}
-    
-    // UPhotoSubjectDataComponent* DataComponent = ReactionSource->FindComponentByClass<UPhotoSubjectDataComponent>();
-    // EAlertLevel NewAlertLevel = InAlertLevel;
-
-    // if (DataComponent != nullptr)
-    // {
-    //     for (ESubjectName PreyName : Prey)
-    //     {
-    //         if (DataComponent->GetSubjectName() == PreyName && NewAlertLevel == EAlertLevel::ALARMED)
-    //         {
-    //             NewAlertLevel = EAlertLevel::AGGRO;
-    //             break;
-    //         }
-    //     }
-    // }
-
-    // else if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(ReactionSource))
-    // {
-    //     if (bIsHostileToPlayer && NewAlertLevel == EAlertLevel::ALARMED)
-    //     {
-    //         NewAlertLevel = EAlertLevel::AGGRO;
-    //     }
-    // }
-
-    // SetAlertLevelKeyValue(BBKEY_ALERT_LEVEL, NewAlertLevel);
-    // SetObjectKeyValue(BBKEY_REACTION_TARGET, ReactionSource);
 }
 
 void APhotoSubjectAIController::OnPerceptionInfoUpdated(const FActorPerceptionUpdateInfo& UpdateInfo)

@@ -45,3 +45,15 @@ void UMenu::SetGameOnlyControls()
     PlayerController->SetInputMode(InputModeData);
     PlayerController->bShowMouseCursor = false;
 }
+
+void UMenu::PlayButtonHoverSound()
+{
+    CHECK_NULLPTR_RET(MenuInterface, LogUserWidget, "Menu:: MenuInterface is NULL!");
+    MenuInterface->PlayUISound("UIButtonHovered", this);
+}
+
+void UMenu::PlayButtonPressedSound(bool bPersistOnLevelLoad)
+{
+    CHECK_NULLPTR_RET(MenuInterface, LogUserWidget, "Menu:: MenuInterface is NULL!");
+    MenuInterface->PlayUISound("UIButtonPressed", this, bPersistOnLevelLoad);
+}

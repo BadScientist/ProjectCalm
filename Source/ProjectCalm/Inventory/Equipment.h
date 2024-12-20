@@ -15,6 +15,7 @@ class UInputAction;
 class UInputMappingContext;
 class IEquipmentInterface;
 class APlayerCharacter;
+class USoundCue;
 struct FInputActionValue;
 struct FInfoFlag;
 struct FEnhancedInputActionEventBinding;
@@ -35,6 +36,12 @@ private:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* EquipmentSecondaryAction;
+
+    UPROPERTY(EditAnywhere, Category = SFX)
+    USoundCue* PrimaryActionSound;
+
+    UPROPERTY(EditAnywhere, Category = SFX)
+    USoundCue* SecondaryActionSound;
 
 	FEnhancedInputActionEventBinding* PrimaryInputStartBinding;
 	FEnhancedInputActionEventBinding* PrimaryInputCompletedBinding;
@@ -81,6 +88,9 @@ protected:
 	void SetSecondaryActionOnCooldown() {bSecondaryActionOnCooldown = true;};
 	void ClearPrimaryActionOnCooldown() {bPrimaryActionOnCooldown = false;};
 	void ClearSecondaryActionOnCooldown() {bSecondaryActionOnCooldown = false;};
+
+	void PlayPrimaryActionSound();
+	void PlaySecondaryActionSound();
 
 	bool GetPlayerFlag(FName FlagName);
 	void SetPlayerFlag(FName FlagName, bool Value);

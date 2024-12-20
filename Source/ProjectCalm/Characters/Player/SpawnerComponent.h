@@ -24,7 +24,7 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = SpawnRegions, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Spawning, meta = (AllowPrivateAccess = "true"))
 	int32 MaxSpawns{15};
 
 	UPROPERTY(EditAnywhere, Category = Spawning, meta = (AllowPrivateAccess = "true"))
@@ -39,7 +39,7 @@ private:
 	UPROPERTY(EditAnywhere, Category = Spawning, meta = (AllowPrivateAccess = "true"))
 	float SpawnCooldown{1.0f};
 
-	UPROPERTY(EditAnywhere, Category = Spawning, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, Category = Spawning, meta = (AllowPrivateAccess = "true"), meta = (ClampMin = "0.0", ClampMax = "1.0", UIMin = "0.0", UIMax = "1.0"))
 	float SpawnCooldownRangeFactor{0.5f};
 
 	int32 CurrentSpawns{0};

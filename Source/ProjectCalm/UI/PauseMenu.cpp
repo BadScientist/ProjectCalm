@@ -15,6 +15,7 @@ bool UPauseMenu::Initialize()
 
     CHECK_NULLPTR_RETVAL(QuitButton, LogUserWidget, "PauseMenu:: No QuitButton in Widget Blueprint!", false);
     QuitButton->OnClicked.AddDynamic(this, &UPauseMenu::QuitToMainMenu);
+    QuitButton->OnHovered.AddDynamic(this, &UMenu::PlayButtonHoverSound);
 
     return true;
 }
@@ -22,6 +23,6 @@ bool UPauseMenu::Initialize()
 void UPauseMenu::QuitToMainMenu()
 {
     CHECK_NULLPTR_RET(MenuInterface, LogUserWidget, "PauseMenu:: No MenuInterface!");
-
+    PlayButtonPressedSound(true);
     MenuInterface->QuitToMainMenu();
 }

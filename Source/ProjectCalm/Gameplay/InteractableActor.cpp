@@ -7,6 +7,9 @@
 
 #include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Sound/SoundCue.h"
+#include "Kismet/GameplayStatics.h"
+
 
 AInteractableActor::AInteractableActor()
 {    
@@ -21,13 +24,16 @@ AInteractableActor::AInteractableActor()
     if (InteractionMesh != nullptr && InteractionCollision != nullptr) {InteractionMesh->SetupAttachment(InteractionCollision);}
 }
 
-void AInteractableActor::Interact(APlayerCharacter *InteractingPlayer)
+void AInteractableActor::Interact(APlayerCharacter* InteractingPlayer)
 {
 	if (InteractingPlayer != nullptr) {PlayerCharacter = InteractingPlayer;}
+    TimesInteracted++;
 
     AProjectCalmGameMode* GameMode = PCGameStatics::GetPCGameMode(this);
     CHECK_NULLPTR_RET(GameMode, LogQuest, "QuestObjective:: No PCGameMode found!");
     GameMode->OnInteract.Broadcast(this);
+
+    if (InteractionSound != nullptr) {UGameplayStatics::PlaySoundAtLocation(this, InteractionSound, GetActorLocation());}
 }
 
 void AInteractableActor::SetCollisionEnabled(bool bValue)

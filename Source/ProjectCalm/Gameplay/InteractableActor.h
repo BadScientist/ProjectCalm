@@ -11,6 +11,7 @@
 class APlayerCharacter;
 class UBoxComponent;
 class UStaticMeshComponent;
+class USoundCue;
 
 
 UCLASS()
@@ -19,19 +20,23 @@ class PROJECTCALM_API AInteractableActor : public AActor, public IInteractableIn
 	GENERATED_BODY()
 
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Mesh, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Mesh)
 	UStaticMeshComponent* InteractionMesh{nullptr};
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Interaction, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Interaction)
 	UBoxComponent* InteractionCollision{nullptr};
 
 	UPROPERTY(EditDefaultsOnly, Category = Interaction)
 	FString InteractionLabel{FString("Activate")};
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = SFX)
+	USoundCue* InteractionSound{nullptr};
+
 	ECollisionEnabled::Type ActiveCollisionType{ECollisionEnabled::QueryOnly};
 	ECollisionEnabled::Type InactiveCollisionType{ECollisionEnabled::NoCollision};
 
     APlayerCharacter* PlayerCharacter{nullptr};
+	int32 TimesInteracted{0};
 	
 public:	
 	// Sets default values for this actor's properties

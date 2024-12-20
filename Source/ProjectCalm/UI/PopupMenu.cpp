@@ -16,7 +16,8 @@ bool UPopupMenu::Initialize()
     if (!Success) {return false;}
 
     CHECK_NULLPTR_RETVAL(CloseButton, LogUserWidget, "PopupMenu:: No CloseButton in Widget Blueprint!", false);
-    CloseButton->OnClicked.AddDynamic(this, &UPopupMenu::Teardown);
+    CloseButton->OnClicked.AddDynamic(this, &UPopupMenu::OnCloseButtonClicked);
+    CloseButton->OnHovered.AddDynamic(this, &UMenu::PlayButtonHoverSound);
     
     return true;
 }
@@ -27,9 +28,17 @@ FReply UPopupMenu::NativeOnKeyDown(const FGeometry &InGeometry, const FKeyEvent 
 	if (InKeyEvent.GetKey() == EKeys::Escape)
     {
         Teardown();
-        return FReply::Handled();}
+        return FReply::Handled();
+    }
 
     return Reply;
+}
+
+void UPopupMenu::OnCloseButtonClicked()
+{
+    UE_LOG(LogTemp, Warning, TEXT("UPopupMenu::OnCloseButtonClicked"));
+    PlayButtonPressedSound();
+    Teardown();
 }
 
 void UPopupMenu::Setup(bool bIsInteractiveIn)

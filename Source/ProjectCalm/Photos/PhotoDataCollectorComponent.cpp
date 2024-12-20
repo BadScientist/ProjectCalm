@@ -35,11 +35,13 @@ void UPhotoDataCollectorComponent::BeginPlay()
 	
 }
 
-FPhotoData UPhotoDataCollectorComponent::CollectPhotoData(FConvexVolume ViewFrustum, FVector ViewLocation)
+FPhotoData UPhotoDataCollectorComponent::CollectPhotoData(FConvexVolume ViewFrustum, FVector ViewLocation, FVector ViewForward)
 {
 	FPhotoData Data;
 	Data.TimeTaken = FDateTime::Now();
-	
+	Data.CameraLocation = ViewLocation;
+	Data.CameraForwardVector = ViewForward;
+		
 	TArray<AActor*> PhotoSubjects;
 	if (Spawner != nullptr) {PhotoSubjects = Spawner->GetAllPhotoSubjects();}
 	for (AActor* Actor : PhotoSubjects)
@@ -48,8 +50,12 @@ FPhotoData UPhotoDataCollectorComponent::CollectPhotoData(FConvexVolume ViewFrus
 		if (UPhotoSubjectDataComponent* PhotoSubjectDataComponent = Actor->FindComponentByClass<UPhotoSubjectDataComponent>())
 		{
 			FPhotoSubjectData SubjectData;
-			bool Visible = PhotoSubjectDataComponent->GeneratePhotoSubjectData(ViewFrustum, ViewLocation, SubjectData);
-			if (Visible) {Data.Subjects.Add(SubjectData);}
+			bool Visible = PhotoSubjectDataComponent->GeneratePhotoSubjectData(ViewFrustum, FCameraOrientation(ViewLocation, ViewForward), SubjectData);
+			if (Visible)
+			{
+				Data.Subjects.Add(SubjectData);
+				Data.Score += SubjectData.Score;  // @todo: add diminishing returns for multiple subjects of same species
+			}
 		}
 	}
 

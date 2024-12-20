@@ -29,6 +29,6 @@ private:
     USpawnerComponent* Spawner;
 
 public:
-	FPhotoData CollectPhotoData(FConvexVolume ViewFrustum, FVector ViewLocation);
+	FPhotoData CollectPhotoData(FConvexVolume ViewFrustum, FVector ViewLocation, FVector ViewForward);
 		
 };

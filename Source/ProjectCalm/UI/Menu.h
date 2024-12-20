@@ -35,5 +35,10 @@ public:
 
 	UFUNCTION()
 	virtual void Teardown();
+
+	UFUNCTION()
+	void PlayButtonHoverSound();
+	UFUNCTION()
+	void PlayButtonPressedSound(bool bPersistOnLevelLoad = false);
 	
 };

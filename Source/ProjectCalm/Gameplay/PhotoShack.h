@@ -43,21 +43,29 @@ class PROJECTCALM_API APhotoShack : public AInteractableActor
 	UPROPERTY(EditDefaultsOnly, Category = Mesh)
 	UStaticMeshComponent* PlanksMesh{nullptr};
 
+	UPROPERTY(EditDefaultsOnly, Category = SFX)
+	USoundCue* WindowMoveSound{nullptr};
+
 	UPROPERTY(EditAnywhere, Category = Proprietor)
 	AProprietor* Proprietor{nullptr};
 	UPROPERTY(EditAnywhere, Category = Proprietor)
 	float ProprietorMoveSpeed{20};
 	UPROPERTY(EditAnywhere, Category = Proprietor)
-	FWidgetVector ProprietorActiveOffset{FWidgetVector(0, 20, 170)};
+	TArray<FWidgetVector> ProprietorPath;
+	TArray<FVector> ProprietorPathLocations;
+	int32 ProprietorPathIdx{0};
 
 
 	UPROPERTY(EditAnywhere, Category = Window)
-    float WindowMoveSpeed{30};
+    float WindowSlideTime{2.0f};
+	UPROPERTY(EditAnywhere, Category = Window)
+    float WindowOpenZOffset{55.0f};
+
+	FVector WindowDefaultPosition;
+	float WindowProgress{0.0f};
 
 	FVector ProprietorInactiveLocation;
 	FVector ProprietorActiveLocation;
-    FVector WindowClosedPosition;
-    FVector WindowOpenPosition;
 
 	EShackState ShackState{EShackState::SHOP_CLOSED};
 	
@@ -82,5 +90,6 @@ private:
 	void SetState(EShackState NewState);
 	void MoveProprietor(float DeltaTime);
 	void MoveWindow(float DeltaTime);
+	void PlayWindowMoveSound();
 
 };

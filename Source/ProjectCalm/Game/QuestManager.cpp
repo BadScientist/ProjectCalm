@@ -66,6 +66,11 @@ bool UQuestManager::StartQuest(uint32 QuestID)
     if (SetStage(QuestID, 0)) 
     {
         PCPlayerStatics::SendOnScreenNotification(this, "Quest Started: " + Quests[QuestID].Name.ToString());
+
+        AProjectCalmGameMode* GameMode = PCGameStatics::GetPCGameMode(this);
+        CHECK_NULLPTR_RETVAL(GameMode, LogQuest, "QuestManager:: No ProjectCalmGameMode found!", true);
+        GameMode->OnQuestUpdated.Broadcast(Quests[QuestID]);
+
         return true;
     }
     return false;

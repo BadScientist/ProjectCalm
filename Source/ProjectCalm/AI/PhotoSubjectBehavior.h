@@ -11,7 +11,10 @@ enum EPhotoSubjectBehavior
     REST                UMETA(DisplayName = "Rest"),
     SEARCH_STATIONARY   UMETA(DisplayName = "Search Stationary"),
     SEARCH_MOBILE       UMETA(DisplayName = "Search Mobile"),
-    CHASE               UMETA(DisplayName = "Chase")
+    CHASE               UMETA(DisplayName = "Chase"),
+    RUN_AWAY            UMETA(DisplayName = "Run Away"),
+    ATTACK_TARGET       UMETA(DisplayName = "Attack Target"),
+    DIE                 UMETA(DisplayName = "Die")
 };
 
 class PCPhotoSubjectBehavior
@@ -39,9 +42,15 @@ public:
             return FString("Search Mobile");
         case EPhotoSubjectBehavior::CHASE :
             return FString("Chase");
+        case EPhotoSubjectBehavior::RUN_AWAY :
+            return FString("Run Away");
+        case EPhotoSubjectBehavior::ATTACK_TARGET :
+            return FString("Attack Target");
+        case EPhotoSubjectBehavior::DIE :
+            return FString("Die");
         
         default:
-            return FString("Idle");
+            return FString("Error");
         }
         return FString();
     }

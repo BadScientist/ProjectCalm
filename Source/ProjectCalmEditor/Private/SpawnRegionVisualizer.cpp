@@ -1,7 +1,7 @@
 #include "SpawnRegionVisualizer.h"
 #include "VisualizerProxy.h"
 
-#include "ProjectCalm/Characters/PhotoSubjects/PhotoSubjectSpawnRegion.h"
+#include "ProjectCalm/Game/World/SpawnRegionInterface.h"
 #include "EditorOnly/SpawnRegionVisualizerComponent.h"
 
 FSpawnRegionVisualizer::FSpawnRegionVisualizer()
@@ -58,10 +58,11 @@ bool FSpawnRegionVisualizer::VisProxyHandleClick(FEditorViewportClient* InViewpo
     if (VisProxy && VisProxy->Component.IsValid())
     {
         bEditing = true;
-        APhotoSubjectSpawnRegion* SpawnRegion = GetSpawnRegion();
-        if (SpawnRegion != nullptr)
+        
+        if (ISpawnRegionInterface* SpawnRegion = GetSpawnRegion())
         {
-            GEditor->SelectActor(GetSpawnRegion(), true, true, false, true);
+            AActor* SpawnRegionActor = Cast<AActor>(SpawnRegion->_getUObject());
+            GEditor->SelectActor(SpawnRegionActor, true, true, false, true);
         }
     }
 
@@ -70,10 +71,10 @@ bool FSpawnRegionVisualizer::VisProxyHandleClick(FEditorViewportClient* InViewpo
 
 bool FSpawnRegionVisualizer::GetWidgetLocation(const FEditorViewportClient* ViewportClient, FVector& OutLocation) const
 {
-    APhotoSubjectSpawnRegion* SpawnRegion = GetSpawnRegion();
+    ISpawnRegionInterface* SpawnRegion = GetSpawnRegion();
     if (SpawnRegion != nullptr)
     {
-        OutLocation = GetSpawnRegion()->GetActorLocation();
+        OutLocation = GetSpawnRegion()->GetRegionLocation();
         return true;
     }
     return false;
@@ -83,14 +84,14 @@ bool FSpawnRegionVisualizer::HandleInputDelta(FEditorViewportClient *ViewportCli
 {
     bool bHandled = false;
     
-    APhotoSubjectSpawnRegion* SpawnRegion = GetSpawnRegion();
+    ISpawnRegionInterface* SpawnRegion = GetSpawnRegion();
     if (SpawnRegion != nullptr)
     {
-        FVector RegionLocation = SpawnRegion->GetActorLocation();
-        SpawnRegion->SetActorLocation(RegionLocation + DeltaTranslate);
+        FVector RegionLocation = SpawnRegion->GetRegionLocation();
+        SpawnRegion->SetRegionLocation(RegionLocation + DeltaTranslate);
 
-        FRotator RegionRotation = SpawnRegion->GetActorRotation();
-        SpawnRegion->SetActorRotation(RegionRotation + DeltaRotate);
+        FRotator RegionRotation = SpawnRegion->GetRegionRotation();
+        SpawnRegion->SetRegionRotation(RegionRotation + DeltaRotate);
 
         FVector RegionSize = SpawnRegion->GetSize();
         FVector NewSize = FVector(RegionSize.X * (1 + DeltaScale.X), RegionSize.Y * (1 + DeltaScale.Y), RegionSize.Z * (1 + DeltaScale.Z));
@@ -102,7 +103,7 @@ bool FSpawnRegionVisualizer::HandleInputDelta(FEditorViewportClient *ViewportCli
     return bHandled;
 }
 
-APhotoSubjectSpawnRegion* FSpawnRegionVisualizer::GetSpawnRegion() const
+ISpawnRegionInterface* FSpawnRegionVisualizer::GetSpawnRegion() const
 {
     UActorComponent* EditedComponent = GetEditedComponent();
     if (EditedComponent == nullptr) {return nullptr;}
@@ -110,5 +111,5 @@ APhotoSubjectSpawnRegion* FSpawnRegionVisualizer::GetSpawnRegion() const
     AActor* OwningActor = EditedComponent->GetOwner();
     if (OwningActor == nullptr) {return nullptr;}
 
-    return Cast<APhotoSubjectSpawnRegion>(OwningActor);
+    return Cast<ISpawnRegionInterface>(OwningActor);
 }

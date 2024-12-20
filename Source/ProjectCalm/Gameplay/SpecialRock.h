@@ -26,13 +26,18 @@ class PROJECTCALM_API ASpecialRock : public AInteractableActor
 {
 	GENERATED_BODY()
 
+	UPROPERTY(EditAnywhere)
+	FVector HomeLocation;
+    
+    UPROPERTY(EditAnywhere)
+    FRotator HomeRotation;
+
+	FVector TargetLocation;
+    FRotator TargetRotation;
+
 public:
 	ASpecialRock();
 	ASpecialRock(const FObjectInitializer& ObjectInitializer) : ASpecialRock(){};
-
-private:
-	UPROPERTY(EditAnywhere, Category = SpecialRock)
-	TArray<FDestination> TeleportLocations;
 
 protected:
 	virtual void BeginPlay() override;
@@ -42,5 +47,14 @@ public:
     virtual void Interact(APlayerCharacter* InteractingPlayer);
 	/*END INTERACTABLE INTERFACE*/
 
+private:
+	void UpdateRock();
+	bool IsAtLocation(FVector TestLocation) const;
+
+public:
+	virtual FString GetInteractionLabel() const override;
+
+	UFUNCTION()
+	void OnQuestUpdated(FQuestDetails QuestDetails);
 	
 };

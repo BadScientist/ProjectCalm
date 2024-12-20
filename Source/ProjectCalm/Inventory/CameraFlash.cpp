@@ -47,6 +47,7 @@ float ACameraFlash::PlayCameraFlash()
 
     SpotLight->SetVisibility(true);
     GetWorldTimerManager().SetTimer(FlashTimerHandle, this, &ACameraFlash::DeactivateFlash, FlashDuration);
+    PlayPrimaryActionSound();
 
     return FlashDuration;
 }

@@ -1,3 +1,6 @@
+Attributions for assets used in:
+Project Calm by Joseph Tong a.k.a. "BadScientist"
+
 Menu Background Image by Freepik: https://www.freepik.com/free-vector/flat-geometric-background_13900621.htm#page=2&query=ui%20background&position=45&from_view=search&track=ais&uuid=06d2eba9-4666-4b57-9c93-8ab31fc5ec7b"
 Footsteps_Water_Light_003_9624.wav by duckduckpony -- https://freesound.org/s/204018/ -- License: Attribution 4.0
 Footsteps_Water_Light_005.wav by duckduckpony -- https://freesound.org/s/204032/ -- License: Attribution 4.0
@@ -13,3 +16,15 @@ Rustling Grass 3 Sound Effect from Pixabay [https://pixabay.com/?utm_source=link
 Rustling Grass 4 Sound Effect from Pixabay [https://pixabay.com/sound-effects/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=101281]
 Camera Flash Sound Effect by Štefan Baša [https://pixabay.com/users/malarbrush-43159066/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=204151] from Pixabay [https://pixabay.com//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=204151]
 Camera Sound Effect by irinairinafomicheva [https://pixabay.com/users/irinairinafomicheva-25140203/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=13695] from Pixabay [https://pixabay.com/sound-effects//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=13695]
+tick __ by waveplaySFX -- https://freesound.org/s/201766/ -- License: Creative Commons 0
+Canon DOS D30 (no focus).wav by FreqMan -- https://freesound.org/s/42899/ -- License: Attribution 4.0
+a_click_01.wav by joedeshon -- https://freesound.org/s/266017/ -- License: Attribution 4.0
+Forest ambience by MrAuralization -- https://freesound.org/s/424289/ -- License: Attribution NonCommercial 4.0
+Cabinet_sliding_Drawers_Close_wooden_kitchen_01 by MattRuthSound -- https://freesound.org/s/550354/ -- License: Attribution 4.0
+Sound Effect by u_7bikmggkv2 from Pixabay [https://pixabay.com/sound-effects/screaming-sound-of-a-monkey-154721/]
+Glass Knock 9 Sound Effect by floraphonic from Pixabay [https://pixabay.com/sound-effects/glass-knock-9-189104/]
+
+From Unreal Engine Store:
+Stylized Character Kit: Casual 01 by Epic Games
+Animal Variety Pack by PROTOFACTOR INC
+Procedural Nature Pack by PurePolygons

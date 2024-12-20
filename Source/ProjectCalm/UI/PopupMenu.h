@@ -27,6 +27,9 @@ private:
 	UPROPERTY(meta = (BindWidget))
 	UButton* CloseButton;
 
+	UFUNCTION()
+	void OnCloseButtonClicked();
+
 public:
 	virtual void Setup(bool bIsInteractiveIn = true) override;
     virtual void Teardown() override;

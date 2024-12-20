@@ -9,6 +9,12 @@
 #include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/ArrowComponent.h"
+#include "Sound/SoundCue.h"
+#include "Kismet/GameplayStatics.h"
+
+#ifdef PC_DEBUG_LOGS
+	// #define LOCAL_DEBUG_LOGS
+#endif
 
 
 // Sets default values
@@ -48,6 +54,8 @@ APhotoShack::APhotoShack()
         PlanksMesh->SetupAttachment(ShackMesh);
         SetupMeshCollisionAndPhysics(PlanksMesh);
     }
+
+    ProprietorPath.Add(FWidgetVector::Zero());
 }
 
 // Called when the game starts or when spawned
@@ -55,21 +63,17 @@ void APhotoShack::BeginPlay()
 {
 	Super::BeginPlay();
 
-    if (Proprietor != nullptr)
+    for (FWidgetVector Offset : ProprietorPath)
     {
-        ProprietorInactiveLocation = Proprietor->GetActorLocation();
-        ProprietorActiveLocation = GetActorLocation() + ProprietorActiveOffset.Vector.RotateAngleAxis(GetActorRotation().Yaw, FVector::UpVector);
+        ProprietorPathLocations.Add(GetActorLocation() + Offset.Vector.RotateAngleAxis(GetActorRotation().Yaw, FVector::UpVector));
     }
 
-	if (InteractionMesh != nullptr) {WindowClosedPosition = InteractionMesh->GetRelativeLocation();}
-    WindowOpenPosition = FVector(WindowClosedPosition.X, WindowClosedPosition.Y, WindowClosedPosition.Z + 55);
+    if (InteractionMesh != nullptr) {WindowDefaultPosition = InteractionMesh->GetRelativeLocation();}
 }
 
 void APhotoShack::Interact(APlayerCharacter* InteractingPlayer)
 {
     Super::Interact(InteractingPlayer);
-
-	// @todo: Play knocking animation & sfx
 
     SetState(EShackState::PROPRIETOR_MOVING_IN);
 }
@@ -117,36 +121,57 @@ void APhotoShack::SetState(EShackState NewState)
             break;
         case EShackState::PROPRIETOR_MOVING_IN:
             SetCollisionEnabled(false);
+            ProprietorPathIdx = 1;
+
+#ifdef LOCAL_DEBUG_LOGS
+            {FString LocationsString;
+            for (int32 i = 0; i < ProprietorPathLocations.Num(); i++) 
+            {
+                LocationsString.Append(ProprietorPathLocations[i].ToCompactString() + (i == ProprietorPathIdx ? "* " : " "));
+            }
+            UE_LOG(LogInteractable, Display, TEXT("PhotoShack:: ProprietorPath: %s"), *LocationsString);}
+#endif
+
+            break;
+        case EShackState::PROPRIETOR_MOVING_OUT:
+            ProprietorPathIdx = ProprietorPathLocations.Num() - 2;
+
+#ifdef LOCAL_DEBUG_LOGS
+            {FString LocationsString;
+            for (int32 i = 0; i < ProprietorPathLocations.Num(); i++) 
+            {
+                LocationsString.Append(ProprietorPathLocations[i].ToCompactString() + (i == ProprietorPathIdx ? "* " : " "));
+            }
+            UE_LOG(LogInteractable, Display, TEXT("PhotoShack:: ProprietorPath: %s"), *LocationsString);}
+#endif
+
             break;
         case EShackState::SHOP_OPEN:
             if (Proprietor != nullptr){Proprietor->SetCollisionEnabled(true);}
             break;
         case EShackState::WINDOW_CLOSING:
             if (Proprietor != nullptr){Proprietor->SetCollisionEnabled(false);}
+            PlayWindowMoveSound();
+            break;
+        case EShackState::WINDOW_OPENING:
+            PlayWindowMoveSound();
             break;
         
         default:
             break;
         }
     }
-
-    // FString StateString = ShackState == EShackState::SHOP_OPEN ? FString("Shop Open") : \
-    //     ShackState == EShackState::PROPRIETOR_MOVING_IN ? FString("Proprietor Moving In") : \
-    //     ShackState == EShackState::WINDOW_OPENING ? FString("Window Opening") : \
-    //     ShackState == EShackState::SHOP_CLOSED ? FString("Shop Closed") : \
-    //     ShackState == EShackState::WINDOW_CLOSING ? FString("Window Closing") : FString("Proprietor Moving Out");
-
-    // UE_LOG(LogTemp, Warning, TEXT("PhotoShack:: State: %s"), *StateString);
 }
 
 void APhotoShack::MoveProprietor(float DeltaTime)
 {
     CHECK_NULLPTR_RET(Proprietor, LogInteractable, "PhotoShack:: No Proprietor found!");
+    if (ProprietorPathLocations.Num() < 2) {return;}
 
     FVector CurrentPosition = Proprietor->GetActorLocation();
 
-    FVector StartLocation = ShackState == EShackState::PROPRIETOR_MOVING_IN ? ProprietorInactiveLocation : ProprietorActiveLocation;
-    FVector Destination = ShackState == EShackState::PROPRIETOR_MOVING_IN ? ProprietorActiveLocation : ProprietorInactiveLocation;
+    FVector StartLocation = ShackState == EShackState::PROPRIETOR_MOVING_IN ? ProprietorPathLocations[ProprietorPathIdx - 1] : ProprietorPathLocations[ProprietorPathIdx + 1];
+    FVector Destination = ProprietorPathLocations[ProprietorPathIdx];
 
     FVector Direction = (Destination - CurrentPosition).GetSafeNormal();
     FVector NewPosition = CurrentPosition + (Direction * ProprietorMoveSpeed * DeltaTime);
@@ -155,8 +180,16 @@ void APhotoShack::MoveProprietor(float DeltaTime)
     {
         Proprietor->SetActorLocation(Destination);
 
-        if (ShackState == EShackState::PROPRIETOR_MOVING_IN) {SetState(EShackState::WINDOW_OPENING);}
-        else {SetState(EShackState::WINDOW_CLOSING);}
+        if (ShackState == EShackState::PROPRIETOR_MOVING_IN)
+        {
+            if (ProprietorPathIdx == ProprietorPathLocations.Num() - 1) {SetState(EShackState::WINDOW_OPENING);}
+            else {ProprietorPathIdx++;}
+        }
+        else
+        {
+            if (ProprietorPathIdx == 0) {SetState(EShackState::WINDOW_CLOSING);}
+            else {ProprietorPathIdx--;}
+        }
     }
     else {Proprietor->SetActorLocation(NewPosition);}
 }
@@ -165,19 +198,27 @@ void APhotoShack::MoveWindow(float DeltaTime)
 {
     CHECK_NULLPTR_RET(InteractionMesh, LogInteractable, "PhotoShack:: WindowMesh not found!");
 
-    float MoveDistance = WindowMoveSpeed * DeltaTime;
-    FVector NewPosition = InteractionMesh->GetRelativeLocation();
+    WindowProgress += (DeltaTime / WindowSlideTime) * (ShackState == EShackState::WINDOW_OPENING ? 1 : ShackState == EShackState::WINDOW_CLOSING ? -1 : 0);
+    WindowProgress = FMath::Clamp(WindowProgress, 0, 1);
 
-    if (ShackState == EShackState::WINDOW_OPENING) {NewPosition.Z = FMath::Min(NewPosition.Z + MoveDistance, WindowOpenPosition.Z);}
-    else {NewPosition.Z = FMath::Max(NewPosition.Z - MoveDistance, WindowClosedPosition.Z);}
-    InteractionMesh->SetRelativeLocation(NewPosition);
+#ifdef LOCAL_DEBUG_LOGS
+    UE_LOG(LogTemp, Display, TEXT("ShackState: %u, WindowProgress: %f"), (uint8)ShackState, WindowProgress);
+#endif
 
-    if (ShackState == EShackState::WINDOW_OPENING && FMath::IsNearlyZero(WindowOpenPosition.Z - NewPosition.Z))
+    float VerticalOffset = WindowOpenZOffset * (WindowProgress < 0.5 ? (4 * FMath::Pow(WindowProgress, 3)) : (1 - FMath::Pow(-2 * WindowProgress + 2, 3) / 2));
+    InteractionMesh->SetRelativeLocation(FVector(WindowDefaultPosition.X, WindowDefaultPosition.Y, WindowDefaultPosition.Z + VerticalOffset));
+
+    if (ShackState == EShackState::WINDOW_OPENING && FMath::IsNearlyEqual(WindowProgress, 1))
     {
         SetState(EShackState::SHOP_OPEN);
     }
-    else if (ShackState == EShackState::WINDOW_CLOSING && FMath::IsNearlyZero(WindowClosedPosition.Z - NewPosition.Z))
+    else if (ShackState == EShackState::WINDOW_CLOSING && FMath::IsNearlyZero(WindowProgress))
     {
         SetState(EShackState::SHOP_CLOSED);
     }
+}
+
+void APhotoShack::PlayWindowMoveSound()
+{
+    if (WindowMoveSound != nullptr) {UGameplayStatics::PlaySoundAtLocation(this, WindowMoveSound, GetActorLocation());}
 }

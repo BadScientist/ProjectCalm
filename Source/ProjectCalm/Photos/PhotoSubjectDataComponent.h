@@ -13,6 +13,20 @@ struct FPhotoSubjectData;
 struct FConvexVolume;
 
 
+struct FCameraOrientation
+{
+	FCameraOrientation(){};
+	FCameraOrientation(FVector InLocation, FVector InForward)
+	{
+		Location = InLocation;
+		Forward = InForward;
+	};
+
+	FVector Location;
+	FVector Forward;
+};
+
+
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PROJECTCALM_API UPhotoSubjectDataComponent : public USceneComponent
 {
@@ -31,8 +45,10 @@ private:
 	TEnumAsByte<ESubjectName> SubjectName;
 	UPROPERTY(EditAnywhere)
 	TArray<FPhotoSubjectPointOfInterest> PointsOfInterest;
+	UPROPERTY(EditAnywhere)
+	float IdealPhotoDistance{1000.0f};
 
 public:
 	ESubjectName GetSubjectName() {return SubjectName;}
-	bool GeneratePhotoSubjectData(FConvexVolume ViewFrustum, FVector CameraLocation, FPhotoSubjectData &OutSubjectData);
+	bool GeneratePhotoSubjectData(FConvexVolume ViewFrustum, FCameraOrientation CameraOrientation, FPhotoSubjectData &OutSubjectData);
 };

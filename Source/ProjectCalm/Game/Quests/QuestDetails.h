@@ -10,6 +10,7 @@ class AInteractableActor;
 class UItemData;
 
 
+// @todo: implement manual quest tracking
 UENUM()
 enum EObjectiveType
 {
@@ -52,10 +53,14 @@ struct FObjectiveDetails
     bool bIsOptional{false};
 
     bool bIsComplete{false};
-
-    // TRAVEL OBJECTIVE    
+    
     UPROPERTY(EditAnywhere)
-    FVector Destination{FVector()};
+    FVector TargetLocation{FVector::ZeroVector};
+    
+    UPROPERTY(EditAnywhere)
+    FRotator TargetRotation{FRotator::ZeroRotator};
+
+    // TRAVEL OBJECTIVE
     UPROPERTY(EditAnywhere)
     float Tolerance{300.0f};
     //END TRAVEL OBJECTIVE
@@ -66,12 +71,6 @@ struct FObjectiveDetails
 
     UPROPERTY(EditAnywhere)
     bool bSpawnNewInteractable{false};
-    
-    UPROPERTY(EditAnywhere)
-    FVector TargetLocation;
-    
-    UPROPERTY(EditAnywhere)
-    FRotator TargetRotation;
     //END INTERACT OBJECTIVE
 
     // PHOTO OBJECTIVE
@@ -139,7 +138,7 @@ struct PROJECTCALM_API FQuestDetails : public FTableRowBase
     UPROPERTY(EditDefaultsOnly)
     int32 ActiveStageIdx{-1};
 
-    bool IsComplete() {return ActiveStageIdx == Stages.Num();}
+    bool IsComplete() {return ActiveStageIdx >= Stages.Num();}
     bool IsActive() {return ActiveStageIdx >= 0 && !IsComplete();}
 
 };

@@ -12,9 +12,11 @@ bool UMainGameMenu::Initialize()
 
     CHECK_NULLPTR_RETVAL(StartButton, LogUserWidget, "MainGameMenu:: No StartButton in Widget Blueprint!", false);
     StartButton->OnClicked.AddDynamic(this, &UMainGameMenu::StartGame);
+    StartButton->OnHovered.AddDynamic(this, &UMenu::PlayButtonHoverSound);
 
     CHECK_NULLPTR_RETVAL(ExitButton, LogUserWidget, "MainGameMenu:: No ExitButton in Widget Blueprint!", false);
     ExitButton->OnClicked.AddDynamic(this, &UMainGameMenu::ExitGame);
+    ExitButton->OnHovered.AddDynamic(this, &UMenu::PlayButtonHoverSound);
 
     return true;
 }
@@ -22,15 +24,16 @@ bool UMainGameMenu::Initialize()
 void UMainGameMenu::StartGame()
 {
     CHECK_NULLPTR_RET(MenuInterface, LogUserWidget, "MainGameMenu:: No MenuInterface!");
-
+    PlayStartButtonPressedSound();
     MenuInterface->StartGame();
 }
 
 void UMainGameMenu::ExitGame()
 {
-    CHECK_NULLPTR_RET(MenuInterface, LogUserWidget, "MainGameMenu:: No MenuInterface!");
-
+    PlayButtonPressedSound();
     bIsInteractive = false;
+
+    CHECK_NULLPTR_RET(MenuInterface, LogUserWidget, "MainGameMenu:: No MenuInterface!");
     MenuInterface->QuitToDesktop();
 }
 
@@ -56,4 +59,10 @@ void UMainGameMenu::Teardown()
     Super::Teardown();
     
     if (bIsInteractive) {SetGameOnlyControls();}
+}
+
+void UMainGameMenu::PlayStartButtonPressedSound()
+{
+    CHECK_NULLPTR_RET(MenuInterface, LogUserWidget, "Menu:: MenuInterface is NULL!");
+    MenuInterface->PlayUISound("UIStartButtonPressed", this, true);
 }

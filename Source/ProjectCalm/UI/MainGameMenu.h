@@ -31,5 +31,9 @@ private:
 public:
 	virtual void Setup(bool bIsInteractiveIn) override;
 	virtual void Teardown() override;
+
+private:
+	UFUNCTION(BlueprintCallable)
+	void PlayStartButtonPressedSound();
 	
 };

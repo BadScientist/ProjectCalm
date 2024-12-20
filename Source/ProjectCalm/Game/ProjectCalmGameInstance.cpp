@@ -2,12 +2,15 @@
 
 
 #include "ProjectCalmGameInstance.h"
+#include "SoundManager.h"
+#include "ProjectCalm/UI/MainGameMenu.h"
 #include "ProjectCalm/UI/PauseMenu.h"
 #include "ProjectCalm/UI/InventoryMenu.h"
 #include "ProjectCalm/UI/QuestLog.h"
 #include "ProjectCalm/UI/PhotoLog.h"
 #include "ProjectCalm/UI/DialogueBox.h"
 #include "ProjectCalm/UI/Dialogue.h"
+#include "ProjectCalm/UI/DeathScreen.h"
 #include "ProjectCalm/Utilities/LogMacros.h"
 #include "ProjectCalm/Photos/PhotoData.h"
 
@@ -21,6 +24,7 @@
 
 UProjectCalmGameInstance::UProjectCalmGameInstance(const FObjectInitializer &ObjectInitializer)
 {
+    SoundManager = CreateDefaultSubobject<USoundManager>(TEXT("SoundManager"));
 }
 
 void UProjectCalmGameInstance::Init()
@@ -31,22 +35,25 @@ void UProjectCalmGameInstance::Init()
 
 void UProjectCalmGameInstance::StartGame()
 {
-    APlayerController* PlayerController = GetFirstLocalPlayerController();
-    CHECK_NULLPTR_RET(PlayerController, LogPlayerController, "ProjectCalmGameInstance:: PlayerController is NULL!");
-
-    GameplayMap.LoadSynchronous();
-    CHECK_SOFTPTR_RET(GameplayMap, LogLoad, "ProjectCalmGameInstance:: GameplayMap is NULL!");
-    UGameplayStatics::OpenLevelBySoftObjectPtr(PlayerController, GameplayMap);
+    LoadLoadingScreen();
+    PendingMap = GameplayMap;
 }
 
 void UProjectCalmGameInstance::QuitToMainMenu()
 {
+    LoadLoadingScreen();
+    PendingMap = MainMenuMap;
+}
+
+void UProjectCalmGameInstance::LoadPendingMap()
+{
     APlayerController* PlayerController = GetFirstLocalPlayerController();
     CHECK_NULLPTR_RET(PlayerController, LogPlayerController, "ProjectCalmGameInstance:: PlayerController is NULL!");
-
-    MainMenuMap.LoadSynchronous();
-    CHECK_SOFTPTR_RET(MainMenuMap, LogLoad, "ProjectCalmGameInstance:: MainMenuMap is NULL!");
-    UGameplayStatics::OpenLevelBySoftObjectPtr(PlayerController, MainMenuMap);
+    
+    PendingMap.LoadSynchronous();
+    CHECK_SOFTPTR_RET(GameplayMap, LogLoad, "ProjectCalmGameInstance:: GameplayMap is NULL!");
+    UGameplayStatics::OpenLevelBySoftObjectPtr(PlayerController, PendingMap);
+    PendingMap.Reset();
 }
 
 void UProjectCalmGameInstance::QuitToDesktop()
@@ -106,6 +113,33 @@ void UProjectCalmGameInstance::LoadDialogueBox(FDialogue Dialogue)
     SetupMenuWidget(DialogueBox, true);
 
     DialogueBox->SetDialogue(Dialogue);
+}
+
+void UProjectCalmGameInstance::LoadDeathScreen(FString DamageMessage)
+{
+    CHECK_NULLPTR_RET(DeathScreenClass, LogLoad, "ProjectCalmGameInstance:: DeathScreen class is NULL!");
+    UDeathScreen* Menu = CreateWidget<UDeathScreen>(this, DeathScreenClass);
+    SetupMenuWidget(Menu, true);
+
+    Menu->SetCauseOfDeathText(DamageMessage);
+}
+
+void UProjectCalmGameInstance::PlayUISound(FName SoundName, UObject* WorldContextObject, bool bPersistOnLevelLoad)
+{
+    CHECK_NULLPTR_RET(SoundManager, LogAudio, "ProjectCalmGameInstance:: No SoundManager!");
+    SoundManager->PlayUISound(SoundName, WorldContextObject, bPersistOnLevelLoad);
+}
+
+void UProjectCalmGameInstance::PlayMusicOrAmbientSound(FName SoundName, UObject* WorldContextObject, bool bIsMusic, bool bPersistOnLevelLoad)
+{
+    CHECK_NULLPTR_RET(SoundManager, LogAudio, "ProjectCalmGameInstance:: No SoundManager!");
+    SoundManager->PlayMusicOrAmbientSound(SoundName, WorldContextObject, bIsMusic, bPersistOnLevelLoad);
+}
+
+void UProjectCalmGameInstance::PlayDiageticSound(FName SoundName, UObject *WorldContextObject, FVector SourceLocation, float VolumeMultiplier)
+{
+    CHECK_NULLPTR_RET(SoundManager, LogAudio, "ProjectCalmGameInstance:: No SoundManager!");
+    SoundManager->PlayDiageticSound(SoundName, WorldContextObject, SourceLocation, VolumeMultiplier);
 }
 
 void UProjectCalmGameInstance::SetupMenuWidget(UMenu* Menu, bool bIsInteractable)

@@ -21,4 +21,13 @@ struct FPhotoData
     
     UPROPERTY(VisibleAnywhere)
     TArray<FPhotoSubjectData> Subjects;
+
+    UPROPERTY(VisibleAnywhere)
+    FVector CameraLocation;
+
+    UPROPERTY(VisibleAnywhere)
+    FVector CameraForwardVector;
+    
+    UPROPERTY(VisibleAnywhere)
+    float Score;
 };

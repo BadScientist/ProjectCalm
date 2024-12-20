@@ -23,6 +23,7 @@ class UInputAction;
 class UInputMappingContext;
 class IEquipmentInterface;
 class USpawnerComponent;
+class UHealthComponent;
 class UInventoryComponent;
 class UItemData;
 enum EEquipReply;
@@ -34,6 +35,8 @@ class PROJECTCALM_API APlayerCharacter : public ACharacter, public IEquipperInte
 	GENERATED_BODY()
 
 private:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	USceneComponent* ViewPivotComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* FirstPersonCamera;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
@@ -52,15 +55,21 @@ private:
 	UPCPerceptionStimulusComponent* StimulusSourceComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Gameplay, meta = (AllowPrivateAccess = "true"))
 	UInteractionComponent* InteractionComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Gameplay, meta = (AllowPrivateAccess = "true"))
+	UHealthComponent* HealthComponent;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputMappingContext* DefaultMappingContext;	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* LookAction;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputAction* MoveAction;	
+	UInputAction* MoveAction;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* JumpAction;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* CrouchAction;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* SprintAction;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* PauseAction;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
@@ -82,9 +91,16 @@ private:
 	bool bIsMenuOpen{false};
 	bool bIsMovementRestricted{false};
 
+	FVector RespawnPoint{FVector::ZeroVector};
+
+	FVector ViewAdjustmentLocation{FVector::ZeroVector};
+	bool bIsCrouching{false};
+
 public:
 	// Default constructor
-	APlayerCharacter();
+	APlayerCharacter(const FObjectInitializer& ObjectInitializer);
+
+	virtual void Tick( float DeltaSeconds );
 
 protected:
 	IEquipmentInterface* EquippedItem;
@@ -93,6 +109,10 @@ protected:
 
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
+	void StartCrouching();
+	void StopCrouching();
+	void StartSprinting();
+	void StopSprinting();
 	void Pause(const FInputActionValue& Value);
 	void OpenInventory(const FInputActionValue& Value);
 	void OpenQuestLog(const FInputActionValue& Value);
@@ -104,9 +124,23 @@ protected:
 	virtual void RemoveEquipment(IEquipmentInterface* Equipment) override {EquippedItem = nullptr;};
 	// END IEQUIPPERINTERFACE
 
+	UFUNCTION()
+	virtual void HandleDeath(FString DamageMessage);
+
+	UFUNCTION()
+	virtual void Respawn();
+
+private:
+	void DisplayDeathScreen(FString DamageMessage);
+	void AdjustViewToHalfHeight(float DeltaTime);
+
 public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	virtual void OnStartCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust) override;
+	virtual void OnEndCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust) override;
+
+	void SetRespawnPoint(FVector InVector) {RespawnPoint = InVector;};
 
 	UCameraComponent* GetCameraComponent() {return FirstPersonCamera;};
 

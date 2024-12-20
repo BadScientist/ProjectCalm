@@ -19,11 +19,9 @@ class PROJECTCALM_API UBTDecorator_RandomLoop : public UBTDecorator_Loop
 {
 	GENERATED_BODY()
 
-	/** number of executions */
 	UPROPERTY(Category=Decorator, EditAnywhere, meta=(EditCondition="!bInfiniteLoop", ClampMin="0"))
 	int32 NumLoopsDeviation;
 
-	/** timeout (when looping infinitely, when we finish a loop we will check whether we have spent this time looping, if we have we will stop looping). A negative value means loop forever. */
 	UPROPERTY(Category = Decorator, EditAnywhere, meta = (EditCondition = "bInfiniteLoop", ClampMin="0.0"))
 	float TimeoutTimeDeviation;
 

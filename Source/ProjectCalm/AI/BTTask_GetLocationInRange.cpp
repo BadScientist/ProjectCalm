@@ -2,14 +2,14 @@
 
 
 #include "BTTask_GetLocationInRange.h"
+#include "ProjectCalm/Utilities/LogMacros.h"
 
 #include "PhotoSubjectAIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "BehaviorTree/Blackboard/BlackboardKeyType_Vector.h"
 
-#if WITH_EDITORONLY_DATA
-    // #define DEBUG_DRAW_SHAPES
-    // #define DEBUG_LOGS
+#ifdef PC_DEBUG_DRAW_SHAPES
+	// #define LOCAL_DEBUG_DRAW_SHAPES
 #endif
 
 
@@ -98,14 +98,14 @@ EBTNodeResult::Type UBTTask_GetLocationInRange::ExecuteTask(UBehaviorTreeCompone
     }
     else {Destination3D = TranslateToRandomElevation(Destination2D);}
 
-#ifdef DEBUG_DRAW_SHAPES
+#ifdef LOCAL_DEBUG_DRAW_SHAPES
     DrawDebugPoint(GetWorld(), HomeLocation, 50, FColor::Red, true);
     DrawDebugCircle(GetWorld(), PawnLocation, MaxDistanceFromPawn, 128, FColor::Purple, false, 4, ESceneDepthPriorityGroup::SDPG_World, 50.0, FVector::ForwardVector, FVector::RightVector, false);
     DrawDebugCircle(GetWorld(), HomeLocation, MaxDistanceFromHome, 128, FColor::Red, false, 4, ESceneDepthPriorityGroup::SDPG_World, 50.0, FVector::ForwardVector, FVector::RightVector, false);
     DrawDebugPoint(GetWorld(), Destination2D, 50, FColor::Blue, false, 4);
     DrawDebugPoint(GetWorld(), Destination3D, 50, FColor::Green, true);
 #endif
-#ifdef DEBUG_LOGS
+#ifdef PC_DEBUG_LOGS
     UE_LOG(LogTemp, Warning, TEXT("BTTask::GetLocationInRange::Destination Found: %s"), *Destination3D.ToCompactString());
 #endif
 
@@ -125,12 +125,12 @@ FVector UBTTask_GetLocationInRange::FindRandomLocationInRange(FVector HomeLocati
     float TravelDistance = FMath::RandRange(0.0f, FMath::Min(MaxTravelDistance, MaxDistanceFromPawn));
     FVector TravelVector = NewDirection * TravelDistance;
 
-#ifdef DEBUG_DRAW_SHAPES
+#ifdef LOCAL_DEBUG_DRAW_SHAPES
     DrawDebugLine(GetWorld(), CurrentLocation, CurrentLocation + NewDirection * MaxTravelDistance, FColor::Red, false, 4, ESceneDepthPriorityGroup::SDPG_World, 50.0);
     DrawDebugLine(GetWorld(), CurrentLocation, CurrentLocation + NewDirection * MaxDistanceFromPawn, FColor::Purple, false, 4, ESceneDepthPriorityGroup::SDPG_World, 75.0);
     DrawDebugLine(GetWorld(), CurrentLocation, CurrentLocation + TravelVector, FColor::Blue, false, 4, ESceneDepthPriorityGroup::SDPG_World, 100.0);
 #endif
-#ifdef DEBUG_LOGS
+#ifdef PC_DEBUG_LOGS
     UE_LOG(LogTemp, Warning, TEXT("BTTask::GetLocationInRange::MaxDistance: %f, ActualDistance: %f, Direction: %s"), MaxTravelDistance, TravelDistance, *Direction.ToCompactString());
 #endif
 

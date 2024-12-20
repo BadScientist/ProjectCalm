@@ -23,6 +23,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPhotoDeletedDelegate);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnInteract, AInteractableActor*, Interactable);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnQuestUpdatedDelegate, FQuestDetails, QuestDetails);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSpecialRockMoved, FVector, Location);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerRespawnDelegate);
 
 
 UCLASS(minimalapi)
@@ -52,6 +53,7 @@ public:
 	FOnInteract OnInteract;
 	FOnQuestUpdatedDelegate OnQuestUpdated;
 	FOnSpecialRockMoved OnSpecialRockMoved;
+	FOnPlayerRespawnDelegate OnPlayerRespawn;
 
 	int32 GenerateInstanceID();
 	UItemData* GetItemDataFromID(int32 ItemID);

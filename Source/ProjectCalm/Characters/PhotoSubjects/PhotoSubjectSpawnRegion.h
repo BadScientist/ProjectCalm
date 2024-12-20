@@ -5,6 +5,11 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 
+#if WITH_EDITORONLY_DATA
+#include "ProjectCalm/EditorOnly/SpawnRegionVisualizerComponent.h"
+#endif
+
+#include "ProjectCalm/Game/World/SpawnRegionInterface.h"
 #include "PhotoSubjectSpawnRegion.generated.h"
 
 
@@ -28,7 +33,7 @@ struct FPhotoSubjectSpawnData
 
 
 UCLASS()
-class PROJECTCALM_API APhotoSubjectSpawnRegion : public AActor
+class PROJECTCALM_API APhotoSubjectSpawnRegion : public AActor, public ISpawnRegionInterface
 {
 	GENERATED_BODY()
 
@@ -53,8 +58,15 @@ private:
     int32 PickSubject();
 
 public:
-    FVector GetSize() {return Size;};
-    void SetSize(FVector InSize) {Size = InSize;};
+    // START ISPAWNREGIONINTERFACE IMPLEMENTATION
+    FVector GetSize() const override {return Size;};
+    FVector GetRegionLocation() const override {return GetActorLocation();};
+    FRotator GetRegionRotation() const override {return GetActorRotation();};
+	virtual void SetSize(FVector InSize) override {Size = InSize;};
+	virtual void SetRegionLocation(FVector InLocation) override {SetActorLocation(InLocation);};
+	virtual void SetRegionRotation(FRotator InRotation) override {SetActorRotation(InRotation);};
+    // END ISPAWNREGIONINTERFACE IMPLEMENTATION
+
     TArray<FPhotoSubjectSpawnData> GetSpawnableSubjects() {return SpawnableSubjects;}
     TArray<AActor*> GetSpawnedSubjects() {return SpawnedSubjects;}
 
@@ -65,17 +77,18 @@ public:
 
 #if WITH_EDITORONLY_DATA
 // EDITOR-ONLY VISUALIZATION
+DEFINE_VISUALIZER
 
-private:
-    class USpawnRegionVisualizerComponent* SpawnRegionVisComp;
-    void UpdateVisualizerComponentProperties();
+// private:
+//     class USpawnRegionVisualizerComponent* SpawnRegionVisComp;
+//     void UpdateVisualizerComponentProperties();
 
-public:
-    virtual void EditorApplyTranslation(const FVector & DeltaTranslation, bool bAltDown, bool bShiftDown, bool bCtrlDown) override;
-    virtual void EditorApplyRotation(const FRotator& DeltaRotation, bool bAltDown, bool bShiftDown, bool bCtrlDown) override;
-    virtual void EditorApplyScale(const FVector& DeltaScale, const FVector* PivotLocation, bool bAltDown, bool bShiftDown, bool bCtrlDown) override;
-    virtual void PostEditChangeChainProperty(FPropertyChangedChainEvent &EditEvent) override;
-    virtual void PostEditUndo() override;
+// public:
+//     virtual void EditorApplyTranslation(const FVector & DeltaTranslation, bool bAltDown, bool bShiftDown, bool bCtrlDown) override;
+//     virtual void EditorApplyRotation(const FRotator& DeltaRotation, bool bAltDown, bool bShiftDown, bool bCtrlDown) override;
+//     virtual void EditorApplyScale(const FVector& DeltaScale, const FVector* PivotLocation, bool bAltDown, bool bShiftDown, bool bCtrlDown) override;
+//     virtual void PostEditChangeChainProperty(FPropertyChangedChainEvent &EditEvent) override;
+//     virtual void PostEditUndo() override;
 #endif
 
 };

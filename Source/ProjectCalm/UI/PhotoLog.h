@@ -10,6 +10,8 @@
 class UImage;
 class UBorder;
 class UButton;
+class UHorizontalBox;
+class UTextBlock;
 struct FPhotoData;
 
 
@@ -31,6 +33,12 @@ class PROJECTCALM_API UPhotoLog : public UPopupMenu
     UButton* RightButton;
 	UPROPERTY(meta = (BindWidget))
     UButton* DeleteButton;
+	UPROPERTY(meta = (BindWidget))
+    UHorizontalBox* PhotoDetails;
+	UPROPERTY(meta = (BindWidget))
+    UTextBlock* ScoreText;
+	UPROPERTY(meta = (BindWidget))
+    UTextBlock* SubjectsText;
 
 	uint32 CameraID{0};
     TArray<FPhotoData> Photos;

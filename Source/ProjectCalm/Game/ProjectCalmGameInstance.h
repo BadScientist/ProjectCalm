@@ -9,12 +9,15 @@
 #include "ProjectCalmGameInstance.generated.h"
 
 class UMenu;
+class UMainGameMenu;
 class UPopupMenu;
 class UPauseMenu;
 class UInventoryMenu;
 class UQuestLog;
 class UPhotoLog;
 class UDialogueBox;
+class UDeathScreen;
+class USoundManager;
 struct FDialogue;
 
 
@@ -40,12 +43,18 @@ class PROJECTCALM_API UProjectCalmGameInstance : public UGameInstance, public IM
     UPROPERTY(EditDefaultsOnly, Category = WidgetClasses)
 	TSubclassOf<UPhotoLog> PhotoLogClass;
     UPROPERTY(EditDefaultsOnly, Category = WidgetClasses)
-	TSubclassOf<UMenu> MainMenuClass;
+	TSubclassOf<UMainGameMenu> MainMenuClass;
     UPROPERTY(EditDefaultsOnly, Category = WidgetClasses)
 	TSubclassOf<UMenu> LoadingScreenClass;
     UPROPERTY(EditDefaultsOnly, Category = WidgetClasses)
 	TSubclassOf<UDialogueBox> DialogueBoxClass;
+    UPROPERTY(EditDefaultsOnly, Category = WidgetClasses)
+	TSubclassOf<UDeathScreen> DeathScreenClass;
 
+    UPROPERTY(EditDefaultsOnly, Category = SoundManager)
+	USoundManager* SoundManager;
+	
+	TSoftObjectPtr<UWorld> PendingMap;
 
 public:
 	UProjectCalmGameInstance(const FObjectInitializer &ObjectInitializer);
@@ -56,24 +65,35 @@ public:
 	virtual void StartGame() override;
 	UFUNCTION(exec)
 	virtual void QuitToMainMenu() override;
+	UFUNCTION(BlueprintCallable)
+	void LoadPendingMap();
 	UFUNCTION(exec)
 	virtual void QuitToDesktop() override;
+	UFUNCTION(BlueprintCallable)
+	virtual void PlayUISound(FName SoundName, UObject* WorldContextObject, bool bPersistOnLevelLoad) override;
 	// End Menu Interface Implementation
+
+	UFUNCTION(BlueprintCallable)
+	virtual void PlayMusicOrAmbientSound(FName SoundName, UObject* WorldContextObject, bool bIsMusic, bool bPersistOnLevelLoad);
+    virtual void PlayDiageticSound(FName SoundName, UObject* WorldContextObject, FVector SourceLocation, float VolumeMultiplier = 1.0f);
 	
-	UFUNCTION(exec, BlueprintCallable)
+	UFUNCTION(BlueprintCallable)
 	void LoadMainMenu();
-	UFUNCTION(exec, BlueprintCallable)
+	UFUNCTION(BlueprintCallable)
 	void LoadLoadingScreen();
-	UFUNCTION(exec)
+	UFUNCTION()
 	void LoadPauseMenu();
-	UFUNCTION(exec)
+	UFUNCTION()
 	void LoadInventoryMenu();
-	UFUNCTION(exec)
+	UFUNCTION()
 	void LoadQuestLog();
-	UFUNCTION(exec)
+	UFUNCTION()
 	void LoadPhotoLog(uint32 CameraID);
 	UFUNCTION()
 	void LoadDialogueBox(FDialogue Dialogue);
+	UFUNCTION()
+	void LoadDeathScreen(FString DamageMessage);
+
 
 
 	// DEBUG COMMANDS

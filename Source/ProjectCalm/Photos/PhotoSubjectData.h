@@ -21,10 +21,16 @@ struct FPhotoSubjectData
     
     UPROPERTY(EditAnywhere)
     TEnumAsByte<ESubjectName> Name {ESubjectName::NO_NAME};
+    
     UPROPERTY(EditAnywhere)
     TEnumAsByte<EPhotoSubjectBehavior> Behavior {EPhotoSubjectBehavior::NONE};  // @todo: set on photo capture
+
     UPROPERTY(EditAnywhere)
     FVector Location {FVector::ZeroVector};
+
     UPROPERTY(EditAnywhere)
     TArray<FPhotoSubjectPointOfInterest> PointsOfInterest;
+
+    UPROPERTY(EditAnywhere)
+    float Score{0};
 };
