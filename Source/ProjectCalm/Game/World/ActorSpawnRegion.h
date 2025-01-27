@@ -12,6 +12,8 @@
 #include "SpawnRegionInterface.h"
 #include "ActorSpawnRegion.generated.h"
 
+class APlayerCharacter;
+
 
 USTRUCT()
 struct FSpawnInfo
@@ -34,6 +36,8 @@ struct FSpawnInfo
 
     UPROPERTY(EditAnywhere, meta=(ClampMin="0", UIMin="0"))
     int32 Count{1};
+
+    bool bHasSpawned{false};
 };
 
 
@@ -79,12 +83,29 @@ private:
     UPROPERTY(EditAnywhere)
     int32 HorizontalCells{1};
     UPROPERTY(EditAnywhere)
-    bool bDestroyAfterSpawning{true};
+    float SpawnActivationDistance{50000.0f};
+    UPROPERTY(EditAnywhere)
+    float UnrenderDistance{65000.0f};
+    UPROPERTY(EditAnywhere)
+    bool bDestroyAfterSpawning{false};
 
+    bool bReadyToSpawn{false};
+    bool bSpawningComplete{false};
+    APlayerCharacter* PlayerCharacter;
+    TArray<AActor*> SpawnedActors;
+    bool bActorsActive{true};
+
+    UFUNCTION()
+    void SetReadyToSpawn() {bReadyToSpawn = true;};
+    
     TArray<FSpawnCell> CreateSpawnCells();
+    void SpawnActors();
     bool SpawnActor(FVector Location, FSpawnInfo SpawnInfo);
+    void SetActorsActive(bool bValue);
 
 public:
+	virtual void Tick(float DeltaTime) override;
+
     // START ISPAWNREGIONINTERFACE IMPLEMENTATION
     FVector GetSize() const override {return Size;};
     FVector GetRegionLocation() const override {return GetActorLocation();};

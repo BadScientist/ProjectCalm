@@ -6,11 +6,11 @@
 #include "EquipperInterface.h"
 #include "MeshSockets.h"
 #include "ProjectCalm/Utilities/LogMacros.h"
+#include "ProjectCalm/Utilities/PCGameStatics.h"
 #include "ProjectCalm/Utilities/PCPlayerStatics.h"
 
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
-#include "Sound/SoundCue.h"
 #include "Kismet/GameplayStatics.h"
 
 
@@ -128,12 +128,22 @@ void AEquipment::ResetPlayerControls()
 
 void AEquipment::PlayPrimaryActionSound()
 {
-    if (PrimaryActionSound != nullptr) {UGameplayStatics::PlaySoundAtLocation(this, PrimaryActionSound, GetActorLocation());}
+    if (!PrimaryActionSound.IsNone())
+    {
+        UProjectCalmGameInstance* GameInstance = PCGameStatics::GetPCGameInstance(this);
+        CHECK_NULLPTR_RET(GameInstance, LogEquipment, "Equipment:: No Game Instance found!");
+        GameInstance->PlayDiageticSound(PrimaryActionSound, this, GetActorLocation());
+    }
 }
 
 void AEquipment::PlaySecondaryActionSound()
 {
-    if (SecondaryActionSound != nullptr) {UGameplayStatics::PlaySoundAtLocation(this, SecondaryActionSound, GetActorLocation());}
+    if (!SecondaryActionSound.IsNone())
+    {
+        UProjectCalmGameInstance* GameInstance = PCGameStatics::GetPCGameInstance(this);
+        CHECK_NULLPTR_RET(GameInstance, LogEquipment, "Equipment:: No Game Instance found!");
+        GameInstance->PlayDiageticSound(SecondaryActionSound, this, GetActorLocation());
+    }
 }
 
 bool AEquipment::GetPlayerFlag(FName FlagName)

@@ -61,8 +61,6 @@ void USpawnerComponent::SpawnPhotoSubject()
 	FVector Offset = GetForwardVector().RotateAngleAxis(FMath::RandRange(MinDirectionOffset, 360 - MinDirectionOffset), GetUpVector());
 	Offset *= FMath::RandRange(SpawnLocationMinOffset, SpawnLocationMaxOffset);
 	SpawnLocation += Offset;
-	
-	// UE_LOG(LogTemp, Error, TEXT("SpawnerComponent:: Requesting spawn at %s."), *SpawnLocation.ToCompactString());
 
 	TArray<APhotoSubjectSpawnRegion*> ValidRegions;
 	for (APhotoSubjectSpawnRegion* SpawnRegion : SpawnRegions)
@@ -85,7 +83,6 @@ void USpawnerComponent::SpawnPhotoSubject()
 void USpawnerComponent::CleanupSpawns()
 {
 	if (SpawnRegions.IsEmpty()) {return;}
-	// UE_LOG(LogTemp, Error, TEXT("SpawnerComponent:: Cleaning up spawns in region %i"), TickCount % SpawnRegions.Num());
 
 	APhotoSubjectSpawnRegion* SpawnRegion = SpawnRegions[TickCount % SpawnRegions.Num()];
 	int32 DespawnedActorCount = SpawnRegion->CleanupSpawns(GetOwner());

@@ -21,6 +21,7 @@
 #include "ProjectCalm/AI/PCPerceptionStimulusComponent.h"
 
 #include "Camera/CameraComponent.h"
+#include "Components/SpotLightComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "EnhancedInputComponent.h"
@@ -70,6 +71,13 @@ APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer) 
 
 	FirstPersonCamera->SetupAttachment(CharacterMesh, SOCKET_PLAYER_CAMERA);
 	FirstPersonCamera->bUsePawnControlRotation = false;
+
+	SpotLight = CreateDefaultSubobject<USpotLightComponent>(TEXT("SpotLight"));
+	if (SpotLight != nullptr)
+	{
+		SpotLight->SetupAttachment(FirstPersonCamera);
+		SpotLight->SetCastShadows(false);
+	}
 
 	InteractionComponent = CreateDefaultSubobject<UInteractionComponent>(TEXT("InteractionComponent"));
 	if (InteractionComponent != nullptr) {InteractionComponent->SetupAttachment(FirstPersonCamera);}

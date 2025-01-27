@@ -38,10 +38,10 @@ private:
 	UInputAction* EquipmentSecondaryAction;
 
     UPROPERTY(EditAnywhere, Category = SFX)
-    USoundCue* PrimaryActionSound;
+    FName PrimaryActionSound;
 
     UPROPERTY(EditAnywhere, Category = SFX)
-    USoundCue* SecondaryActionSound;
+    FName SecondaryActionSound;
 
 	FEnhancedInputActionEventBinding* PrimaryInputStartBinding;
 	FEnhancedInputActionEventBinding* PrimaryInputCompletedBinding;

@@ -25,4 +25,14 @@ public:
 	virtual void QuitToMainMenu() = 0;
 	virtual void QuitToDesktop() = 0;
 	virtual void PlayUISound(FName SoundName, UObject *WorldContextObject, bool bPersistOnLevelLoad = false) = 0;
+	virtual float GetMasterVolume() = 0;
+	virtual float GetMusicVolume() = 0;
+	virtual float GetAmbientVolume() = 0;
+	virtual float GetSFXVolume() = 0;
+	virtual float GetUIVolume() = 0;
+	virtual void SetMasterVolume(float InVolume) = 0;
+	virtual void SetMusicVolume(float InVolume) = 0;
+	virtual void SetAmbientVolume(float InVolume) = 0;
+	virtual void SetSFXVolume(float InVolume) = 0;
+	virtual void SetUIVolume(float InVolume) = 0;
 };

@@ -112,10 +112,10 @@ public:
 	virtual void Setup(FObjectiveDetails ObjectiveDetails, uint32 InQuestID, uint32 InStageIdx, uint32 InObjectiveIdx) override;
 
 	UFUNCTION()
-	virtual void OnPhotoTaken(FPhotoData Photo);
+	virtual void CheckNewPhoto(FPhotoData Photo);
 
 	UFUNCTION()
-	virtual void OnPhotoDeleted();
+	virtual void CheckAllPhotos();
 
 	virtual void OnInteract(AInteractableActor* Interactable) override;
 

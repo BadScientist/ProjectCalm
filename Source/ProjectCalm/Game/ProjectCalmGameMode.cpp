@@ -9,14 +9,53 @@
 
 #include "UObject/ConstructorHelpers.h"
 
+#ifdef PC_DEBUG_LOGS
+	// #define LOCAL_DEBUG_LOGS
+#endif
+
+#ifdef PC_DEBUG_DRAW_SHAPES
+	// #define LOCAL_DEBUG_DRAW_SHAPES
+#endif
+
+
 AProjectCalmGameMode::AProjectCalmGameMode() : Super()
 {
+	PrimaryActorTick.bCanEverTick = true;
+
 	static ConstructorHelpers::FClassFinder<APawn> PlayerPawnClassFinder(TEXT("/Game/ProjectCalm/Blueprints/Player/BP_PlayerCharacter"));
 	DefaultPawnClass = PlayerPawnClassFinder.Class;
 
 	ItemManager = CreateDefaultSubobject<UItemManager>(TEXT("ItemManager"));
 	QuestManager = CreateDefaultSubobject<UQuestManager>(TEXT("QuestManager"));
 	PhotoManager = CreateDefaultSubobject<UPhotoManager>(TEXT("PhotoManager"));
+}
+
+void AProjectCalmGameMode::Tick(float DeltaTime)
+{
+	CheckIsLandscapeReady();
+}
+
+void AProjectCalmGameMode::CheckIsLandscapeReady()
+{
+#ifdef LOCAL_DEBUG_LOGS
+	UE_LOG(LogGameMode, Display, TEXT("Checking Landscape..."));
+#endif // DEBUG
+
+    FVector TraceStart = FVector(-50000.0f, -50000.0f, 5.0f);
+    FVector TraceEnd = FVector(-50000.0f, -50000.0f, -5.0f);
+    FHitResult OutHit;
+    FCollisionQueryParams Params;
+    Params.bReturnPhysicalMaterial = true;
+
+    bool Hit = GetWorld()->LineTraceSingleByChannel(OutHit, TraceStart, TraceEnd, ECollisionChannel::ECC_Visibility, Params);
+    if (Hit && OutHit.PhysMaterial.IsValid())
+	{
+#ifdef LOCAL_DEBUG_LOGS
+		UE_LOG(LogGameMode, Display, TEXT("Landscape Ready!"));
+#endif // DEBUG
+		OnLandscapeReady.Broadcast();
+		PrimaryActorTick.SetTickFunctionEnable(false);
+	}
 }
 
 int32 AProjectCalmGameMode::GenerateInstanceID()
@@ -92,6 +131,8 @@ void AProjectCalmGameMode::GetPhotos(int32 CameraID, TArray<FPhotoData>& OutPhot
 
 void AProjectCalmGameMode::GetAllPhotos(TArray<FPhotoData>& OutPhotos)
 {
+	CHECK_NULLPTR_RET(PhotoManager, LogGameMode, "ProjectCalmGameMode:: No PhotoManager found!");
+	PhotoManager->GetAllPhotos(OutPhotos);
 }
 
 FPhotoData AProjectCalmGameMode::GetPhoto(int32 CameraID, uint32 PhotoIdx)
@@ -110,6 +151,7 @@ void AProjectCalmGameMode::AddPhoto(int32 CameraID, FPhotoData Photo)
 {
 	CHECK_NULLPTR_RET(PhotoManager, LogGameMode, "ProjectCalmGameMode:: No PhotoManager found!");
 	PhotoManager->AddPhoto(CameraID, Photo);
+	OnPhotoTaken.Broadcast(Photo);
 }
 
 bool AProjectCalmGameMode::RemovePhoto(int32 CameraID, uint32 PhotoIdx)

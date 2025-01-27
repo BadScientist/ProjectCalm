@@ -7,6 +7,9 @@
 #include "PopupMenu.h"
 #include "PauseMenu.generated.h"
 
+class UWidgetSwitcher;
+class UOptionsMenu;
+
 /**
  * 
  */
@@ -21,8 +24,20 @@ protected:
 private:
 	UPROPERTY(meta = (BindWidget))
 	UButton* QuitButton;
+	UPROPERTY(meta = (BindWidget))
+	UButton* OptionsButton;
+	UPROPERTY(meta = (BindWidget))
+	UWidgetSwitcher* MenuSwitcher;
+	UPROPERTY(meta = (BindWidget))
+	UOptionsMenu* OptionsMenu;
     
 	UFUNCTION()
 	void QuitToMainMenu();
-	
+	UFUNCTION()
+	void SwitchToOptionsMenu();
+
+public:
+	virtual void SetMenuInterface(IMenuInterface* NewMenuInterface) override;
+	virtual void Setup(bool bIsInteractiveIn) override;
+	virtual void Teardown() override;	
 };

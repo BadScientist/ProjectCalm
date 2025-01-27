@@ -71,6 +71,16 @@ public:
 	virtual void QuitToDesktop() override;
 	UFUNCTION(BlueprintCallable)
 	virtual void PlayUISound(FName SoundName, UObject* WorldContextObject, bool bPersistOnLevelLoad) override;
+	virtual float GetMasterVolume() override;
+	virtual float GetMusicVolume() override;
+	virtual float GetAmbientVolume() override;
+	virtual float GetSFXVolume() override;
+	virtual float GetUIVolume() override;
+	virtual void SetMasterVolume(float InVolume) override;
+	virtual void SetMusicVolume(float InVolume) override;
+	virtual void SetAmbientVolume(float InVolume) override;
+	virtual void SetSFXVolume(float InVolume) override;
+	virtual void SetUIVolume(float InVolume) override;
 	// End Menu Interface Implementation
 
 	UFUNCTION(BlueprintCallable)

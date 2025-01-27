@@ -104,7 +104,6 @@ void APhotoSubjectAIController::HandleHearingStimulus(const FActorPerceptionUpda
 
 void APhotoSubjectAIController::HandleSightStimulus(const FActorPerceptionUpdateInfo& UpdateInfo)
 {
-    UE_LOG(LogTemp, Display, TEXT("PhotoSubjectAIController:: HandleSightStimulus"));
     bool bIsActiveStimulus = UpdateInfo.Stimulus.IsActive() && !UpdateInfo.Stimulus.IsExpired();
 
     if (UpdateInfo.Target.Get() != nullptr)
@@ -155,10 +154,6 @@ void APhotoSubjectAIController::UpdateMoods(float DeltaSeconds)
 
 void APhotoSubjectAIController::UpdateBehavior()
 {
-#ifdef LOCAL_DEBUG_LOGS
-    UE_LOG(LogPhotoSubjectAI, Warning, TEXT("PhotoSubjectAIController:: UpdateBehavior()"));
-#endif
-
     LastBehaviorUpdateTime = GetWorld()->GetTimeSeconds();
 
     EAlertLevel NewAlertLevel{EAlertLevel::CALM};
@@ -264,11 +259,7 @@ void APhotoSubjectAIController::SetAlertLevelKeyValue(const FName &KeyName, EAle
 {
     if (KeyName == BBKEY_ALERT_LEVEL)
     {
-        if (InAlertLevel == AlertLevel)
-        {
-            LastBehavior = ActiveBehavior;
-            // SetBehaviorKeyValue(BBKEY_ACTIVE_BEHAVIOR, EPhotoSubjectBehavior::RESTART_LAST);
-        }
+        if (InAlertLevel == AlertLevel) {LastBehavior = ActiveBehavior;}
         else {AlertLevel = InAlertLevel;}
     }
     GetBlackboardComponent()->SetValueAsEnum(KeyName, InAlertLevel);

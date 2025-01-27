@@ -33,25 +33,6 @@ void UViewBlenderComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-// #if WITH_EDITORONLY_DATA
-// 	FString CurrentLog = FString::Printf(
-// 		TEXT("ViewBlenderComponent::bBlending=%i|bDefaultView=%i|TargetBlendAlpha=%f|CurrentBlendAlpha=%f|EyeFOV=%f|LensFOV=%f"),
-// 		bBlending,
-// 		bDefaultView,
-// 		TargetBlendAlpha,
-// 		CurrentBlendAlpha,
-// 		CharacterEyes != nullptr ? CharacterEyes->FieldOfView : 0.0f,
-// 		TargetSceneCaptureComponent != nullptr ? TargetSceneCaptureComponent->FOVAngle : 0.0f);
-	
-// 	if(CurrentLog != LastLog)
-// 	{
-// 		UE_LOG(LogTemp, Display, TEXT("%s"), *CurrentLog);
-// 		LastLog = CurrentLog;
-// 	}
-
-// 	if (GEngine != nullptr){GEngine->AddOnScreenDebugMessage(-1, 0.1f, FColor::Yellow, FString::Printf(TEXT("%f"), GetScalarBlendParam()));}
-// #endif
-
 	SetEyePOV();
 
 	UpdateCurrentBlendAlpha(DeltaTime);
@@ -68,7 +49,6 @@ void UViewBlenderComponent::SetCharacterEyes(UCameraComponent *CameraComp)
 
 float UViewBlenderComponent::BlendToNewView(USceneCaptureComponent2D *SceneCaptureComponent)
 {
-	// UE_LOG(LogTemp, Warning, TEXT("ViewBlenderComponent::BlendToNewView()"));
 	TargetSceneCaptureComponent = SceneCaptureComponent;
 
 	if (TargetSceneCaptureComponent != nullptr && GEngine != nullptr)
@@ -83,7 +63,6 @@ float UViewBlenderComponent::BlendToNewView(USceneCaptureComponent2D *SceneCaptu
 
 float UViewBlenderComponent::BlendToDefaultView()
 {
-	// UE_LOG(LogTemp, Warning, TEXT("ViewBlenderComponent::BlendToDefaultView()"));
 	return StartBlend(0.0f);
 }
 
@@ -98,7 +77,6 @@ void UViewBlenderComponent::SetEyePOV()
 
 void UViewBlenderComponent::SetViewToSceneCapture(USceneCaptureComponent2D* SceneCaptureComponent)
 {
-	// UE_LOG(LogTemp, Warning, TEXT("ViewBlenderComponent::SetViewToSceneCapture()"));
 	if (CharacterEyes == nullptr) 
 	{
 		UE_LOG(LogTemp, Error, TEXT("ViewBlender: NO CHARACTER EYE CAMERA"));
@@ -123,7 +101,6 @@ void UViewBlenderComponent::SetViewToSceneCapture(USceneCaptureComponent2D* Scen
 
 void UViewBlenderComponent::ResetView()
 {
-	// UE_LOG(LogTemp, Warning, TEXT("ViewBlenderComponent::ResetView()"));
 	if (CharacterEyes == nullptr) {return;}
 
 	CharacterEyes->ClearAdditiveOffset();
@@ -149,7 +126,6 @@ void UViewBlenderComponent::SetScalarBlendParam(float Alpha)
 
 float UViewBlenderComponent::StartBlend(float TargetAlpha)
 {
-	// UE_LOG(LogTemp, Warning, TEXT("ViewBlenderComponent::StartBlend()"));
 	TargetBlendAlpha = TargetAlpha;
 	ViewBlendTime = DefaultBlendTime * FMath::Abs(TargetAlpha - CurrentBlendAlpha);
 
@@ -173,7 +149,6 @@ float UViewBlenderComponent::StartBlend(float TargetAlpha)
 void UViewBlenderComponent::UpdateCurrentBlendAlpha(float DeltaTime)
 {
 	if (!bBlending) {return;}
-	// UE_LOG(LogTemp, Warning, TEXT("ViewBlenderComponent::UpdateCurrentBlendAlpha()"));
 
 	ViewBlendTime -= DeltaTime;
 	float NewBlendAlpha = FMath::Clamp(FMath::Square(DefaultBlendTime - ViewBlendTime) / FMath::Square(DefaultBlendTime), 0.0f, 1.0f);
@@ -187,7 +162,6 @@ void UViewBlenderComponent::UpdateCurrentBlendAlpha(float DeltaTime)
 void UViewBlenderComponent::EndBlend()
 {
 	if (!bBlending) {return;}
-	// UE_LOG(LogTemp, Warning, TEXT("ViewBlenderComponent::EndBlend()"));
 
 	if (TargetSceneCaptureComponent != nullptr && GEngine != nullptr)
 	{	

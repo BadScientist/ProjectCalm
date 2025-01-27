@@ -8,6 +8,10 @@
 
 #include "BehaviorTree/BlackboardComponent.h"
 
+#ifdef PC_DEBUG_LOGS
+	// #define LOCAL_DEBUG_LOGS
+#endif
+
 
 UBTTaskNode_SelectBehavior::UBTTaskNode_SelectBehavior()
 {
@@ -27,14 +31,14 @@ EBTNodeResult::Type UBTTaskNode_SelectBehavior::ExecuteTask(UBehaviorTreeCompone
     float Selector = FMath::RandRange(0.0f, TotalWeight);
     float CurrentWeight {0};
 
-#ifdef PC_DEBUG_LOGS
+#ifdef LOCAL_DEBUG_LOGS
     FString BehaviorsString;
 #endif
 
     for (FWeightedBehavior Behavior : Behaviors)
     {
 
-#ifdef PC_DEBUG_LOGS
+#ifdef LOCAL_DEBUG_LOGS
         BehaviorsString.Append(PCPhotoSubjectBehavior::EnumToString(Behavior.Behavior));
 #endif
 
@@ -42,7 +46,7 @@ EBTNodeResult::Type UBTTaskNode_SelectBehavior::ExecuteTask(UBehaviorTreeCompone
 
         if (CurrentWeight < Selector && Selector <= NextWeight)
         {
-#ifdef PC_DEBUG_LOGS
+#ifdef LOCAL_DEBUG_LOGS
             BehaviorsString.Append("*");
 #endif
             AIController->SetBehaviorKeyValue(BBKEY_ACTIVE_BEHAVIOR, Behavior.Behavior);
@@ -51,14 +55,14 @@ EBTNodeResult::Type UBTTaskNode_SelectBehavior::ExecuteTask(UBehaviorTreeCompone
         }
         else {Behavior.ConsecutiveSelections = 0;}
 
-#ifdef PC_DEBUG_LOGS
+#ifdef LOCAL_DEBUG_LOGS
             BehaviorsString.Append(", ");
 #endif
 
         CurrentWeight = NextWeight;
     }
 
-#ifdef PC_DEBUG_LOGS
+#ifdef LOCAL_DEBUG_LOGS
     UE_LOG(LogBehaviorTree, Display, TEXT("BTTask_SelectBehavior:: Behaviors: %s"), *BehaviorsString);
 #endif
 

@@ -51,7 +51,7 @@ void UProjectCalmGameInstance::LoadPendingMap()
     CHECK_NULLPTR_RET(PlayerController, LogPlayerController, "ProjectCalmGameInstance:: PlayerController is NULL!");
     
     PendingMap.LoadSynchronous();
-    CHECK_SOFTPTR_RET(GameplayMap, LogLoad, "ProjectCalmGameInstance:: GameplayMap is NULL!");
+    CHECK_SOFTPTR_RET(PendingMap, LogLoad, "ProjectCalmGameInstance:: PendingMap is NULL!");
     UGameplayStatics::OpenLevelBySoftObjectPtr(PlayerController, PendingMap);
     PendingMap.Reset();
 }
@@ -130,6 +130,66 @@ void UProjectCalmGameInstance::PlayUISound(FName SoundName, UObject* WorldContex
     SoundManager->PlayUISound(SoundName, WorldContextObject, bPersistOnLevelLoad);
 }
 
+float UProjectCalmGameInstance::GetMasterVolume()
+{
+    CHECK_NULLPTR_RETVAL(SoundManager, LogAudio, "ProjectCalmGameInstance:: No SoundManager!", 1.0f);
+    return SoundManager->GetMasterVolume();
+}
+
+float UProjectCalmGameInstance::GetMusicVolume()
+{
+    CHECK_NULLPTR_RETVAL(SoundManager, LogAudio, "ProjectCalmGameInstance:: No SoundManager!", 1.0f);
+    return SoundManager->GetMusicVolume();
+}
+
+float UProjectCalmGameInstance::GetAmbientVolume()
+{
+    CHECK_NULLPTR_RETVAL(SoundManager, LogAudio, "ProjectCalmGameInstance:: No SoundManager!", 1.0f);
+    return SoundManager->GetAmbientVolume();
+}
+
+float UProjectCalmGameInstance::GetSFXVolume()
+{
+    CHECK_NULLPTR_RETVAL(SoundManager, LogAudio, "ProjectCalmGameInstance:: No SoundManager!", 1.0f);
+    return SoundManager->GetSFXVolume();
+}
+
+float UProjectCalmGameInstance::GetUIVolume()
+{
+    CHECK_NULLPTR_RETVAL(SoundManager, LogAudio, "ProjectCalmGameInstance:: No SoundManager!", 1.0f);
+    return SoundManager->GetUIVolume();
+}
+
+void UProjectCalmGameInstance::SetMasterVolume(float InVolume)
+{
+    CHECK_NULLPTR_RET(SoundManager, LogAudio, "ProjectCalmGameInstance:: No SoundManager!");
+    SoundManager->SetMasterVolume(InVolume);
+}
+
+void UProjectCalmGameInstance::SetMusicVolume(float InVolume)
+{
+    CHECK_NULLPTR_RET(SoundManager, LogAudio, "ProjectCalmGameInstance:: No SoundManager!");
+    SoundManager->SetMusicVolume(InVolume);
+}
+
+void UProjectCalmGameInstance::SetAmbientVolume(float InVolume)
+{
+    CHECK_NULLPTR_RET(SoundManager, LogAudio, "ProjectCalmGameInstance:: No SoundManager!");
+    SoundManager->SetAmbientVolume(InVolume);
+}
+
+void UProjectCalmGameInstance::SetSFXVolume(float InVolume)
+{
+    CHECK_NULLPTR_RET(SoundManager, LogAudio, "ProjectCalmGameInstance:: No SoundManager!");
+    SoundManager->SetSFXVolume(InVolume);
+}
+
+void UProjectCalmGameInstance::SetUIVolume(float InVolume)
+{
+    CHECK_NULLPTR_RET(SoundManager, LogAudio, "ProjectCalmGameInstance:: No SoundManager!");
+    SoundManager->SetUIVolume(InVolume);
+}
+
 void UProjectCalmGameInstance::PlayMusicOrAmbientSound(FName SoundName, UObject* WorldContextObject, bool bIsMusic, bool bPersistOnLevelLoad)
 {
     CHECK_NULLPTR_RET(SoundManager, LogAudio, "ProjectCalmGameInstance:: No SoundManager!");
@@ -152,15 +212,16 @@ void UProjectCalmGameInstance::SetupMenuWidget(UMenu* Menu, bool bIsInteractable
 
 // DEBUG COMMANDS
 
+#if WITH_EDITORONLY_DATA
+
 void UProjectCalmGameInstance::AddItem(int32 ItemID)
 {
     if (APlayerCharacter* PlayerCharacter = PCPlayerStatics::GetPlayerCharacter(this))
     {
-        if (UInventoryComponent* InventoryComp = PlayerCharacter->GetInventoryComponent())
-        {
-            InventoryComp->AddItem(ItemID);
-        }
+        if (UInventoryComponent* InventoryComp = PlayerCharacter->GetInventoryComponent()) {InventoryComp->AddItem(ItemID);}
     }
 }
+
+#endif
 
 // END DEBUG COMMANDS

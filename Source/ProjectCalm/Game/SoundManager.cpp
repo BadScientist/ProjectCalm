@@ -16,13 +16,32 @@ void USoundManager::BeginPlay()
     
 }
 
+void USoundManager::SetMasterVolume(float InVolume)
+{
+    MasterVolumeMultiplier = InVolume;
+    UpdateMusicVolume();
+    UpdateAmbientVolume();
+}
+
+void USoundManager::SetMusicVolume(float InVolume)
+{
+    MusicVolumeMultiplier = InVolume;
+    UpdateMusicVolume();
+}
+
+void USoundManager::SetAmbientVolume(float InVolume)
+{
+    AmbienceVolumeMultiplier = InVolume;
+    UpdateAmbientVolume();
+}
+
 void USoundManager::PlayDiageticSound(FName SoundName, UObject *WorldContextObject, FVector SourceLocation, float VolumeMultiplier)
 {
     USoundBase** Sound = SoundData.Find(SoundName);
     CHECK_NULLPTR_RET(Sound, LogAudio, "USoundManager:: Invalid SoundName!");
     CHECK_NULLPTR_RET(*Sound, LogAudio, "USoundManager:: No Sound asset assigned to SoundName!");
 
-    UGameplayStatics::PlaySoundAtLocation(WorldContextObject, *Sound, SourceLocation, DiageticVolumeMultiplier * VolumeMultiplier);
+    UGameplayStatics::PlaySoundAtLocation(WorldContextObject, *Sound, SourceLocation, MasterVolumeMultiplier * DiageticVolumeMultiplier * VolumeMultiplier);
 }
 
 void USoundManager::PlayUISound(FName SoundName, UObject *WorldContextObject, bool bPersistOnLevelLoad)
@@ -30,9 +49,10 @@ void USoundManager::PlayUISound(FName SoundName, UObject *WorldContextObject, bo
     UAudioComponent* AudioComponent = CreateAudioComponent(SoundName, WorldContextObject);
     CHECK_NULLPTR_RET(AudioComponent, LogAudio, "USoundManager:: Failed to create AudioComponent!");
 
-    AudioComponent->VolumeMultiplier = UIVolumeMultiplier;
+    AudioComponent->VolumeMultiplier = MasterVolumeMultiplier * UIVolumeMultiplier;
     AudioComponent->bAllowSpatialization = false;
     AudioComponent->bIsUISound = true;
+    AudioComponent->bAutoDestroy = true;
     AudioComponent->bIgnoreForFlushing = bPersistOnLevelLoad;
     AudioComponent->bStopWhenOwnerDestroyed = !bPersistOnLevelLoad;
     AudioComponent->Play();
@@ -59,7 +79,7 @@ void USoundManager::PlayMusicOrAmbientSound(FName SoundName, UObject* WorldConte
         AudioComponent = CreateAudioComponent(SoundName, WorldContextObject);
         CHECK_NULLPTR_RET(AudioComponent, LogAudio, "USoundManager:: Failed to create AudioComponent!");
 
-        AudioComponent->VolumeMultiplier = bIsMusic ? MusicVolumeMultiplier : AmbienceVolumeMultiplier;
+        AudioComponent->VolumeMultiplier = MasterVolumeMultiplier * (bIsMusic ? MusicVolumeMultiplier : AmbienceVolumeMultiplier);
         AudioComponent->bAllowSpatialization = false;
         AudioComponent->bIsUISound = true;
         AudioComponent->bIgnoreForFlushing = bPersistOnLevelLoad;
@@ -86,4 +106,24 @@ UAudioComponent* USoundManager::CreateAudioComponent(FName SoundName, UObject* W
     CHECK_NULLPTR_RETVAL(*Sound, LogAudio, "USoundManager:: No Sound asset assigned to SoundName!", nullptr);
 
     return FAudioDevice::CreateComponent(*Sound, WorldAudioDevice);
+}
+
+void USoundManager::UpdateMusicVolume()
+{
+    TArray<UAudioComponent*> AudioComponents;
+    ActiveMusic.GenerateValueArray(AudioComponents);
+    for (UAudioComponent* AudioComponent: AudioComponents)
+    {
+        AudioComponent->SetVolumeMultiplier(MasterVolumeMultiplier * MusicVolumeMultiplier);
+    }
+}
+
+void USoundManager::UpdateAmbientVolume()
+{
+    TArray<UAudioComponent*> AudioComponents;
+    ActiveAmbience.GenerateValueArray(AudioComponents);
+    for (UAudioComponent* AudioComponent: AudioComponents)
+    {
+        AudioComponent->SetVolumeMultiplier(MasterVolumeMultiplier * AmbienceVolumeMultiplier);
+    }
 }

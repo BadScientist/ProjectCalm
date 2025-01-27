@@ -11,6 +11,7 @@
 class APlayerCharacter;
 class UBoxComponent;
 class UStaticMeshComponent;
+class UNiagaraSystem;
 class USoundCue;
 
 
@@ -29,8 +30,11 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = Interaction)
 	FString InteractionLabel{FString("Activate")};
 
+	UPROPERTY(EditDefaultsOnly, Category = VFX)
+	UNiagaraSystem* InteractionVFX{nullptr};
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = SFX)
-	USoundCue* InteractionSound{nullptr};
+	FName InteractionSound;
 
 	ECollisionEnabled::Type ActiveCollisionType{ECollisionEnabled::QueryOnly};
 	ECollisionEnabled::Type InactiveCollisionType{ECollisionEnabled::NoCollision};

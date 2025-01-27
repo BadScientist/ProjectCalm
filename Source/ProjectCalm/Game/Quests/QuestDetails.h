@@ -78,7 +78,7 @@ struct FObjectiveDetails
     TArray<FSubjectBehaviorPair> PhotoTargets;
 
     UPROPERTY(EditAnywhere)
-    float Score;
+    float Score{0.0f};
     //END PHOTO OBJECTIVE
 };
 

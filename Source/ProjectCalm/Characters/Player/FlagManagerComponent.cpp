@@ -2,6 +2,11 @@
 
 
 #include "FlagManagerComponent.h"
+#include "ProjectCalm/Utilities/LogMacros.h"
+
+#ifdef PC_DEBUG_LOGS
+	// #define LOCAL_DEBUG_LOGS
+#endif
 
 // Sets default values for this component's properties
 UFlagManagerComponent::UFlagManagerComponent()
@@ -15,7 +20,7 @@ UFlagManagerComponent::UFlagManagerComponent()
 
 void UFlagManagerComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction)
 {
-#if WITH_EDITORONLY_DATA
+#ifdef LOCAL_DEBUG_LOGS
 	FString CurrentLog = FString::Printf(TEXT("FlagManagerComponent::%s"), *GetAllFlagsString());
 
 	if (CurrentLog != LastLog)

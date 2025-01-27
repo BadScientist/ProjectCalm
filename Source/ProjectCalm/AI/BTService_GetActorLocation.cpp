@@ -67,5 +67,5 @@ void UBTService_GetActorLocation::StoreTargetActorLocation(UBehaviorTreeComponen
         return;
     }
     
-     UE_LOG(LogBehaviorTree, Error, TEXT("BTTask::GetActorLocation:: INVALID TARGETACTORKEY TYPE!"));
+    UE_LOG(LogBehaviorTree, Error, TEXT("BTTask::GetActorLocation:: INVALID TARGETACTORKEY TYPE!"));
 }

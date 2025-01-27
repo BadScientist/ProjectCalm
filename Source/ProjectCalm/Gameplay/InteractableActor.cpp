@@ -7,7 +7,7 @@
 
 #include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
-#include "Sound/SoundCue.h"
+#include "NiagaraFunctionLibrary.h"
 #include "Kismet/GameplayStatics.h"
 
 
@@ -33,7 +33,13 @@ void AInteractableActor::Interact(APlayerCharacter* InteractingPlayer)
     CHECK_NULLPTR_RET(GameMode, LogQuest, "QuestObjective:: No PCGameMode found!");
     GameMode->OnInteract.Broadcast(this);
 
-    if (InteractionSound != nullptr) {UGameplayStatics::PlaySoundAtLocation(this, InteractionSound, GetActorLocation());}
+    if (!InteractionSound.IsNone())
+    {
+        UProjectCalmGameInstance* GameInstance = PCGameStatics::GetPCGameInstance(this);
+        CHECK_NULLPTR_RET(GameInstance, LogInteractable, "InteractableActor:: No Game Instance found!");
+        GameInstance->PlayDiageticSound(InteractionSound, this, GetActorLocation());
+    }
+    if (InteractionVFX != nullptr) {UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, InteractionVFX, GetActorLocation(), GetActorRotation());}
 }
 
 void AInteractableActor::SetCollisionEnabled(bool bValue)

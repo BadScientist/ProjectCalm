@@ -8,7 +8,7 @@
 #include "Components/BoxComponent.h"
 
 #ifdef PC_DEBUG_LOGS
-	#define LOCAL_DEBUG_LOGS
+	// #define LOCAL_DEBUG_LOGS
 #endif
 
 #define SPECIAL_ROCK_QUEST_ID 2
@@ -63,20 +63,20 @@ void ASpecialRock::Interact(APlayerCharacter* InteractingPlayer)
     case 2:
         InteractionLabel = FString("Grab!");
         break;
-    case 3:
-        InteractionLabel = FString("Touch");
-        break;    
     default:
+        InteractionLabel = FString("Touch");
         break;
     }
+    
+#ifdef LOCAL_DEBUG_LOGS
+    UE_LOG(LogInteractable, Display, TEXT("SpecialRock:: OnInteract:: Target Location: %s"), *(TargetLocation.ToCompactString()));
+#endif
 
     if (TargetLocation == FVector::ZeroVector || IsAtLocation(TargetLocation))
     {
         TeleportTo(HomeLocation, HomeRotation);
     }
-    else {TeleportTo(TargetLocation, TargetRotation);}
-    
-    // @todo: play fx    
+    else {TeleportTo(TargetLocation, TargetRotation, false, true);} 
     
     UpdateRock();
 }
@@ -87,12 +87,6 @@ void ASpecialRock::UpdateRock()
     CHECK_NULLPTR_RET(GameMode, LogInteractable, "SpecialRock:: Could not get Game Mode!");
 
     GameMode->SetSpecialRockLocation(GetActorLocation());
-
-    // FQuestDetails SpecialRockQuest = GameMode->GetQuestDetails(SPECIAL_ROCK_QUEST_ID);
-    // if (InteractionCollision != nullptr)
-    // {
-    //     InteractionCollision->SetCollisionEnabled((SpecialRockQuest.IsActive() && !SpecialRockQuest.IsComplete()) ? ActiveCollisionType : InactiveCollisionType);
-    // }
 }
 
 bool ASpecialRock::IsAtLocation(FVector TestLocation) const
@@ -139,4 +133,6 @@ void ASpecialRock::OnQuestUpdated(FQuestDetails QuestDetails)
             return;
         }
     }
+
+    TargetLocation = FVector::ZeroVector;
 }

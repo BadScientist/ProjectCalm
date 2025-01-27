@@ -24,6 +24,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnInteract, AInteractableActor*, In
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnQuestUpdatedDelegate, FQuestDetails, QuestDetails);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSpecialRockMoved, FVector, Location);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerRespawnDelegate);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLandscapeReadyDelegate);
 
 
 UCLASS(minimalapi)
@@ -47,6 +48,13 @@ class AProjectCalmGameMode : public AGameModeBase
 public:
 	AProjectCalmGameMode();
 
+	virtual void Tick(float DeltaTime) override;
+
+private:
+	bool bIsLandscapeReady{false};
+	void CheckIsLandscapeReady();
+
+public:
 	FOnMakeNoiseDelegate OnMakeNoise;
 	FOnPhotoTakenDelegate OnPhotoTaken;
 	FOnPhotoDeletedDelegate OnPhotoDeleted;
@@ -54,6 +62,9 @@ public:
 	FOnQuestUpdatedDelegate OnQuestUpdated;
 	FOnSpecialRockMoved OnSpecialRockMoved;
 	FOnPlayerRespawnDelegate OnPlayerRespawn;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnLandscapeReadyDelegate OnLandscapeReady;
 
 	int32 GenerateInstanceID();
 	UItemData* GetItemDataFromID(int32 ItemID);

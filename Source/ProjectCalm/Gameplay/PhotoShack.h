@@ -44,7 +44,7 @@ class PROJECTCALM_API APhotoShack : public AInteractableActor
 	UStaticMeshComponent* PlanksMesh{nullptr};
 
 	UPROPERTY(EditDefaultsOnly, Category = SFX)
-	USoundCue* WindowMoveSound{nullptr};
+	FName WindowMoveSound;
 
 	UPROPERTY(EditAnywhere, Category = Proprietor)
 	AProprietor* Proprietor{nullptr};

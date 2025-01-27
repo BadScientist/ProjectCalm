@@ -24,22 +24,21 @@
 
 void UAnimNotify_FootPlant::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)
 {
-    AActor* Owner{nullptr};
     if (MeshComp != nullptr) {Owner = MeshComp->GetOwner();}
     CHECK_NULLPTR_RET(Owner, LogAnimation, "AnimNotify_FootPlant:: No owning Actor found!");
 
-    if (!IsCharacterMoving(Owner)) {return;}
+    if (!IsCharacterMoving()) {return;}
 
-    CalculateSpeedRatio(Owner);
+    CalculateSpeedRatio();
     
-    PrepareFootstepSound(Owner);
+    PrepareFootstepSound();
 
     Super::Notify(MeshComp, Animation, EventReference);
 }
 
-void UAnimNotify_FootPlant::ReportNoiseEvent(AActor* OwningActor)
+void UAnimNotify_FootPlant::ReportNoiseEvent()
 {
-    CHECK_NULLPTR_RET(OwningActor, LogAnimation, "AnimNotify_FootPlant:: No owning Actor found!");
+    CHECK_NULLPTR_RET(Owner, LogAnimation, "AnimNotify_FootPlant:: No owning Actor found!");
     if (FMath::IsNearlyZero(BaseNoiseLevel)) {return;}
 
     float NoiseLevel = FMath::RandRange(FMath::Max(BaseNoiseLevel - NoiseDeviation, 0.0f), BaseNoiseLevel + NoiseDeviation);
@@ -49,26 +48,26 @@ void UAnimNotify_FootPlant::ReportNoiseEvent(AActor* OwningActor)
     UE_LOG(LogAnimation, Display, TEXT("AnimNotify_FootPlant:: ReportNoiseEvent: Strength: %f"), FinalNoiseLevel);
 #endif
 
-    UAISense_Hearing::ReportNoiseEvent(OwningActor, OwningActor->GetActorLocation(), FinalNoiseLevel, OwningActor, MAX_NOISE_RANGE);
+    UAISense_Hearing::ReportNoiseEvent(Owner, Owner->GetActorLocation(), FinalNoiseLevel, Owner, MAX_NOISE_RANGE);
 }
 
-void UAnimNotify_FootPlant::PrepareFootstepSound(AActor* OwningActor)
+void UAnimNotify_FootPlant::PrepareFootstepSound()
 {
-    CHECK_NULLPTR_RET(OwningActor, LogAnimation, "AnimNotify_FootPlant:: No owning Actor found!");
-    SoundLocation = OwningActor->GetActorLocation() + FootOffset;
+    CHECK_NULLPTR_RET(Owner, LogAnimation, "AnimNotify_FootPlant:: No owning Actor found!");
+    SoundLocation = Owner->GetActorLocation() + FootOffset;
 
     FVector TraceStart = SoundLocation + FVector(0.0f, 0.0f, 50.0f);
     FVector TraceEnd = SoundLocation - FVector(0.0f, 0.0f, 200.0f);
     FCollisionQueryParams Params;
     Params.bReturnPhysicalMaterial = true;
-    Params.AddIgnoredActor(OwningActor);
+    Params.AddIgnoredActor(Owner);
 
 #ifdef LOCAL_DEBUG_SHAPES
-    DrawDebugLine(OwningActor->GetWorld(), TraceStart, TraceEnd, FColor::Red, true, 100.0f, ESceneDepthPriorityGroup::SDPG_Foreground, 10.0);
+    DrawDebugLine(Owner->GetWorld(), TraceStart, TraceEnd, FColor::Red, true, 100.0f, ESceneDepthPriorityGroup::SDPG_Foreground, 10.0);
 #endif
 
     FHitResult OutHit;
-    bool bHit = OwningActor->GetWorld()->LineTraceSingleByChannel(OutHit, TraceStart, TraceEnd, ECollisionChannel::ECC_Visibility, Params);
+    bool bHit = Owner->GetWorld()->LineTraceSingleByChannel(OutHit, TraceStart, TraceEnd, ECollisionChannel::ECC_Visibility, Params);
     
     EPhysicalSurface SurfaceType = EPhysicalSurface::SurfaceType_Default;
     if (bHit)
@@ -78,7 +77,7 @@ void UAnimNotify_FootPlant::PrepareFootstepSound(AActor* OwningActor)
             SurfaceType = OutHit.PhysMaterial->SurfaceType;
 
 #ifdef LOCAL_DEBUG_LOGS
-            UE_LOG(LogAnimation, Warning, TEXT("AnimNotify_FootPlant:: SurfaceType: %s"),
+            UE_LOG(LogAnimation, Warning, TEXT("AnimNotify_FootPlant:: PhysMatIsValid: %i, SurfaceType: %s"), OutHit.PhysMaterial.IsValid(),
                 (SurfaceType == EPhysicalSurface::SurfaceType1 ? *FString("SurfaceType1") :
                 SurfaceType == EPhysicalSurface::SurfaceType2 ? *FString("SurfaceType2") :
                 SurfaceType == EPhysicalSurface::SurfaceType3 ? *FString("SurfaceType3") :
@@ -102,18 +101,18 @@ void UAnimNotify_FootPlant::PrepareFootstepSound(AActor* OwningActor)
     }
 }
 
-bool UAnimNotify_FootPlant::IsCharacterMoving(AActor* OwningActor)
+bool UAnimNotify_FootPlant::IsCharacterMoving()
 {
-    ACharacter* OwningCharacter = Cast<ACharacter>(OwningActor);
+    ACharacter* OwnerCharacter = Cast<ACharacter>(Owner);
 
-    CHECK_NULLPTR_RETVAL(OwningCharacter, LogAnimation, "AnimNotify_FootPlant:: No Owning Character!", false);
+    CHECK_NULLPTR_RETVAL(OwnerCharacter, LogAnimation, "AnimNotify_FootPlant:: No Owning Character!", false);
 
-    return !FMath::IsNearlyZero(OwningCharacter->GetVelocity().Length());
+    return !FMath::IsNearlyZero(OwnerCharacter->GetVelocity().Length());
 }
 
-void UAnimNotify_FootPlant::CalculateSpeedRatio(AActor *OwningActor)
+void UAnimNotify_FootPlant::CalculateSpeedRatio()
 {
-    ACharacter* OwnerCharacter = Cast<ACharacter>(OwningActor);
+    ACharacter* OwnerCharacter = Cast<ACharacter>(Owner);
     UCharacterMovementComponent* MovementComp = (OwnerCharacter == nullptr) ? nullptr :
         Cast<UCharacterMovementComponent>(OwnerCharacter->GetMovementComponent());
     

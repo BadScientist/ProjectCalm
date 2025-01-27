@@ -8,6 +8,10 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "BehaviorTree/Blackboard/BlackboardKeyType_Vector.h"
 
+#ifdef PC_DEBUG_LOGS
+	// #define LOCAL_DEBUG_LOGS
+#endif
+
 #ifdef PC_DEBUG_DRAW_SHAPES
 	// #define LOCAL_DEBUG_DRAW_SHAPES
 #endif
@@ -105,7 +109,7 @@ EBTNodeResult::Type UBTTask_GetLocationInRange::ExecuteTask(UBehaviorTreeCompone
     DrawDebugPoint(GetWorld(), Destination2D, 50, FColor::Blue, false, 4);
     DrawDebugPoint(GetWorld(), Destination3D, 50, FColor::Green, true);
 #endif
-#ifdef PC_DEBUG_LOGS
+#ifdef LOCAL_DEBUG_LOGS
     UE_LOG(LogTemp, Warning, TEXT("BTTask::GetLocationInRange::Destination Found: %s"), *Destination3D.ToCompactString());
 #endif
 
@@ -130,7 +134,7 @@ FVector UBTTask_GetLocationInRange::FindRandomLocationInRange(FVector HomeLocati
     DrawDebugLine(GetWorld(), CurrentLocation, CurrentLocation + NewDirection * MaxDistanceFromPawn, FColor::Purple, false, 4, ESceneDepthPriorityGroup::SDPG_World, 75.0);
     DrawDebugLine(GetWorld(), CurrentLocation, CurrentLocation + TravelVector, FColor::Blue, false, 4, ESceneDepthPriorityGroup::SDPG_World, 100.0);
 #endif
-#ifdef PC_DEBUG_LOGS
+#ifdef LOCAL_DEBUG_LOGS
     UE_LOG(LogTemp, Warning, TEXT("BTTask::GetLocationInRange::MaxDistance: %f, ActualDistance: %f, Direction: %s"), MaxTravelDistance, TravelDistance, *Direction.ToCompactString());
 #endif
 

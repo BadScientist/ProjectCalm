@@ -20,7 +20,8 @@ public class ProjectCalm : ModuleRules
 			"NavigationSystem",
 			"PhysicsCore",
 			"Slate",
-			"SlateCore"
+			"SlateCore",
+			"Niagara"
 		});
 	}
 }

@@ -1,11 +1,12 @@
 #include "ActorSpawnRegion.h"
 #include "ProjectCalm/Utilities/LogMacros.h"
+#include "ProjectCalm/Utilities/PCPlayerStatics.h"
+#include "ProjectCalm/Utilities/PCGameStatics.h"
 
 #include "PhysicalMaterials/PhysicalMaterial.h"
 
-
 #ifdef PC_DEBUG_LOGS
-	#define LOCAL_DEBUG_LOGS
+	// #define LOCAL_DEBUG_LOGS
 #endif
 
 #ifdef PC_DEBUG_DRAW_SHAPES
@@ -15,6 +16,8 @@
 
 AActorSpawnRegion::AActorSpawnRegion()
 {
+    PrimaryActorTick.bCanEverTick = true;
+
 #if WITH_EDITORONLY_DATA
     SpawnRegionVisComp = CreateDefaultSubobject<USpawnRegionVisualizerComponent>(TEXT("VisualizerComponent"));
     if (SpawnRegionVisComp != nullptr) {SetRootComponent(SpawnRegionVisComp);}
@@ -25,21 +28,11 @@ void AActorSpawnRegion::BeginPlay()
 {
     Super::BeginPlay();
 
-    TArray<FSpawnCell> SpawnCells = CreateSpawnCells();
+    PlayerCharacter = PCPlayerStatics::GetPlayerCharacter(this);
 
-    for (FSpawnInfo SpawnInfo : SpawnList)
-    {
-        int32 Spawns{0};
-        int32 Attempts{0};
-        while (Spawns < SpawnInfo.Count && Attempts < SpawnInfo.Count * 2)
-        {
-            int32 CellIdx = Attempts % SpawnCells.Num();
-            if (SpawnActor(SpawnCells[CellIdx].GetRandomLocation(), SpawnInfo)) {Spawns++;}
-            Attempts++;
-        }
-    }
-
-    if (bDestroyAfterSpawning) {Destroy();}
+    AProjectCalmGameMode* GameMode = PCGameStatics::GetPCGameMode(this);
+    CHECK_NULLPTR_RET(GameMode, LogActor, "ActorSpawnRegion:: No Game Mode!");
+    GameMode->OnLandscapeReady.AddDynamic(this, &AActorSpawnRegion::SetReadyToSpawn);
 }
 
 TArray<FSpawnCell> AActorSpawnRegion::CreateSpawnCells()
@@ -75,8 +68,41 @@ TArray<FSpawnCell> AActorSpawnRegion::CreateSpawnCells()
     return Result;
 }
 
+void AActorSpawnRegion::SpawnActors()
+{
+    TArray<FSpawnCell> SpawnCells;
+    
+    bool bIsComplete{true};
+    for (FSpawnInfo SpawnInfo : SpawnList)
+    {
+        if (SpawnInfo.bHasSpawned) {continue;}
+
+        if (SpawnCells.IsEmpty()) {SpawnCells = CreateSpawnCells();}
+
+        int32 Spawns{0};
+        int32 Attempts{0};
+        while (Spawns < SpawnInfo.Count && Attempts < SpawnInfo.Count * 2)
+        {
+            int32 CellIdx = Attempts % SpawnCells.Num();
+            if (SpawnActor(SpawnCells[CellIdx].GetRandomLocation(), SpawnInfo))
+            {
+                Spawns++;
+            }
+            Attempts++;
+        }
+
+        SpawnInfo.bHasSpawned = true;
+        bIsComplete = bIsComplete & SpawnInfo.bHasSpawned;
+    }
+
+    bSpawningComplete = bIsComplete;
+
+    if (bDestroyAfterSpawning) {Destroy();}
+}
+
 bool AActorSpawnRegion::SpawnActor(FVector Location, FSpawnInfo SpawnInfo)
 {
+    bool Result = false;
     FVector TraceStart = Location;
     FVector TraceEnd = FVector(TraceStart.X, TraceStart.Y, TraceStart.Z - Size.Z);
     FHitResult OutHit;
@@ -87,15 +113,49 @@ bool AActorSpawnRegion::SpawnActor(FVector Location, FSpawnInfo SpawnInfo)
     bool Hit = GetWorld()->SweepSingleByChannel(OutHit, TraceStart, TraceEnd, FQuat::Identity, ECollisionChannel::ECC_Visibility, Sphere, Params);
     if (Hit)
     {
-        if (SpawnInfo.ValidSurfaces.IsEmpty() || SpawnInfo.ValidSurfaces.Contains(OutHit.PhysMaterial->SurfaceType))
+        if (SpawnInfo.ValidSurfaces.IsEmpty() || (OutHit.PhysMaterial.IsValid() && SpawnInfo.ValidSurfaces.Contains(OutHit.PhysMaterial->SurfaceType)))
         {
-            return GetWorld()->SpawnActor<AActor>(
+            AActor* SpawnedActor = GetWorld()->SpawnActor<AActor>(
                 SpawnInfo.ActorClass.Get(),
                 FVector(OutHit.ImpactPoint.X, OutHit.ImpactPoint.Y, OutHit.ImpactPoint.Z + SpawnInfo.SurfaceOffset),
-                FRotator(0,0,0)) != nullptr;
+                FRotator(0,0,0));
+
+            if (SpawnedActor != nullptr)
+            {
+                SpawnedActors.Add(SpawnedActor);
+                Result = true;
+            }
         }
     }
-    return false;
+
+#ifdef LOCAL_DEBUG_LOGS
+    UE_LOG(LogTemp, Display, TEXT("%s:: Hit: %i, ValidPhysMat: %i, Result: %i"), *GetActorNameOrLabel(), Hit, OutHit.PhysMaterial.IsValid(), Result);
+#endif // LOCAL_DEBUG_LOGS
+
+    return Result;
+}
+
+void AActorSpawnRegion::SetActorsActive(bool bValue)
+{
+    for (AActor* SpawnedActor : SpawnedActors)
+    {
+        if (SpawnedActor == nullptr) {continue;}
+        SpawnedActor->SetActorTickEnabled(bValue);
+        SpawnedActor->SetActorHiddenInGame(!bValue);
+    }
+}
+
+void AActorSpawnRegion::Tick(float DeltaTime)
+{
+    Super::Tick(DeltaTime);
+
+    if (!bSpawningComplete && bReadyToSpawn) {SpawnActors();}
+
+    CHECK_NULLPTR_RET(PlayerCharacter, LogActor, "ActorSpawnRegion:: No PlayerCharacter!");
+
+    float DistanceToPlayer = FVector::Distance(PlayerCharacter->GetActorLocation(), GetActorLocation());
+    if (DistanceToPlayer <= SpawnActivationDistance) {SetActorsActive(true);}
+    else if (DistanceToPlayer >= UnrenderDistance) {SetActorsActive(false);}
 }
 
 #if WITH_EDITORONLY_DATA

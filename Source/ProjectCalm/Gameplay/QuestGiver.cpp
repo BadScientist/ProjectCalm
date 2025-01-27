@@ -57,7 +57,7 @@ void AQuestGiver::HandleInteraction()
                 Dialogue.Strings = CurrentQuest.Stages[CurrentQuest.ActiveStageIdx].IntroDialogue;
                 GameMode->MarkIntroDialoguePlayed(CurrentQuest.QuestID, CurrentQuest.ActiveStageIdx);
             }
-            else
+            else if (!CurrentQuest.Stages[CurrentQuest.ActiveStageIdx].OngoingDialogue.IsEmpty())
             {
                 Dialogue.Strings = CurrentQuest.Stages[CurrentQuest.ActiveStageIdx].OngoingDialogue;
             }

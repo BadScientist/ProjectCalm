@@ -23,11 +23,11 @@ struct FPhotoData
     TArray<FPhotoSubjectData> Subjects;
 
     UPROPERTY(VisibleAnywhere)
-    FVector CameraLocation;
+    FVector CameraLocation{FVector::ZeroVector};
 
     UPROPERTY(VisibleAnywhere)
-    FVector CameraForwardVector;
+    FVector CameraForwardVector{FVector(1, 0, 0)};
     
     UPROPERTY(VisibleAnywhere)
-    float Score;
+    float Score{0.0f};
 };

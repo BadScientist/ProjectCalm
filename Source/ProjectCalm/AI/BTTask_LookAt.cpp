@@ -3,6 +3,7 @@
 
 #include "BTTask_LookAt.h"
 #include "ProjectCalm/Utilities/PCMath.h"
+#include "ProjectCalm/Utilities/LogMacros.h"
 
 #include "AIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
@@ -32,28 +33,16 @@ EBTNodeResult::Type UBTTask_LookAt::ExecuteTask(UBehaviorTreeComponent &OwnerCom
     bNotifyTaskFinished = true;
 
     AAIController* AIController = OwnerComp.GetAIOwner();
-    if (AIController == nullptr)
-    {
-        UE_LOG(LogBehaviorTree, Error, TEXT("BTTask::LookAt:: AI CONTROLLER NOT FOUND!"));
-        return EBTNodeResult::Failed;
-    }
+    CHECK_NULLPTR_RETVAL(AIController, LogBehaviorTree, "BTTask::LookAt:: AI CONTROLLER NOT FOUND!", EBTNodeResult::Failed);
 
     UBlackboardComponent* BlackboardComponent = OwnerComp.GetBlackboardComponent();
-    if (BlackboardComponent == nullptr)
-    {
-        UE_LOG(LogBehaviorTree, Error, TEXT("BTTask::LookAt:: BLACKBOARD COMPONENT NOT FOUND!"));
-        return EBTNodeResult::Failed;
-    }
+    CHECK_NULLPTR_RETVAL(BlackboardComponent, LogBehaviorTree, "BTTask::LookAt:: BLACKBOARD COMPONENT NOT FOUND!", EBTNodeResult::Failed);
 
     FVector FocusLocation;
     if (BlackboardKey.SelectedKeyType.Get() == UBlackboardKeyType_Object::StaticClass())
     {
         AActor* ReferenceActor = Cast<AActor>(BlackboardComponent->GetValueAsObject(BlackboardKey.SelectedKeyName));
-        if (ReferenceActor == nullptr)
-        {
-            UE_LOG(LogBehaviorTree, Error, TEXT("BTTask::LookAt:: REFERENCE OBJECT NOT AN ACTOR!"));
-            return EBTNodeResult::Failed;
-        }
+        CHECK_NULLPTR_RETVAL(ReferenceActor, LogBehaviorTree, "BTTask::LookAt:: REFERENCE OBJECT NOT AN ACTOR!", EBTNodeResult::Failed);
 
         FocusLocation = ReferenceActor->GetActorLocation();
     }
@@ -86,32 +75,16 @@ void UBTTask_LookAt::SetPawnRotationSettings(UBehaviorTreeComponent& OwnerComp, 
     if (NodeMemory == nullptr) {return;}
 
     AAIController* AIController = OwnerComp.GetAIOwner();
-    if (AIController == nullptr)
-    {
-        UE_LOG(LogBehaviorTree, Error, TEXT("BTTask::LookAt:: AI CONTROLLER NOT FOUND!"));
-        return;
-    }
+    CHECK_NULLPTR_RET(AIController, LogBehaviorTree, "BTTask::LookAt:: AI CONTROLLER NOT FOUND!");
     
     APawn* AIPawn = AIController->GetPawn();
-    if (AIPawn == nullptr)
-    {
-        UE_LOG(LogBehaviorTree, Error, TEXT("BTTask::LookAt:: PAWN NOT FOUND!"));
-        return;
-    }
+    CHECK_NULLPTR_RET(AIPawn, LogBehaviorTree, "BTTask::LookAt:: PAWN NOT FOUND!");
 
     ACharacter* AICharacter = Cast<ACharacter>(AIPawn);
-    if (AICharacter == nullptr)
-    {
-        UE_LOG(LogBehaviorTree, Error, TEXT("BTTask::LookAt:: CHARACTER NOT FOUND!"));
-        return;
-    }
+    CHECK_NULLPTR_RET(AICharacter, LogBehaviorTree, "BTTask::LookAt:: CHARACTER NOT FOUND!");
     
     UCharacterMovementComponent* AIMovement = Cast<UCharacterMovementComponent>(AICharacter->GetMovementComponent());
-    if (AIMovement == nullptr)
-    {
-        UE_LOG(LogBehaviorTree, Error, TEXT("BTTask::LookAt:: MOVEMENT COMPONENT NOT FOUND!"));
-        return;
-    }
+    CHECK_NULLPTR_RET(AIMovement, LogBehaviorTree, "BTTask::LookAt:: MOVEMENT COMPONENT NOT FOUND!");
 
     if (NodeMemory->RotationSpeed < 0) {NodeMemory->RotationSpeed = AIMovement->RotationRate.Yaw;}
 

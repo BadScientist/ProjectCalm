@@ -35,11 +35,11 @@ private:
 	float SpeedRatio{1.0f};
 
 protected:
-	virtual void ReportNoiseEvent(AActor* OwningActor) override;
+	virtual void ReportNoiseEvent() override;
 
 private:
-	void PrepareFootstepSound(AActor* OwningActor);
-	bool IsCharacterMoving(AActor* OwningActor);
-	void CalculateSpeedRatio(AActor* OwningActor);
+	void PrepareFootstepSound();
+	bool IsCharacterMoving();
+	void CalculateSpeedRatio();
 	
 };

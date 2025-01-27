@@ -15,14 +15,13 @@ void UAnimNotify_CameraAnimationEnded::Notify(USkeletalMeshComponent *MeshComp, 
     TArray<AActor*> AttachedActors;
     OwnerActor->GetAttachedActors(AttachedActors);
 
+    APhotoCameraEquipment* PhotoCamera{nullptr};
     for (AActor* AttachedActor : AttachedActors)
     {
-        if (APhotoCameraEquipment* PhotoCamera = Cast<APhotoCameraEquipment>(AttachedActor))
-        {
-            PhotoCamera->OnAnimationEnded();
-            return;
-        }
+        PhotoCamera = Cast<APhotoCameraEquipment>(AttachedActor);
+        if (PhotoCamera != nullptr) {break;}
     }
 
-    UE_LOG(LogAnimation, Error, TEXT("AnimNotify_CameraAnimationEnded:: No PhotoCamera found!"))
+    CHECK_NULLPTR_RET(PhotoCamera, LogAnimation, "AnimNotify_CameraAnimationEnded:: No PhotoCamera found!");
+    PhotoCamera->OnAnimationEnded();
 }

@@ -42,7 +42,8 @@ APickup* UItemManager::SpawnPickup(UItemData* ItemData, FVector InLocation, FRot
 {
 	CHECK_NULLPTR_RETVAL(ItemData, LogItemData, "ItemManager:: SpawnPickup was not passed valid ItemData!", nullptr);
 	APickup* Pickup = GetWorld()->SpawnActor<APickup>(InLocation, InRotation);
-	if (Pickup != nullptr) {Pickup->Setup(ItemData);}
-	else {UE_LOG(LogInteractable, Warning, TEXT("ItemManager:: SpawnActor failed!"));}
+
+	CHECK_NULLPTR_RETVAL(Pickup, LogInteractable, "ItemManager:: SpawnActor failed!", nullptr);
+	Pickup->Setup(ItemData);
 	return Pickup;
 }

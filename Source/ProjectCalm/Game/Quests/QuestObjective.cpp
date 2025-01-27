@@ -10,6 +10,10 @@
 
 #include "Components/SphereComponent.h"
 
+#ifdef PC_DEBUG_LOGS
+	// #define LOCAL_DEBUG_LOGS
+#endif
+
 
 AQuestObjective::AQuestObjective()
 {
@@ -107,13 +111,17 @@ void AInteractObjective::OnInteract(AInteractableActor* Interactable)
     {
         if(Interactable != InteractTarget)
         {
+#ifdef LOCAL_DEBUG_LOGS
             UE_LOG(LogTemp, Warning, TEXT("QuestObjective::OnInteract: Interactable is not InteractTarget"));
+#endif
             return;
         }
     }
     else if (Interactable->GetClass() != InteractTargetClass.Get())
     {
+#ifdef LOCAL_DEBUG_LOGS
         UE_LOG(LogTemp, Warning, TEXT("QuestObjective::OnInteract: Interactable class is not InteractTargetClass"));
+#endif
         return;
     }
     CompleteObjective();
@@ -140,25 +148,27 @@ void APhotoObjective::Setup(FObjectiveDetails ObjectiveDetails, uint32 InQuestID
 
     if (ObjectiveDetails.Type != ObjectiveType) {return;}
 
-    InteractTargetClass = AProprietor::StaticClass();
-
     PhotoTargets.Append(ObjectiveDetails.PhotoTargets);
     Score = ObjectiveDetails.Score;
 }
 
-void APhotoObjective::OnPhotoTaken(FPhotoData Photo)
+void APhotoObjective::CheckNewPhoto(FPhotoData Photo)
 {
     if (IsQualifiedPhoto(Photo)) {bHasQualifiedPhoto = true;}
 }
 
-void APhotoObjective::OnPhotoDeleted()
+void APhotoObjective::CheckAllPhotos()
 {
     AProjectCalmGameMode* GameMode = PCGameStatics::GetPCGameMode(this);
     CHECK_NULLPTR_RET(GameMode, LogQuest, "QuestObjective:: No PCGameMode found!");
 
     TArray<FPhotoData> AllPhotos;
     GameMode->GetAllPhotos(AllPhotos);
-    for (FPhotoData Photo : AllPhotos) {if (IsQualifiedPhoto(Photo)) {return;}}
+    for (FPhotoData Photo : AllPhotos) {if (IsQualifiedPhoto(Photo))
+    {
+        bHasQualifiedPhoto = true;
+        return;
+    }}
 
     bHasQualifiedPhoto = false;
 }
@@ -175,8 +185,10 @@ void APhotoObjective::BeginPlay()
     AProjectCalmGameMode* GameMode = PCGameStatics::GetPCGameMode(this);
     CHECK_NULLPTR_RET(GameMode, LogQuest, "QuestObjective:: No PCGameMode found!");
 
-    GameMode->OnPhotoTaken.AddDynamic(this, &APhotoObjective::OnPhotoTaken);
-    GameMode->OnPhotoDeleted.AddDynamic(this, &APhotoObjective::OnPhotoDeleted);
+    GameMode->OnPhotoTaken.AddDynamic(this, &APhotoObjective::CheckNewPhoto);
+    GameMode->OnPhotoDeleted.AddDynamic(this, &APhotoObjective::CheckAllPhotos);
+
+    CheckAllPhotos();
 }
 
 bool APhotoObjective::IsQualifiedPhoto(FPhotoData Photo)
@@ -186,7 +198,7 @@ bool APhotoObjective::IsQualifiedPhoto(FPhotoData Photo)
     {
         for (FPhotoSubjectData Subject : Photo.Subjects)
         {
-            if (Subject.Name == Target.Subject && Subject.Behavior == Target.Behavior)
+            if (Subject.Name == Target.Subject && (Target.Behavior == EPhotoSubjectBehavior::NONE || Subject.Behavior == Target.Behavior))
             {
                 Matches++;
                 break;
@@ -194,11 +206,9 @@ bool APhotoObjective::IsQualifiedPhoto(FPhotoData Photo)
         }
     }
 
-    float ScoreTotal{0};
-    for (FPhotoSubjectData Subject : Photo.Subjects)
-    {
-        for (FPhotoSubjectPointOfInterest POI : Subject.PointsOfInterest) {ScoreTotal += POI.ScoreValue;}
-    }
+#ifdef LOCAL_DEBUG_LOGS
+    UE_LOG(LogQuest, Display, TEXT("PhotoObjective:: IsQualifiedPhoto: %i"), (Matches == PhotoTargets.Num() && Photo.Score >= Score));
+#endif // DEBUG
 
-    return Matches == PhotoTargets.Num() && ScoreTotal >= Score;
+    return Matches == PhotoTargets.Num() && Photo.Score >= Score;
 }

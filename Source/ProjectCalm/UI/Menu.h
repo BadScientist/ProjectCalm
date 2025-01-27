@@ -29,7 +29,7 @@ protected:
 	void SetGameOnlyControls();
 
 public:
-	void SetMenuInterface(IMenuInterface* NewMenuInterface);
+	virtual void SetMenuInterface(IMenuInterface* NewMenuInterface);
 
 	virtual void Setup(bool bIsInteractiveIn = true);
 

@@ -10,6 +10,7 @@
 #include "PlayerCharacter.generated.h"
 
 class UCameraComponent;
+class USpotLightComponent;
 class USceneCaptureComponent2D;
 class UInteractionComponent;
 class UViewBlenderComponent;
@@ -39,6 +40,8 @@ private:
 	USceneComponent* ViewPivotComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* FirstPersonCamera;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	USpotLightComponent* SpotLight;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	UViewBlenderComponent* ViewBlenderComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Flags, meta = (AllowPrivateAccess = "true"))

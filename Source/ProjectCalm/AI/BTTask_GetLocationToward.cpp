@@ -10,6 +10,10 @@
 #include "BehaviorTree/Blackboard/BlackboardKeyType_Vector.h"
 #include "NavigationSystem.h"
 
+#ifdef PC_DEBUG_LOGS
+	// #define LOCAL_DEBUG_LOGS
+#endif
+
 
 UBTTask_GetLocationToward::UBTTask_GetLocationToward()
 {

@@ -54,8 +54,6 @@ int32 APhotoSubjectSpawnRegion::PickSubject()
 
 bool APhotoSubjectSpawnRegion::Contains2D(FVector TestLocation)
 {
-    // UE_LOG(LogTemp, Warning, TEXT("SpawnRegion:: Checking TestLocation %s"), *TestLocation.ToCompactString());
-
     FVector RegionLocation = GetActorLocation();
     FVector TestOffset = TestLocation - RegionLocation;
     FVector AdjustedTestOffset = TestOffset.RotateAngleAxis(-1 * GetActorRotation().Yaw, FVector::UpVector);
@@ -65,15 +63,12 @@ bool APhotoSubjectSpawnRegion::Contains2D(FVector TestLocation)
         && AdjustedTestLocation.X <= RegionLocation.X + (Size.X / 2) \
         && RegionLocation.Y - (Size.Y / 2) <= AdjustedTestLocation.Y \
         && AdjustedTestLocation.Y <= RegionLocation.Y + (Size.Y / 2);
-    
-    // DrawDebugPoint(GetWorld(), TestLocation, 50, bIsInRegion ? FColor::Green : FColor::Red, true);
+        
     return bIsInRegion;
 }
 
 bool APhotoSubjectSpawnRegion::SpawnPhotoSubject(FVector SpawnLocation)
 {
-    // UE_LOG(LogTemp, Warning, TEXT("SpawnRegion:: Attempting to spawn at %s"), *SpawnLocation.ToCompactString());
-
     int32 SubjectIdx = PickSubject();
     if (SubjectIdx < 0) {return false;}
 
@@ -133,74 +128,4 @@ int32 APhotoSubjectSpawnRegion::CleanupSpawns(AActor* Player)
 
 #if WITH_EDITORONLY_DATA
 IMPLEMENT_VISUALIZER(APhotoSubjectSpawnRegion, Size);
-// // EDITOR-ONLY VISUALIZATION
-
-// void APhotoSubjectSpawnRegion::UpdateVisualizerComponentProperties()
-// {
-//     // Only allow rotation around Z-axis
-//     SetActorRotation(FRotator(0, GetActorRotation().Yaw, 0));
-
-//     if (SpawnRegionVisComp == nullptr) {return;}
-//     SpawnRegionVisComp->UpdateProperties(GetActorLocation(), GetActorRotation(), Size);
-// }
-
-// void APhotoSubjectSpawnRegion::EditorApplyTranslation(const FVector& DeltaTranslation, bool bAltDown, bool bShiftDown, bool bCtrlDown)
-// {
-//     Super::EditorApplyTranslation(DeltaTranslation, bAltDown, bShiftDown, bCtrlDown);
-//     UpdateVisualizerComponentProperties();
-// }
-
-// void APhotoSubjectSpawnRegion::EditorApplyRotation(const FRotator& DeltaRotation, bool bAltDown, bool bShiftDown, bool bCtrlDown)
-// {
-//     Super::EditorApplyRotation(DeltaRotation, bAltDown, bShiftDown, bCtrlDown);
-//     UpdateVisualizerComponentProperties();
-// }
-
-// void APhotoSubjectSpawnRegion::EditorApplyScale(const FVector& DeltaScale, const FVector* PivotLocation, bool bAltDown, bool bShiftDown, bool bCtrlDown)
-// {
-//     const FVector CurrentScale = GetRootComponent()->GetRelativeScale3D();
-
-//     FVector SafeDeltaScale = FVector(
-//         FMath::Clamp(DeltaScale.X, -1.0f, 1.0f),
-//         FMath::Clamp(DeltaScale.Y, -1.0f, 1.0f),
-//         FMath::Clamp(DeltaScale.Z, -1.0f, 1.0f));
-//     FVector ScalingVector = FVector(1.0f) + SafeDeltaScale;
-
-//     Size *= ScalingVector;
-
-//     if (PivotLocation)
-//     {
-//         const FRotator ActorRotation = GetActorRotation();
-//         const FVector WorldDelta = GetActorLocation() - (*PivotLocation);
-//         const FVector LocalDelta = (ActorRotation.GetInverse()).RotateVector(WorldDelta);
-//         const FVector LocalScaledDelta = LocalDelta * (ScalingVector / FVector(1.0f));
-//         const FVector WorldScaledDelta = ActorRotation.RotateVector(LocalScaledDelta);
-
-//         SetActorLocation(WorldScaledDelta + (*PivotLocation));
-//     }
-
-//     UpdateVisualizerComponentProperties();
-// }
-
-// void APhotoSubjectSpawnRegion::PostEditChangeChainProperty(FPropertyChangedChainEvent &EditEvent)
-// {
-//     Super::PostEditChangeChainProperty(EditEvent);
-
-//     if (!EditEvent.PropertyChain.IsEmpty() && EditEvent.PropertyChain.GetHead() != nullptr)
-//     {
-//         if (FProperty* EditedProperty = EditEvent.PropertyChain.GetHead()->GetValue())
-//         {
-//             if (EditedProperty->GetNameCPP() == "RelativeLocation" || EditedProperty->GetNameCPP() == "RelativeRotation" || EditedProperty->GetNameCPP() == "Size")
-//             {
-//                 UpdateVisualizerComponentProperties();
-//             }
-//         }
-//     }
-// }
-
-// void APhotoSubjectSpawnRegion::PostEditUndo()
-// {
-//     Super::PostEditUndo();
-//     UpdateVisualizerComponentProperties();
-// }
 #endif

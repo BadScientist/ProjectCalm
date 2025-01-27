@@ -3,30 +3,20 @@
 
 #include "BTTask_StorePawnLocation.h"
 #include "PhotoSubjectAIController.h"
+#include "ProjectCalm/Utilities/LogMacros.h"
 
 
 EBTNodeResult::Type UBTTask_StorePawnLocation::ExecuteTask(UBehaviorTreeComponent &OwnerComp, uint8 *NodeMemory)
 {
     AAIController* AIController = OwnerComp.GetAIOwner();
-    if (AIController == nullptr)
-    {
-        UE_LOG(LogTemp, Error, TEXT("BTTask::StorePawnLocation:: AICONTROLLER NOT FOUND!"));
-        return EBTNodeResult::Failed;
-    }
+    CHECK_NULLPTR_RETVAL(AIController, LogBehaviorTree, "BTTask::LookAt:: AI CONTROLLER NOT FOUND!", EBTNodeResult::Failed);
 
     APawn* Pawn = AIController->GetPawn();
-    if (Pawn == nullptr) 
-    {
-        UE_LOG(LogTemp, Error, TEXT("BTTask::StorePawnLocation:: PAWN NOT FOUND!"));
-        return EBTNodeResult::Failed;
-    }
+    CHECK_NULLPTR_RETVAL(Pawn, LogBehaviorTree, "BTTask::LookAt:: PAWN NOT FOUND!", EBTNodeResult::Failed);
 
-    if(APhotoSubjectAIController* SubjectController = Cast<APhotoSubjectAIController>(AIController))
-    {
-        SubjectController->SetVectorKeyValue(GetSelectedBlackboardKey(), Pawn->GetActorLocation());
-        return EBTNodeResult::Succeeded;
-    }
+    APhotoSubjectAIController* SubjectController = Cast<APhotoSubjectAIController>(AIController);
+    CHECK_NULLPTR_RETVAL(SubjectController, LogBehaviorTree, "BTTask::LookAt:: COULD NOT CAST AICONTROLLER TO PHOTOSUBJECTAICONTROLLER!", EBTNodeResult::Failed);
 
-    UE_LOG(LogTemp, Error, TEXT("BTTask::StorePawnLocation:: COULD NOT CAST AICONTROLLER TO PHOTOSUBJECTAICONTROLLER!"));
-    return EBTNodeResult::Failed;
+    SubjectController->SetVectorKeyValue(GetSelectedBlackboardKey(), Pawn->GetActorLocation());
+    return EBTNodeResult::Succeeded;
 }

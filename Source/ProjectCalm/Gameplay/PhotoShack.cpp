@@ -4,12 +4,12 @@
 #include "PhotoShack.h"
 #include "ProjectCalm/Characters/Player/PlayerCharacter.h"
 #include "Proprietor.h"
+#include "ProjectCalm/Utilities/PCGameStatics.h"
 #include "ProjectCalm/Utilities/LogMacros.h"
 
 #include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/ArrowComponent.h"
-#include "Sound/SoundCue.h"
 #include "Kismet/GameplayStatics.h"
 
 #ifdef PC_DEBUG_LOGS
@@ -220,5 +220,10 @@ void APhotoShack::MoveWindow(float DeltaTime)
 
 void APhotoShack::PlayWindowMoveSound()
 {
-    if (WindowMoveSound != nullptr) {UGameplayStatics::PlaySoundAtLocation(this, WindowMoveSound, GetActorLocation());}
+    if (!WindowMoveSound.IsNone())
+    {
+        UProjectCalmGameInstance* GameInstance = PCGameStatics::GetPCGameInstance(this);
+        CHECK_NULLPTR_RET(GameInstance, LogInteractable, "PhotoShack:: No Game Instance found!");
+        GameInstance->PlayDiageticSound(WindowMoveSound, this, GetActorLocation());
+    }
 }

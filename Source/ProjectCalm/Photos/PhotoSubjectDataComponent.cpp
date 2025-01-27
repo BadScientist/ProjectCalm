@@ -52,7 +52,7 @@ bool UPhotoSubjectDataComponent::GeneratePhotoSubjectData(FConvexVolume ViewFrus
 
 	FVector Direction = (OutSubjectData.Location - CameraOrientation.Location).GetSafeNormal();
 	float Angle = FMath::RadiansToDegrees(FMath::Acos(FVector::DotProduct(Direction, CameraOrientation.Forward)) - PI / 2);
-	float AngleMultiplier = FMath::Max(1.5f - (Angle / 30), 0.5f);
+	float AngleMultiplier = FMath::Max(1.5f - (FMath::Abs(Angle) / 30), 0.5f);
 
 	if (ACharacter* OwningCharacter = Cast<ACharacter>(GetOwner()))
 	{
