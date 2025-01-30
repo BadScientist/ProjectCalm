@@ -102,7 +102,7 @@ FString ASpecialRock::GetInteractionLabel() const
 
 void ASpecialRock::OnQuestUpdated(FQuestDetails QuestDetails)
 {
-    if (QuestDetails.bIsHidden || QuestDetails.IsComplete()) {return;}
+    if (QuestDetails.IsComplete()) {return;}
 
     if (QuestDetails.QuestID == SPECIAL_ROCK_QUEST_ID && QuestDetails.ActiveStageIdx == 0)
     {

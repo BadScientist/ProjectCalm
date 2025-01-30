@@ -115,6 +115,7 @@ void APlayerCharacter::BeginPlay()
 	if (PlayerHUD != nullptr) 
 	{
 		PlayerHUD->AddToViewport();
+		HideHUD();
 		
 		if (NotificationComponent != nullptr) {NotificationComponent->SetActiveWidget(PlayerHUD->GetNotificationWidget());}
 		if (InteractionComponent != nullptr) {InteractionComponent->SetInteractionLabelText(PlayerHUD->GetInteractionLabelText());}
@@ -125,6 +126,7 @@ void APlayerCharacter::BeginPlay()
 	if (AProjectCalmGameMode* GameMode = PCGameStatics::GetPCGameMode(this))
 	{
 		GameMode->OnPlayerRespawn.AddDynamic(this, &APlayerCharacter::Respawn);
+		GameMode->OnLandscapeReady.AddDynamic(this, &APlayerCharacter::ShowHUD);
 	}
 
 	SetRespawnPoint(GetActorLocation());

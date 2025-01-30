@@ -139,7 +139,7 @@ void AInteractObjective::BeginPlay()
 
 APhotoObjective::APhotoObjective()
 {
-    ObjectiveType = EObjectiveType::PHOTO;
+    this->ObjectiveType = EObjectiveType::PHOTO;
 }
 
 void APhotoObjective::Setup(FObjectiveDetails ObjectiveDetails, uint32 InQuestID, uint32 InStageIdx, uint32 InObjectiveIdx)
@@ -148,8 +148,20 @@ void APhotoObjective::Setup(FObjectiveDetails ObjectiveDetails, uint32 InQuestID
 
     if (ObjectiveDetails.Type != ObjectiveType) {return;}
 
-    PhotoTargets.Append(ObjectiveDetails.PhotoTargets);
-    Score = ObjectiveDetails.Score;
+    this->PhotoTargets.Append(ObjectiveDetails.PhotoTargets);
+    this->Score = ObjectiveDetails.Score;
+
+#ifdef LOCAL_DEBUG_LOGS
+    UE_LOG(LogQuest, Display, TEXT("PhotoObjective:: Setup:: Quest: %i, Stage: %i, NumTargets: %i / %i, Score: %f / %f"),
+        QuestID,
+        StageIdx,
+        PhotoTargets.Num(),
+        ObjectiveDetails.PhotoTargets.Num(),
+        ObjectiveDetails.Score,
+        Score);
+#endif // DEBUG
+
+    CheckAllPhotos();
 }
 
 void APhotoObjective::CheckNewPhoto(FPhotoData Photo)
@@ -164,11 +176,14 @@ void APhotoObjective::CheckAllPhotos()
 
     TArray<FPhotoData> AllPhotos;
     GameMode->GetAllPhotos(AllPhotos);
-    for (FPhotoData Photo : AllPhotos) {if (IsQualifiedPhoto(Photo))
+    for (FPhotoData Photo : AllPhotos)
     {
-        bHasQualifiedPhoto = true;
-        return;
-    }}
+        if (IsQualifiedPhoto(Photo))
+        {
+            bHasQualifiedPhoto = true;
+            return;
+        }
+    }
 
     bHasQualifiedPhoto = false;
 }
@@ -187,8 +202,6 @@ void APhotoObjective::BeginPlay()
 
     GameMode->OnPhotoTaken.AddDynamic(this, &APhotoObjective::CheckNewPhoto);
     GameMode->OnPhotoDeleted.AddDynamic(this, &APhotoObjective::CheckAllPhotos);
-
-    CheckAllPhotos();
 }
 
 bool APhotoObjective::IsQualifiedPhoto(FPhotoData Photo)
@@ -207,7 +220,14 @@ bool APhotoObjective::IsQualifiedPhoto(FPhotoData Photo)
     }
 
 #ifdef LOCAL_DEBUG_LOGS
-    UE_LOG(LogQuest, Display, TEXT("PhotoObjective:: IsQualifiedPhoto: %i"), (Matches == PhotoTargets.Num() && Photo.Score >= Score));
+    UE_LOG(LogQuest, Display, TEXT("PhotoObjective:: Quest: %i, Stage: %i, NumTargets: %i, NumMatches: %i, Score: %f, RequiredScore: %f, IsQualifiedPhoto: %i"),
+        QuestID,
+        StageIdx,
+        PhotoTargets.Num(),
+        Matches,
+        Photo.Score,
+        Score,
+        (Matches == PhotoTargets.Num() && Photo.Score >= Score));
 #endif // DEBUG
 
     return Matches == PhotoTargets.Num() && Photo.Score >= Score;

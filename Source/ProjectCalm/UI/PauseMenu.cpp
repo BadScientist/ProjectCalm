@@ -16,6 +16,10 @@ bool UPauseMenu::Initialize()
     bool Success = Super::Initialize();
     if (!Success) {return false;}
 
+    CHECK_NULLPTR_RETVAL(ResumeButton, LogUserWidget, "PauseMenu:: No ResumeButton in Widget Blueprint!", false);
+    ResumeButton->OnClicked.AddDynamic(this, &UPauseMenu::OnCloseButtonClicked);
+    ResumeButton->OnHovered.AddDynamic(this, &UMenu::PlayButtonHoverSound);
+
     CHECK_NULLPTR_RETVAL(QuitButton, LogUserWidget, "PauseMenu:: No QuitButton in Widget Blueprint!", false);
     QuitButton->OnClicked.AddDynamic(this, &UPauseMenu::QuitToMainMenu);
     QuitButton->OnHovered.AddDynamic(this, &UMenu::PlayButtonHoverSound);
@@ -40,6 +44,11 @@ void UPauseMenu::SwitchToOptionsMenu()
 
     CHECK_NULLPTR_RET(MenuSwitcher, LogUserWidget, "PauseMenu:: No MenuSwitcher!");
     MenuSwitcher->SetActiveWidget(OptionsMenu);
+}
+
+void UPauseMenu::OnCloseButtonClicked()
+{
+    Super::OnCloseButtonClicked();
 }
 
 void UPauseMenu::SetMenuInterface(IMenuInterface *NewMenuInterface)

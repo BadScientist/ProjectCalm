@@ -1,6 +1,7 @@
 #include "PhotoSubjectComponent.h"
 #include "ProjectCalm/AI/PhotoSubjectAIController.h"
 
+#include "PhysicalMaterials/PhysicalMaterial.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "GameFramework/Character.h"
@@ -21,9 +22,10 @@ bool UPhotoSubjectComponent::Spawn(float RegionHeight)
     FHitResult OutHit;
     FCollisionQueryParams Params;
     Params.AddIgnoredActor(GetOwner());
+    Params.bReturnPhysicalMaterial = true;
 
     bool Hit = GetWorld()->LineTraceSingleByChannel(OutHit, TraceStart, TraceEnd, ECollisionChannel::ECC_WorldStatic, Params);
-    if (Hit)
+    if (Hit && OutHit.PhysMaterial.IsValid() && ValidSurfaces.Contains(OutHit.PhysMaterial->SurfaceType))
     {
         GetOwner()->SetActorLocation(OutHit.Location);
         return true;

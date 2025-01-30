@@ -36,7 +36,6 @@ FReply UPopupMenu::NativeOnKeyDown(const FGeometry &InGeometry, const FKeyEvent 
 
 void UPopupMenu::OnCloseButtonClicked()
 {
-    UE_LOG(LogTemp, Warning, TEXT("UPopupMenu::OnCloseButtonClicked"));
     PlayButtonPressedSound();
     Teardown();
 }

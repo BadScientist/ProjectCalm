@@ -12,6 +12,9 @@ class PROJECTCALM_API UPhotoSubjectComponent : public UBoxComponent
 {
 	GENERATED_BODY()
 
+    UPROPERTY(EditAnywhere)
+    TArray<TEnumAsByte<EPhysicalSurface>> ValidSurfaces;
+
 public:
     UPhotoSubjectComponent();
 

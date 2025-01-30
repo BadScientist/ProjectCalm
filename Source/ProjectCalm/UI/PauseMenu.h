@@ -23,6 +23,8 @@ protected:
 
 private:
 	UPROPERTY(meta = (BindWidget))
+	UButton* ResumeButton;
+	UPROPERTY(meta = (BindWidget))
 	UButton* QuitButton;
 	UPROPERTY(meta = (BindWidget))
 	UButton* OptionsButton;
@@ -35,6 +37,9 @@ private:
 	void QuitToMainMenu();
 	UFUNCTION()
 	void SwitchToOptionsMenu();
+
+protected:
+	virtual void OnCloseButtonClicked() override;
 
 public:
 	virtual void SetMenuInterface(IMenuInterface* NewMenuInterface) override;

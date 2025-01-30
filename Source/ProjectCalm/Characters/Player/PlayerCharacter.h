@@ -165,6 +165,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void NotifyPlayer(FString InString);
 	
+	UFUNCTION()
 	void ShowHUD();
 	void HideHUD();
 
