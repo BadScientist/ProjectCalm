@@ -98,7 +98,9 @@ void AInteractObjective::Setup(FObjectiveDetails ObjectiveDetails, uint32 InQues
 
     if (ObjectiveDetails.bSpawnNewInteractable)
     {
-        InteractTarget = GetWorld()->SpawnActor<AInteractableActor>(
+        UWorld* World = GetWorld();
+        CHECK_NULLPTR_RET(World, LogQuest, "InteractObjective:: Could not get World!");
+        InteractTarget = World->SpawnActor<AInteractableActor>(
             ObjectiveDetails.InteractTargetClass.Get(),
             ObjectiveDetails.TargetLocation,
             ObjectiveDetails.TargetRotation);

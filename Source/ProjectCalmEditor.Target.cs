@@ -8,8 +8,8 @@ public class ProjectCalmEditorTarget : TargetRules
 	public ProjectCalmEditorTarget(TargetInfo Target) : base(Target)
 	{
 		Type = TargetType.Editor;
-		DefaultBuildSettings = BuildSettingsVersion.V2;
-		IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_1;
+		DefaultBuildSettings = BuildSettingsVersion.V5;
+		IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_5;
 		ExtraModuleNames.AddRange(new string[] {"ProjectCalm", "ProjectCalmEditor"});
 	}
 }

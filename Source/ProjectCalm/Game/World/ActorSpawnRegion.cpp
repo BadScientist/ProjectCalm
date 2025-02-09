@@ -18,7 +18,7 @@ AActorSpawnRegion::AActorSpawnRegion()
 {
     PrimaryActorTick.bCanEverTick = true;
 
-#if WITH_EDITORONLY_DATA
+#if WITH_EDITOR
     SpawnRegionVisComp = CreateDefaultSubobject<USpawnRegionVisualizerComponent>(TEXT("VisualizerComponent"));
     if (SpawnRegionVisComp != nullptr) {SetRootComponent(SpawnRegionVisComp);}
 #endif
@@ -44,8 +44,9 @@ TArray<FSpawnCell> AActorSpawnRegion::CreateSpawnCells()
     FVector FirstCellLocation = FVector(RegionCenter.X - Size.X/2 + CellSize.X/2, RegionCenter.Y - Size.Y/2 + CellSize.Y/2, RegionCenter.Z);
 
 #ifdef LOCAL_DEBUG_DRAW_SHAPES
-            GetWorld()->PersistentLineBatcher->SetComponentTickEnabled(false);
-            DrawDebugBox(GetWorld(), FirstCellLocation, CellSize/2, FColor::Red, true, 100000.0f, ESceneDepthPriorityGroup::SDPG_MAX, 50.0f);
+    UWorld* World = GetWorld();
+    if (World != nullptr) {World->PersistentLineBatcher->SetComponentTickEnabled(false);}
+    DrawDebugBox(World, FirstCellLocation, CellSize/2, FColor::Red, true, 100000.0f, ESceneDepthPriorityGroup::SDPG_MAX, 50.0f);
 #endif
 
     for (int32 i = 0; i < VerticalCells; i++)
@@ -110,12 +111,14 @@ bool AActorSpawnRegion::SpawnActor(FVector Location, FSpawnInfo SpawnInfo)
     FCollisionQueryParams Params;
     Params.bReturnPhysicalMaterial = true;
 
-    bool Hit = GetWorld()->SweepSingleByChannel(OutHit, TraceStart, TraceEnd, FQuat::Identity, ECollisionChannel::ECC_Visibility, Sphere, Params);
+    UWorld* World = GetWorld();
+    CHECK_NULLPTR_RETVAL(World, LogActor, "ActorSpawnRegion:: Could not get World!", false);
+    bool Hit = World->SweepSingleByChannel(OutHit, TraceStart, TraceEnd, FQuat::Identity, ECollisionChannel::ECC_Visibility, Sphere, Params);
     if (Hit)
     {
         if (SpawnInfo.ValidSurfaces.IsEmpty() || (OutHit.PhysMaterial.IsValid() && SpawnInfo.ValidSurfaces.Contains(OutHit.PhysMaterial->SurfaceType)))
         {
-            AActor* SpawnedActor = GetWorld()->SpawnActor<AActor>(
+            AActor* SpawnedActor = World->SpawnActor<AActor>(
                 SpawnInfo.ActorClass.Get(),
                 FVector(OutHit.ImpactPoint.X, OutHit.ImpactPoint.Y, OutHit.ImpactPoint.Z + SpawnInfo.SurfaceOffset),
                 FRotator(0,0,0));
@@ -158,6 +161,64 @@ void AActorSpawnRegion::Tick(float DeltaTime)
     else if (DistanceToPlayer >= UnrenderDistance) {SetActorsActive(false);}
 }
 
-#if WITH_EDITORONLY_DATA
-IMPLEMENT_VISUALIZER(AActorSpawnRegion, Size);
+#if WITH_EDITOR
+void AActorSpawnRegion::UpdateVisualizerComponentProperties() 
+{
+    SetActorRotation(FRotator(0, GetActorRotation().Yaw, 0));
+    if (SpawnRegionVisComp == nullptr) {return;}
+    SpawnRegionVisComp->UpdateProperties(GetActorLocation(), GetActorRotation(), Size);
+}
+
+void AActorSpawnRegion::EditorApplyTranslation(const FVector& DeltaTranslation, bool bAltDown, bool bShiftDown, bool bCtrlDown)
+{
+    Super::EditorApplyTranslation(DeltaTranslation, bAltDown, bShiftDown, bCtrlDown);
+    UpdateVisualizerComponentProperties();
+}
+
+void AActorSpawnRegion::EditorApplyRotation(const FRotator& DeltaRotation, bool bAltDown, bool bShiftDown, bool bCtrlDown)
+{
+    Super::EditorApplyRotation(DeltaRotation, bAltDown, bShiftDown, bCtrlDown);
+    UpdateVisualizerComponentProperties();
+}
+
+void AActorSpawnRegion::EditorApplyScale(const FVector& DeltaScale, const FVector* PivotLocation, bool bAltDown, bool bShiftDown, bool bCtrlDown)
+{
+    const FVector CurrentScale = GetRootComponent()->GetRelativeScale3D();
+    FVector SafeDeltaScale = FVector(FMath::Clamp(DeltaScale.X, -1.0f, 1.0f), FMath::Clamp(DeltaScale.Y, -1.0f, 1.0f), FMath::Clamp(DeltaScale.Z, -1.0f, 1.0f));
+    FVector ScalingVector = FVector(1.0f) + SafeDeltaScale;
+    Size *= ScalingVector;
+
+    if (PivotLocation)
+    {
+        const FRotator ActorRotation = GetActorRotation();
+        const FVector WorldDelta = GetActorLocation() - (*PivotLocation);
+        const FVector LocalDelta = (ActorRotation.GetInverse()).RotateVector(WorldDelta);
+        const FVector LocalScaledDelta = LocalDelta * (ScalingVector / FVector(1.0f));
+        const FVector WorldScaledDelta = ActorRotation.RotateVector(LocalScaledDelta);
+        SetActorLocation(WorldScaledDelta + (*PivotLocation));
+    }
+
+    UpdateVisualizerComponentProperties();
+}
+
+void AActorSpawnRegion::PostEditChangeChainProperty(FPropertyChangedChainEvent &EditEvent)
+{
+    Super::PostEditChangeChainProperty(EditEvent);
+    if (!EditEvent.PropertyChain.IsEmpty() && EditEvent.PropertyChain.GetHead() != nullptr)
+    {
+        if (FProperty* EditedProperty = EditEvent.PropertyChain.GetHead()->GetValue())
+        {
+            if (EditedProperty->GetNameCPP() == "RelativeLocation" || EditedProperty->GetNameCPP() == "RelativeRotation" || EditedProperty->GetNameCPP() == "Size")
+            {
+                UpdateVisualizerComponentProperties();
+            }
+        }
+    }
+}
+
+void AActorSpawnRegion::PostEditUndo()
+{
+    Super::PostEditUndo();
+    UpdateVisualizerComponentProperties();
+}
 #endif

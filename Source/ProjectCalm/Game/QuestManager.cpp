@@ -174,19 +174,22 @@ bool UQuestManager::SpawnStageObjectives(uint32 QuestID, int32 StageIdx)
     return bResult;
 }
 
-AQuestObjective *UQuestManager::SpawnObjective(FObjectiveDetails ObjectiveDetails)
+AQuestObjective* UQuestManager::SpawnObjective(FObjectiveDetails ObjectiveDetails)
 {
+    UWorld* World = GetWorld();
+    CHECK_NULLPTR_RETVAL(World, LogGameMode, "QuestManager:: Could not get World!", nullptr);
+    
     switch (ObjectiveDetails.Type)
     {
     case EObjectiveType::TRAVEL:        
-        return GetWorld()->SpawnActor<ATravelObjective>(FVector(), FRotator());
+        return World->SpawnActor<ATravelObjective>(FVector(), FRotator());
     case EObjectiveType::INTERACT:
-        return GetWorld()->SpawnActor<AInteractObjective>(FVector(), FRotator());
+        return World->SpawnActor<AInteractObjective>(FVector(), FRotator());
     case EObjectiveType::PHOTO:        
-        return GetWorld()->SpawnActor<APhotoObjective>(FVector(), FRotator());
+        return World->SpawnActor<APhotoObjective>(FVector(), FRotator());
     
     default:
-        return GetWorld()->SpawnActor<AQuestObjective>(FVector(), FRotator());
+        return World->SpawnActor<AQuestObjective>(FVector(), FRotator());
     }
     return nullptr;
 }

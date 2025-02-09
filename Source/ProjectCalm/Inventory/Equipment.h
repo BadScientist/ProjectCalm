@@ -19,7 +19,7 @@ class USoundCue;
 struct FInputActionValue;
 struct FInfoFlag;
 struct FEnhancedInputActionEventBinding;
-enum EEquipReply;
+enum EEquipReply : uint8;
 
 
 UCLASS()

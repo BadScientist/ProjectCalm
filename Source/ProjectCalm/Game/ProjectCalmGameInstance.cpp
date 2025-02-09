@@ -196,6 +196,12 @@ void UProjectCalmGameInstance::PlayMusicOrAmbientSound(FName SoundName, UObject*
     SoundManager->PlayMusicOrAmbientSound(SoundName, WorldContextObject, bIsMusic, bPersistOnLevelLoad);
 }
 
+void UProjectCalmGameInstance::StopMusic(FName SoundName, float FadeDuration)
+{
+    CHECK_NULLPTR_RET(SoundManager, LogAudio, "ProjectCalmGameInstance:: No SoundManager!");
+    SoundManager->StopMusic(SoundName, FadeDuration);
+}
+
 void UProjectCalmGameInstance::PlayDiageticSound(FName SoundName, UObject *WorldContextObject, FVector SourceLocation, float VolumeMultiplier)
 {
     CHECK_NULLPTR_RET(SoundManager, LogAudio, "ProjectCalmGameInstance:: No SoundManager!");
@@ -221,6 +227,10 @@ void UProjectCalmGameInstance::AddItem(int32 ItemID)
         if (UInventoryComponent* InventoryComp = PlayerCharacter->GetInventoryComponent()) {InventoryComp->AddItem(ItemID);}
     }
 }
+
+#else
+
+void UProjectCalmGameInstance::AddItem(int32 ItemID){}
 
 #endif
 

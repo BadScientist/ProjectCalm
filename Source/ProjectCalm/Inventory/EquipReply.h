@@ -1,8 +1,10 @@
 #pragma once
 
+#include "CoreMinimal.h"
+
 
 UENUM(BlueprintType)
-enum EEquipReply
+enum EEquipReply : uint8
 {
     NO_REPLY UMETA(DisplayName = "No Reply"),
     SUCCESS UMETA(DisplayName = "Success"),

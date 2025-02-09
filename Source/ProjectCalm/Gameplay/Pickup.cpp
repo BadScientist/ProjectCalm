@@ -37,7 +37,8 @@ void APickup::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	float TimeAlive = GetWorld()->GetTimeSeconds() - SpawnTime;
+	UWorld* World = GetWorld();
+	float TimeAlive = World == nullptr ? Duration : World->GetTimeSeconds() - SpawnTime;
 
 	float Alpha = TimeAlive/Duration;
 	float NewScale = 1.0f;
@@ -114,7 +115,8 @@ void APickup::BeginPlay()
 		InteractionMesh->SetRelativeScale3D(FVector(StartScale));
 	}
 	
-	SpawnTime = GetWorld()->GetTimeSeconds();
+	UWorld* World = GetWorld();
+	SpawnTime = World == nullptr ? 0.0f : World->GetTimeSeconds();
 }
 
 void APickup::AbortPickup(APlayerCharacter *InteractingPlayer)

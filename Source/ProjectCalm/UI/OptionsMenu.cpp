@@ -122,6 +122,7 @@ void UOptionsMenu::OnUIVolumeChanged(float NewValue)
 
 void UOptionsMenu::OnWindowModeChanged(FString SelectedItem, ESelectInfo::Type SelectionType)
 {
+    if (SelectionType == ESelectInfo::Direct) {return;}
     CHECK_NULLPTR_RET(GEngine, LogUserWidget, "OptionsMenu:: GEngine is NULL!");
     
     UGameUserSettings* Settings = GEngine->GetGameUserSettings();
@@ -133,6 +134,7 @@ void UOptionsMenu::OnWindowModeChanged(FString SelectedItem, ESelectInfo::Type S
 
 void UOptionsMenu::OnResolutionChanged(FString SelectedItem, ESelectInfo::Type SelectionType)
 {
+    if (SelectionType == ESelectInfo::Direct) {return;}
     CHECK_NULLPTR_RET(GEngine, LogUserWidget, "OptionsMenu:: GEngine is NULL!");
     
     UGameUserSettings* Settings = GEngine->GetGameUserSettings();

@@ -36,7 +36,20 @@ Wolf Howl Sound Effect by NaturesTemper -- https://pixabay.com/sound-effects/wol
 Wolf Howl Sound Effect by FreeSoundsxx -- https://pixabay.com/sound-effects/wolf-howl-268619/
 Scary Wolf Growling Sound Effect by Alice_soundz -- https://pixabay.com/sound-effects/scary-wolf-growling-224086/
 
+From OpenGameArt.org:
+Forest (music) by syncopika -- https://opengameart.org/content/forest -- License: CC-BY 3.0 -- https://creativecommons.org/licenses/by/3.0/
+
 From Unreal Engine Store:
 Stylized Character Kit: Casual 01 by Epic Games
 Animal Variety Pack by PROTOFACTOR INC
 Procedural Nature Pack by PurePolygons
+
+Tools Used:
+Unreal Engine
+Blender
+Quixel Mixer
+Gimp
+Audacity
+WiX
+Visual Studio 2022
+Visual Studio Code

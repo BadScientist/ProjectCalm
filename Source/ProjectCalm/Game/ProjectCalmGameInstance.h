@@ -85,6 +85,8 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	virtual void PlayMusicOrAmbientSound(FName SoundName, UObject* WorldContextObject, bool bIsMusic, bool bPersistOnLevelLoad);
+	UFUNCTION(BlueprintCallable)
+	virtual void StopMusic(FName SoundName, float FadeDuration = -1.0f);
     virtual void PlayDiageticSound(FName SoundName, UObject* WorldContextObject, FVector SourceLocation, float VolumeMultiplier = 1.0f);
 	
 	UFUNCTION(BlueprintCallable)
@@ -103,8 +105,6 @@ public:
 	void LoadDialogueBox(FDialogue Dialogue);
 	UFUNCTION()
 	void LoadDeathScreen(FString DamageMessage);
-
-
 
 	// DEBUG COMMANDS
 

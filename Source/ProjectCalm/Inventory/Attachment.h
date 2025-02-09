@@ -7,6 +7,8 @@
 
 #include "Attachment.generated.h"
 
+enum EEquipReply : uint8;
+
 
 UCLASS()
 class PROJECTCALM_API AAttachment : public AEquipment

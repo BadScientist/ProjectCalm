@@ -12,7 +12,7 @@ class UItemData;
 
 // @todo: implement manual quest tracking
 UENUM()
-enum EObjectiveType
+enum EObjectiveType : uint8
 {
     OBJECTIVE_BASE  =0  UMETA(DisplayName = "Default"),
     TRAVEL          =1	UMETA(DisplayName = "Travel"),

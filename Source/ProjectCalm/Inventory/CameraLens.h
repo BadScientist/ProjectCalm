@@ -11,7 +11,7 @@ class USceneCaptureComponent2D;
 class UPhotoDataCollectorComponent;
 struct FConvexVolume;
 struct FPhotoData;
-enum EEquipReply;
+enum EEquipReply : uint8;
 
 /**
  * 

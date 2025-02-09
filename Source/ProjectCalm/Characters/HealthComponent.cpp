@@ -19,7 +19,9 @@ void UHealthComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	
 	if (IsDead() || FMath::IsNearlyEqual(CurrentHealth, MaxHealth)) {return;}
 
-	if (GetWorld()->GetTimeSeconds() - LastDamageTime >= RegenDelay)
+	UWorld* World = GetWorld();
+	float CurrentTime = World == nullptr ? 0.0f : World->GetTimeSeconds();
+	if (CurrentTime - LastDamageTime >= RegenDelay)
 	{
 		CurrentHealth = FMath::Min(CurrentHealth + RegenRate * DeltaTime, MaxHealth);
 	}
@@ -48,7 +50,10 @@ float UHealthComponent::ReceiveDamage(float Damage, UObject* DamageSource, FStri
 	float ActualDamage = (Damage > CurrentHealth) ? CurrentHealth : Damage;
 	if (ActualDamage > 0)
 	{
-		LastDamageTime = GetWorld()->GetTimeSeconds();
+		UWorld* World = GetWorld();
+		float CurrentTime = World == nullptr ? 0.0f : World->GetTimeSeconds();
+
+		LastDamageTime = CurrentTime;
 		LastDamageMessage = DamageMessage;
 		if (OnDamageTaken.IsBound()) {OnDamageTaken.Broadcast();}
 	}

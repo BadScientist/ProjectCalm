@@ -18,7 +18,7 @@ class ACameraFlash;
 class ACameraLens;
 struct FInputActionValue;
 struct FPhotoData;
-enum EEquipReply;
+enum EEquipReply : uint8;
 
 
 UENUM()

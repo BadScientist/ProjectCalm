@@ -1,0 +1,337 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <Fragment>
+        <DirectoryRef Id="INSTALLFOLDER">
+            <Component Id="cmpD343821598F5166C12FB0FFB912D2F20" Guid="{1EC1C10F-E092-46F7-9C12-50A00D0748E8}">
+                <File Id="filA64E73FE7D7667A96178DC0E6EAE06DC" KeyPath="yes" Source="$(var.BasePath)\Application.ico" />
+            </Component>
+            <Component Id="cmp5C343F1904A2B78819FFA6FC7BD88DAE" Guid="{0D04FBA8-93AC-4991-8FD2-74C242211BEA}">
+                <File Id="fil909D4349BA7FED0F1A616A0FEF53827D" KeyPath="yes" Source="$(var.BasePath)\Manifest_DebugFiles_Win64.txt" />
+            </Component>
+            <Component Id="cmpFF64DC5E6A88A04C95679A2F09A8AC2B" Guid="{0FFE148A-D6BE-4E17-AC50-75FC0030E447}">
+                <File Id="filE38704CD067FF8A17D55A10E4936C638" KeyPath="yes" Source="$(var.BasePath)\Manifest_NonUFSFiles_Win64.txt" />
+            </Component>
+            <Component Id="cmp4415E7A8CF3B39C452B901DD5B93D01C" Guid="{65E83693-6702-4C86-A936-8636F4C1EEC6}">
+                <File Id="filE38382B8C07314C5C5F33EA41AAE675C" KeyPath="yes" Source="$(var.BasePath)\Manifest_UFSFiles_Win64.txt" />
+            </Component>
+            <Component Id="cmpEF52736E745987DDD2F3E7029DF1C864" Guid="{AF8C93FF-D1CC-43EA-95C9-14671EBCEAD7}">
+                <File Id="fil3BFA3A36FD485895E63EE23C17440D98" KeyPath="yes" Source="$(var.BasePath)\ProjectCalm.exe" />
+            </Component>
+            <Directory Id="dir2AB38F46EAECCB94563A9BD0DCC148AD" Name="Engine">
+                <Directory Id="dirE1064A66121FDC1B281074C67B8982EF" Name="Binaries">
+                    <Directory Id="dir8BC0E5C7C23909FC717BCFB9B59D2263" Name="ThirdParty">
+                        <Directory Id="dirA9A7291130EBE98EFA3B599A2AAF8CA6" Name="DbgHelp">
+                            <Component Id="cmp41E9FCAD39B2BC5DDD61F3B41F56287C" Guid="{AF2D47F0-E30D-4A87-877A-9D6EFE3679F4}">
+                                <File Id="fil3AA84F49F067A8533F0124FA44458516" KeyPath="yes" Source="$(var.BasePath)\Engine\Binaries\ThirdParty\DbgHelp\dbghelp.dll" />
+                            </Component>
+                        </Directory>
+                        <Directory Id="dirE77821B1515A2874374137EAA89C701D" Name="MsQuic">
+                            <Directory Id="dir6EB644A6D1E3330FD9B5159F950052F8" Name="v220">
+                                <Directory Id="dir6EB7200440FA669E9386C01E760D649E" Name="win64">
+                                    <Component Id="cmpD4CD3117BFB6C0C86CA726B61261DFC1" Guid="{5B0AFA42-129F-4566-9240-5F63D992D4AE}">
+                                        <File Id="fil0E2485122B8C421E48D3E7398817ED4B" KeyPath="yes" Source="$(var.BasePath)\Engine\Binaries\ThirdParty\MsQuic\v220\win64\msquic.dll" />
+                                    </Component>
+                                </Directory>
+                            </Directory>
+                        </Directory>
+                        <Directory Id="dirE6F848F59A4A27CA9D2D721824FE42F9" Name="NVIDIA">
+                            <Directory Id="dirC7C782B6DD4896B898B6E5ABC9958384" Name="NVaftermath">
+                                <Directory Id="dirF47512E920F3DBEBFDA08E0C0775191A" Name="Win64">
+                                    <Component Id="cmp07B36CC1DA433970E21F82C76C3EE946" Guid="{75A2D4F1-D39E-4942-B05E-352E859F591C}">
+                                        <File Id="filAC48AF5E99E0A583FE7E3C200BAC3491" KeyPath="yes" Source="$(var.BasePath)\Engine\Binaries\ThirdParty\NVIDIA\NVaftermath\Win64\GFSDK_Aftermath_Lib.x64.dll" />
+                                    </Component>
+                                </Directory>
+                            </Directory>
+                        </Directory>
+                        <Directory Id="dir5F7C3B1BF4F2CC2EA8704738C3EADF06" Name="Ogg">
+                            <Directory Id="dirF6B7BD1950305043197EFF3AC6BDFB7D" Name="Win64">
+                                <Directory Id="dir9CAFE72DB8D1BF5A15E9F74DF00DD75C" Name="VS2015">
+                                    <Component Id="cmp379324C45B84FFBACB0A126DC16B952D" Guid="{6CCC87B8-94AF-4A62-9D3F-19F99AB58FFC}">
+                                        <File Id="fil828A555B8606B91B1C45C2BBF1A074F1" KeyPath="yes" Source="$(var.BasePath)\Engine\Binaries\ThirdParty\Ogg\Win64\VS2015\libogg_64.dll" />
+                                    </Component>
+                                </Directory>
+                            </Directory>
+                        </Directory>
+                        <Directory Id="dirC9A2470D9B138B0AAA2AFE144D9ACE8A" Name="Vorbis">
+                            <Directory Id="dirF3E7B2F843A4E6D1541B581FEB2B514A" Name="Win64">
+                                <Directory Id="dirA007A2AB6E22064666E4E225D34820D9" Name="VS2015">
+                                    <Component Id="cmp111CD54AFACEF48919FA128E813C9B8C" Guid="{FA6E9E8A-442C-4C9C-BF4F-29AE1ABED981}">
+                                        <File Id="filE46926C1C834F70B9E8FF11C9C3FFF93" KeyPath="yes" Source="$(var.BasePath)\Engine\Binaries\ThirdParty\Vorbis\Win64\VS2015\libvorbisfile_64.dll" />
+                                    </Component>
+                                    <Component Id="cmpACFE1F7D7FCEAF8C632BDB513D93312F" Guid="{57D035DD-E459-4B4F-8A09-076FB7341285}">
+                                        <File Id="fil83984C3DFDAB8B636E34158C85ED49A2" KeyPath="yes" Source="$(var.BasePath)\Engine\Binaries\ThirdParty\Vorbis\Win64\VS2015\libvorbis_64.dll" />
+                                    </Component>
+                                </Directory>
+                            </Directory>
+                        </Directory>
+                        <Directory Id="dir7C6642B886BDDFB01D2D10353F6F63FC" Name="Vulkan">
+                            <Directory Id="dir128BEC58941FCA5B53C890E9B81510E4" Name="Win64">
+                                <Component Id="cmp62483A1265F6C0CCCC06D7EEA2CBDC26" Guid="{74F285E4-0B64-4C46-96CA-A7BFA95E48DB}">
+                                    <File Id="filDCE1A29615422188831C8EA83A2CD50E" KeyPath="yes" Source="$(var.BasePath)\Engine\Binaries\ThirdParty\Vulkan\Win64\VkLayer_api_dump.dll" />
+                                </Component>
+                                <Component Id="cmpA60C11483BFC57357C5E0DDD974EA2AE" Guid="{16AC876C-CCB8-4E3D-A08D-8C445E68A0CC}">
+                                    <File Id="fil7CCAA71ED0A58E1AF55F82D38143D750" KeyPath="yes" Source="$(var.BasePath)\Engine\Binaries\ThirdParty\Vulkan\Win64\VkLayer_api_dump.json" />
+                                </Component>
+                                <Component Id="cmp482A163A3C8EFE33752CACCA04F8C490" Guid="{B34057AC-BD69-48BC-93C7-C2AB43757D8D}">
+                                    <File Id="filDE559B031ADEE68D05CC0C570A359BBD" KeyPath="yes" Source="$(var.BasePath)\Engine\Binaries\ThirdParty\Vulkan\Win64\VkLayer_gfxreconstruct.dll" />
+                                </Component>
+                                <Component Id="cmp42607949E434367EF544396CCB505446" Guid="{E4A9661B-D5EA-4FE8-8412-E12319FC8C78}">
+                                    <File Id="fil719F534DC89B1A277B400C7304A783B1" KeyPath="yes" Source="$(var.BasePath)\Engine\Binaries\ThirdParty\Vulkan\Win64\VkLayer_gfxreconstruct.json" />
+                                </Component>
+                                <Component Id="cmpB7DEAE264C4D74E1E76676A89AB46C36" Guid="{EC93C29F-3645-4E43-9FFC-C4B165709315}">
+                                    <File Id="filC1892D8E0D0B2AED0134E6D7B47DC708" KeyPath="yes" Source="$(var.BasePath)\Engine\Binaries\ThirdParty\Vulkan\Win64\VkLayer_khronos_profiles.dll" />
+                                </Component>
+                                <Component Id="cmpD2DF851EE6476B00EBA8DDF366A50AC6" Guid="{DB6086ED-47C5-4E00-ABDD-D8C86C34B0D7}">
+                                    <File Id="filD7DAC21A956DB6D095C4BAA050A1FA90" KeyPath="yes" Source="$(var.BasePath)\Engine\Binaries\ThirdParty\Vulkan\Win64\VkLayer_khronos_profiles.json" />
+                                </Component>
+                                <Component Id="cmp2108C9F7FF6BE540A1D5ABE9B45C70B3" Guid="{D3409D94-E5D0-4B58-ADFC-718781041B4E}">
+                                    <File Id="filBF1FEC10C3C227B74A99E42A9F58A5C0" KeyPath="yes" Source="$(var.BasePath)\Engine\Binaries\ThirdParty\Vulkan\Win64\VkLayer_khronos_synchronization2.dll" />
+                                </Component>
+                                <Component Id="cmpDFCDBE744BC21EB017D287688C24437C" Guid="{1D8A770A-80E9-4C10-B597-C5C343BB1072}">
+                                    <File Id="fil9DDDCD43CDCBA03A61E2C41405C3DE45" KeyPath="yes" Source="$(var.BasePath)\Engine\Binaries\ThirdParty\Vulkan\Win64\VkLayer_khronos_synchronization2.json" />
+                                </Component>
+                                <Component Id="cmpC26FD9918D0B4B974D65FC65B0DC6EE5" Guid="{417E955F-B559-4F35-A0FE-6D068E81E901}">
+                                    <File Id="fil522B00450CCBEBF370DDD7947CC9C7B3" KeyPath="yes" Source="$(var.BasePath)\Engine\Binaries\ThirdParty\Vulkan\Win64\VkLayer_khronos_validation.dll" />
+                                </Component>
+                                <Component Id="cmp0FDD3FBD1699EF0D9F1675CDD230FEE1" Guid="{EF0F82E3-4C1D-416E-A380-AA548847431F}">
+                                    <File Id="filCBB38AF362E7D20E35E701C4CF3B10D1" KeyPath="yes" Source="$(var.BasePath)\Engine\Binaries\ThirdParty\Vulkan\Win64\VkLayer_khronos_validation.json" />
+                                </Component>
+                            </Directory>
+                        </Directory>
+                        <Directory Id="dir174A0B006E56FAA439ED2812CD25BAD4" Name="Windows">
+                            <Directory Id="dirCA4D7C20DFEAF360960C8E98365E74B7" Name="WinPixEventRuntime">
+                                <Directory Id="dir3C772493F0EC1DFBDC060C478D37354E" Name="x64">
+                                    <Component Id="cmp388BBF358722AC7F73E978B20A10090F" Guid="{96B98A8D-CA18-4C80-9ED4-26CCC283C5BD}">
+                                        <File Id="filC15A1C66955F971DCFA887D22D1B99E4" KeyPath="yes" Source="$(var.BasePath)\Engine\Binaries\ThirdParty\Windows\WinPixEventRuntime\x64\WinPixEventRuntime.dll" />
+                                    </Component>
+                                </Directory>
+                            </Directory>
+                            <Directory Id="dirEDDA24723B42505956C18F167079C4BB" Name="XAudio2_9">
+                                <Directory Id="dir0463DCA466B20A92F1FE51F9B358FBD6" Name="x64">
+                                    <Component Id="cmpA8F696FB2521CDBADB4BF91BFDF6D443" Guid="{9FC1CD98-A19D-4494-B645-E538007967D1}">
+                                        <File Id="fil03FE8C0CAD3D74C5744F0EB4CAF57ABD" KeyPath="yes" Source="$(var.BasePath)\Engine\Binaries\ThirdParty\Windows\XAudio2_9\x64\xaudio2_9redist.dll" />
+                                    </Component>
+                                </Directory>
+                            </Directory>
+                        </Directory>
+                    </Directory>
+                    <Directory Id="dirD3DB1794F380F9DDA87A8D8CA22220C9" Name="Win64">
+                        <Component Id="cmp091F7A84617776A6F516E31B061EB136" Guid="{62EEDD5B-10DB-452B-861B-F03AFBB34B9B}">
+                            <File Id="fil2110199389AA7105CC2DC86321D4C39E" KeyPath="yes" Source="$(var.BasePath)\Engine\Binaries\Win64\EOSSDK-Win64-Shipping.dll" />
+                        </Component>
+                    </Directory>
+                </Directory>
+                <Directory Id="dirD4F6971032403FAEE3783C4E10EFB8FA" Name="Config">
+                    <Component Id="cmpFF47F63FD881A7BE15B7B014DCFF3931" Guid="{54FC8F1F-230F-4735-B8D5-294FC7666B7C}">
+                        <File Id="fil40FD76F1169AE444D08893DDCC7BDB3C" KeyPath="yes" Source="$(var.BasePath)\Engine\Config\StagedBuild_ProjectCalm.ini" />
+                    </Component>
+                </Directory>
+                <Directory Id="dir902CD7758DA09DF63D30FF81A1B62AC0" Name="Content">
+                    <Directory Id="dir08BB254E7BFC33CCB58F96458FEC1ACE" Name="Renderer">
+                        <Component Id="cmp38631CEA31DD98E2A309958AE18CA644" Guid="{1218B230-0B6E-4DDE-9A1D-DFAC62BD1280}">
+                            <File Id="filF85FF31D6A15CD6C07A97D3C90719497" KeyPath="yes" Source="$(var.BasePath)\Engine\Content\Renderer\TessellationTable.bin" />
+                        </Component>
+                    </Directory>
+                    <Directory Id="dirE09A89A1063958A20D38FF079A056909" Name="Slate">
+                        <Directory Id="dir3890F8C08F775604ED333C1EDE674C85" Name="Cursor">
+                            <Component Id="cmpE1C3D6D8E11379006DBAC13066D68C19" Guid="{25C1856C-ACDF-440D-B67D-D7D33423CEA7}">
+                                <File Id="filBF519805BC6B7BB18E9AF970181AE82C" KeyPath="yes" Source="$(var.BasePath)\Engine\Content\Slate\Cursor\invisible.cur" />
+                            </Component>
+                        </Directory>
+                    </Directory>
+                    <Directory Id="dirC0C597B2E6330294D145B729E0AC0BE9" Name="SlateDebug">
+                        <Directory Id="dir7CEF7D9A91052655813FAA1860CEFA0B" Name="Fonts">
+                            <Component Id="cmp311D0FD6D3726829E24A119AD8F07EC2" Guid="{DEB41A92-4858-475A-990F-B6B5CD5D74E7}">
+                                <File Id="filEE0B270F0F71616ED6CB14C26B0BE7A9" KeyPath="yes" Source="$(var.BasePath)\Engine\Content\SlateDebug\Fonts\LastResort.tps" />
+                            </Component>
+                            <Component Id="cmp095886D2B5CF8DBA18B94F337CF8CC63" Guid="{B273947C-F3EF-4CAE-B47C-0490A6D5A7CE}">
+                                <File Id="filFAC84F11B91C3B37D4199A64050D845E" KeyPath="yes" Source="$(var.BasePath)\Engine\Content\SlateDebug\Fonts\LastResort.ttf" />
+                            </Component>
+                        </Directory>
+                    </Directory>
+                </Directory>
+                <Directory Id="dir0AB687573E0F1DDCF719CD8C8D972B9D" Name="Extras">
+                    <Directory Id="dirACBC36EE8342E78866D16904884A7DAB" Name="GPUDumpViewer">
+                        <Component Id="cmp46391F841F6782B16313DEB7F75341CF" Guid="{220BEE25-8CE4-4FD9-B74D-15D9AF9D6033}">
+                            <File Id="fil92489A162B39ADADCF3AE4D879F4B463" KeyPath="yes" Source="$(var.BasePath)\Engine\Extras\GPUDumpViewer\GPUDumpViewer.html" />
+                        </Component>
+                        <Component Id="cmp61536607D34EF840074D04B4DD9F6319" Guid="{B988AD4C-78D2-48ED-AEDE-0ACA19A93B44}">
+                            <File Id="fil839D7220AB0826677FE14E3A8A26CD3F" KeyPath="yes" Source="$(var.BasePath)\Engine\Extras\GPUDumpViewer\OpenGPUDumpViewer.bat" />
+                        </Component>
+                        <Component Id="cmp643F9C9D3C45C1490C17732FA46B6960" Guid="{41A00D60-7108-486E-908E-4B2AD0E6CC34}">
+                            <File Id="fil976A1EA2F0C4798A2E13088A82FF9ED3" KeyPath="yes" Source="$(var.BasePath)\Engine\Extras\GPUDumpViewer\OpenGPUDumpViewer.sh" />
+                        </Component>
+                    </Directory>
+                    <Directory Id="dir9E5EDDED8B8471C405E51F93139F5D90" Name="Redist">
+                        <Directory Id="dirE91301220B9AA80B64DD1413292D4FD3" Name="en-us">
+                            <Component Id="cmpB8833BAF27DDF1BE6850104211BF6EB1" Guid="{8BAB83AC-301F-455C-B01F-60E3A3FE6CF1}">
+                                <File Id="fil16E2E026EC59F77AFB171D2AB79A7C23" KeyPath="yes" Source="$(var.BasePath)\Engine\Extras\Redist\en-us\UEPrereqSetup_x64.exe" />
+                            </Component>
+                        </Directory>
+                    </Directory>
+                </Directory>
+                <Directory Id="dir8AD752A5BEABE9CE049DACCA2AACC5FF" Name="Plugins">
+                    <Directory Id="dir16DC7193D2095D7886F7DF9DCA1F60EF" Name="NNE">
+                        <Directory Id="dirD106BCF21CA76398724FFE858DBF9E5E" Name="NNERuntimeORT">
+                            <Directory Id="dirBD736FE67521D785C065591A24ED4CBF" Name="Binaries">
+                                <Directory Id="dirEBF3EF502CAD9707F21C1A4396BB9FF7" Name="ThirdParty">
+                                    <Directory Id="dirF2C83AC8E9AC25D61D0AFB4D4ED6DB5F" Name="Onnxruntime">
+                                        <Directory Id="dirE194B707944C45ABA419AC04D80020E8" Name="Win64">
+                                            <Component Id="cmpC5BE8CEA2DBB435BBC13908577E2EA46" Guid="{1CD01926-0B69-4C57-B88C-9573AA08D208}">
+                                                <File Id="filD01A6DCD4B3FF01235A59488C798D8C6" KeyPath="yes" Source="$(var.BasePath)\Engine\Plugins\NNE\NNERuntimeORT\Binaries\ThirdParty\Onnxruntime\Win64\onnxruntime.dll" />
+                                            </Component>
+                                        </Directory>
+                                    </Directory>
+                                </Directory>
+                            </Directory>
+                        </Directory>
+                    </Directory>
+                </Directory>
+            </Directory>
+            <Directory Id="dir7417BE3B46116C8A04D2E6C729965199" Name="ProjectCalm">
+                <Directory Id="dirC8FE39361A52A2483225BF14451B5687" Name="Binaries">
+                    <Directory Id="dir608648CF4541943102EAF99F38EDDF4D" Name="Win64">
+                        <Component Id="cmpBD1383CB1D25C4D8FF58AE220E2F9D6F" Guid="{FC73EE0C-625E-4A91-B92B-775D5E158CF7}">
+                            <File Id="filFB6260271ECD6C8416FAEBD42B3CA454" KeyPath="yes" Source="$(var.BasePath)\ProjectCalm\Binaries\Win64\boost_atomic-mt-x64.dll" />
+                        </Component>
+                        <Component Id="cmp8A7A94FEF63E9147E825E98183EFD01E" Guid="{F18C0F6E-41E8-4F7D-9E7C-E4C5D90B5180}">
+                            <File Id="filB3EFD74C8445F68CF43D573F19C7B0FA" KeyPath="yes" Source="$(var.BasePath)\ProjectCalm\Binaries\Win64\boost_chrono-mt-x64.dll" />
+                        </Component>
+                        <Component Id="cmpE1033536280F2327F9B391F01B40A63B" Guid="{3C845249-EB05-4D1C-BA17-732711EA7E25}">
+                            <File Id="fil8F59338B9AE7E3ECD0F6255EE39F3001" KeyPath="yes" Source="$(var.BasePath)\ProjectCalm\Binaries\Win64\boost_filesystem-mt-x64.dll" />
+                        </Component>
+                        <Component Id="cmpDD716B04190B0710B6172A50C3EB02A5" Guid="{022C1880-C92C-472E-AAF5-A973FC2A19D1}">
+                            <File Id="filAE2B684F51C51A03F2CE332C833E2B8A" KeyPath="yes" Source="$(var.BasePath)\ProjectCalm\Binaries\Win64\boost_iostreams-mt-x64.dll" />
+                        </Component>
+                        <Component Id="cmp6ABBEE86892A10D0A7679B5EABE9A162" Guid="{1FBE99BB-44C5-4F83-A24C-A71D61F27612}">
+                            <File Id="filEC26A4C4445642AD03EADAD833F9B1A5" KeyPath="yes" Source="$(var.BasePath)\ProjectCalm\Binaries\Win64\boost_program_options-mt-x64.dll" />
+                        </Component>
+                        <Component Id="cmp319DC8D23C53E24B050DE647984B3824" Guid="{9EF9DE87-6559-464C-A8AF-2471BF536BDB}">
+                            <File Id="filFEBE89B4B957F7F5C23B88900CB9D420" KeyPath="yes" Source="$(var.BasePath)\ProjectCalm\Binaries\Win64\boost_python311-mt-x64.dll" />
+                        </Component>
+                        <Component Id="cmpC5853CF5B925AA9199DF9FE138E4188D" Guid="{B675B386-E988-4C78-AB31-0D29FC0A4C71}">
+                            <File Id="fil5968FB7196C80F2510AEA050B1F35537" KeyPath="yes" Source="$(var.BasePath)\ProjectCalm\Binaries\Win64\boost_regex-mt-x64.dll" />
+                        </Component>
+                        <Component Id="cmpB99C9EC392EB936109E053342686B87C" Guid="{A93A760B-65E8-4530-B7CF-28911ED8C4B6}">
+                            <File Id="filE9BF5F596CD5B99F52F701026C5D8144" KeyPath="yes" Source="$(var.BasePath)\ProjectCalm\Binaries\Win64\boost_system-mt-x64.dll" />
+                        </Component>
+                        <Component Id="cmpDAE7F13B40094A392E040A8C01BAF251" Guid="{1FA1DF0F-2B21-4ED8-A6B9-CB6DC1509DA3}">
+                            <File Id="filBE0EB287393A5DE84E54FBBDDD1B7664" KeyPath="yes" Source="$(var.BasePath)\ProjectCalm\Binaries\Win64\boost_thread-mt-x64.dll" />
+                        </Component>
+                        <Component Id="cmp9088F43F197B440B8BCF4C8242ED012F" Guid="{1C709E02-ED7A-4493-9D35-F37F71C748E4}">
+                            <File Id="fil5270A043C7B0EBB7C907990A74836B68" KeyPath="yes" Source="$(var.BasePath)\ProjectCalm\Binaries\Win64\ProjectCalm.exe" />
+                        </Component>
+                        <Component Id="cmp7517E38E1EB43C73BB5B24EDC356CEE1" Guid="{4D35477C-A0C4-410F-8630-6B82749F7514}">
+                            <File Id="fil1FF21AAD313846C7BC03A42B3D58C8F8" KeyPath="yes" Source="$(var.BasePath)\ProjectCalm\Binaries\Win64\ProjectCalm.pdb" />
+                        </Component>
+                        <Component Id="cmpF2EC24113D652519E9B07C5092C1D569" Guid="{FE1568DC-4057-43B8-80A4-77C39BCB102A}">
+                            <File Id="fil4951EE0A90568C77E41F8B8A21FA33D0" KeyPath="yes" Source="$(var.BasePath)\ProjectCalm\Binaries\Win64\tbb.dll" />
+                        </Component>
+                        <Component Id="cmp86F70AE0778116B5790D53AEFC2591B2" Guid="{D1076661-A5D8-437B-8830-74F825584585}">
+                            <File Id="fil009D2773558BC137681AE95E3608F4B1" KeyPath="yes" Source="$(var.BasePath)\ProjectCalm\Binaries\Win64\tbb.pdb" />
+                        </Component>
+                        <Component Id="cmpDC0F22B3B828B48F60A5C940D5E8EF6B" Guid="{A719CD7D-CAA5-482F-A001-3996EB2954D4}">
+                            <File Id="fil4F057CB209FB201D83FD19EFF581B90D" KeyPath="yes" Source="$(var.BasePath)\ProjectCalm\Binaries\Win64\tbbmalloc.dll" />
+                        </Component>
+                        <Component Id="cmp44BD5913CFAB61684E391F138CEB7764" Guid="{2DAAF269-CEA5-40D6-A58B-E130504ED753}">
+                            <File Id="filCB27E50D16F1C6A6FCFE2D0333A68F6B" KeyPath="yes" Source="$(var.BasePath)\ProjectCalm\Binaries\Win64\tbbmalloc.pdb" />
+                        </Component>
+                        <Directory Id="dirD9B5DB557742CE73D32421D84280BC8D" Name="D3D12">
+                            <Component Id="cmp7C1C091A61EAA88EED6637EFBD04087F" Guid="{B82741FD-B1FF-4010-BDBD-398CD1B83478}">
+                                <File Id="fil4F43C46B1C1797DB8F6FC6EF2BC7C6A3" KeyPath="yes" Source="$(var.BasePath)\ProjectCalm\Binaries\Win64\D3D12\D3D12Core.dll" />
+                            </Component>
+                            <Component Id="cmp21AE6FF52748B3E6B117953A2DE5B4CD" Guid="{A22669B7-CDA3-478D-BF7F-8F73375C3849}">
+                                <File Id="filB444D5210EDFEC06C341A4B56737DE74" KeyPath="yes" Source="$(var.BasePath)\ProjectCalm\Binaries\Win64\D3D12\d3d12SDKLayers.dll" />
+                            </Component>
+                        </Directory>
+                        <Directory Id="dir1BB1F58F50E1DDFE1BD1F4A974250450" Name="DML">
+                            <Component Id="cmp20623FF070EF3E096030A0DF23D3FE81" Guid="{8CCE5022-0FC0-4265-99CB-6F11A5D332BB}">
+                                <File Id="fil6D88D21BF054B675A784023A5FA9F597" KeyPath="yes" Source="$(var.BasePath)\ProjectCalm\Binaries\Win64\DML\DirectML.dll" />
+                            </Component>
+                        </Directory>
+                    </Directory>
+                </Directory>
+                <Directory Id="dir54D56658C23B99BA99E7CF3679668C4D" Name="Content">
+                    <Directory Id="dirEE48F31842D60E64ACBEF2E490CF906E" Name="Paks">
+                        <Component Id="cmpAB063415EF03C265B0D39566EC7FDEEA" Guid="{4E08500B-217C-429D-9325-8BCFDC1A1714}">
+                            <File Id="fil852A0F604F502FF23F7123286C512868" KeyPath="yes" Source="$(var.BasePath)\ProjectCalm\Content\Paks\global.ucas" />
+                        </Component>
+                        <Component Id="cmp8472EFF1B7F7AA52B49F87BE00A69811" Guid="{FC003329-72CE-4555-85B3-9B361B761DBA}">
+                            <File Id="fil51E53C0406D10F21AF676D6901AE4ABD" KeyPath="yes" Source="$(var.BasePath)\ProjectCalm\Content\Paks\global.utoc" />
+                        </Component>
+                        <Component Id="cmpB2EAC6E8715C6DBF5D68BEA59DA66F65" Guid="{748FE6A1-B252-4EE6-A772-55646BE2C265}">
+                            <File Id="filC9FD10040858D6330D9B4C9F343C993C" KeyPath="yes" Source="$(var.BasePath)\ProjectCalm\Content\Paks\ProjectCalm-Windows.pak" />
+                        </Component>
+                        <Component Id="cmpA7D38130E28F814F496F5D51D0C876BB" Guid="{A3C08A7B-A204-4E83-982C-8AA987716F85}">
+                            <File Id="filB9B7C74939357882A26A848E6AF689E7" KeyPath="yes" Source="$(var.BasePath)\ProjectCalm\Content\Paks\ProjectCalm-Windows.ucas" />
+                        </Component>
+                        <Component Id="cmpEFCC8F322C3DAC64A940D6AA8539030E" Guid="{D5B2A759-61C4-45F2-ADB4-C56F9F548FBD}">
+                            <File Id="fil011C160EE430BC26B992E90205D09313" KeyPath="yes" Source="$(var.BasePath)\ProjectCalm\Content\Paks\ProjectCalm-Windows.utoc" />
+                        </Component>
+                    </Directory>
+                </Directory>
+            </Directory>
+        </DirectoryRef>
+    </Fragment>
+    <Fragment>
+        <ComponentGroup Id="InstallComponents">
+            <ComponentRef Id="cmpD343821598F5166C12FB0FFB912D2F20" />
+            <ComponentRef Id="cmp5C343F1904A2B78819FFA6FC7BD88DAE" />
+            <ComponentRef Id="cmpFF64DC5E6A88A04C95679A2F09A8AC2B" />
+            <ComponentRef Id="cmp4415E7A8CF3B39C452B901DD5B93D01C" />
+            <ComponentRef Id="cmpEF52736E745987DDD2F3E7029DF1C864" />
+            <ComponentRef Id="cmp41E9FCAD39B2BC5DDD61F3B41F56287C" />
+            <ComponentRef Id="cmpD4CD3117BFB6C0C86CA726B61261DFC1" />
+            <ComponentRef Id="cmp07B36CC1DA433970E21F82C76C3EE946" />
+            <ComponentRef Id="cmp379324C45B84FFBACB0A126DC16B952D" />
+            <ComponentRef Id="cmp111CD54AFACEF48919FA128E813C9B8C" />
+            <ComponentRef Id="cmpACFE1F7D7FCEAF8C632BDB513D93312F" />
+            <ComponentRef Id="cmp62483A1265F6C0CCCC06D7EEA2CBDC26" />
+            <ComponentRef Id="cmpA60C11483BFC57357C5E0DDD974EA2AE" />
+            <ComponentRef Id="cmp482A163A3C8EFE33752CACCA04F8C490" />
+            <ComponentRef Id="cmp42607949E434367EF544396CCB505446" />
+            <ComponentRef Id="cmpB7DEAE264C4D74E1E76676A89AB46C36" />
+            <ComponentRef Id="cmpD2DF851EE6476B00EBA8DDF366A50AC6" />
+            <ComponentRef Id="cmp2108C9F7FF6BE540A1D5ABE9B45C70B3" />
+            <ComponentRef Id="cmpDFCDBE744BC21EB017D287688C24437C" />
+            <ComponentRef Id="cmpC26FD9918D0B4B974D65FC65B0DC6EE5" />
+            <ComponentRef Id="cmp0FDD3FBD1699EF0D9F1675CDD230FEE1" />
+            <ComponentRef Id="cmp388BBF358722AC7F73E978B20A10090F" />
+            <ComponentRef Id="cmpA8F696FB2521CDBADB4BF91BFDF6D443" />
+            <ComponentRef Id="cmp091F7A84617776A6F516E31B061EB136" />
+            <ComponentRef Id="cmpFF47F63FD881A7BE15B7B014DCFF3931" />
+            <ComponentRef Id="cmp38631CEA31DD98E2A309958AE18CA644" />
+            <ComponentRef Id="cmpE1C3D6D8E11379006DBAC13066D68C19" />
+            <ComponentRef Id="cmp311D0FD6D3726829E24A119AD8F07EC2" />
+            <ComponentRef Id="cmp095886D2B5CF8DBA18B94F337CF8CC63" />
+            <ComponentRef Id="cmp46391F841F6782B16313DEB7F75341CF" />
+            <ComponentRef Id="cmp61536607D34EF840074D04B4DD9F6319" />
+            <ComponentRef Id="cmp643F9C9D3C45C1490C17732FA46B6960" />
+            <ComponentRef Id="cmpB8833BAF27DDF1BE6850104211BF6EB1" />
+            <ComponentRef Id="cmpC5BE8CEA2DBB435BBC13908577E2EA46" />
+            <ComponentRef Id="cmpBD1383CB1D25C4D8FF58AE220E2F9D6F" />
+            <ComponentRef Id="cmp8A7A94FEF63E9147E825E98183EFD01E" />
+            <ComponentRef Id="cmpE1033536280F2327F9B391F01B40A63B" />
+            <ComponentRef Id="cmpDD716B04190B0710B6172A50C3EB02A5" />
+            <ComponentRef Id="cmp6ABBEE86892A10D0A7679B5EABE9A162" />
+            <ComponentRef Id="cmp319DC8D23C53E24B050DE647984B3824" />
+            <ComponentRef Id="cmpC5853CF5B925AA9199DF9FE138E4188D" />
+            <ComponentRef Id="cmpB99C9EC392EB936109E053342686B87C" />
+            <ComponentRef Id="cmpDAE7F13B40094A392E040A8C01BAF251" />
+            <ComponentRef Id="cmp9088F43F197B440B8BCF4C8242ED012F" />
+            <ComponentRef Id="cmp7517E38E1EB43C73BB5B24EDC356CEE1" />
+            <ComponentRef Id="cmpF2EC24113D652519E9B07C5092C1D569" />
+            <ComponentRef Id="cmp86F70AE0778116B5790D53AEFC2591B2" />
+            <ComponentRef Id="cmpDC0F22B3B828B48F60A5C940D5E8EF6B" />
+            <ComponentRef Id="cmp44BD5913CFAB61684E391F138CEB7764" />
+            <ComponentRef Id="cmp7C1C091A61EAA88EED6637EFBD04087F" />
+            <ComponentRef Id="cmp21AE6FF52748B3E6B117953A2DE5B4CD" />
+            <ComponentRef Id="cmp20623FF070EF3E096030A0DF23D3FE81" />
+            <ComponentRef Id="cmpAB063415EF03C265B0D39566EC7FDEEA" />
+            <ComponentRef Id="cmp8472EFF1B7F7AA52B49F87BE00A69811" />
+            <ComponentRef Id="cmpB2EAC6E8715C6DBF5D68BEA59DA66F65" />
+            <ComponentRef Id="cmpA7D38130E28F814F496F5D51D0C876BB" />
+            <ComponentRef Id="cmpEFCC8F322C3DAC64A940D6AA8539030E" />
+        </ComponentGroup>
+    </Fragment>
+</Wix>

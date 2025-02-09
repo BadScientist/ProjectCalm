@@ -11,7 +11,7 @@
 class AEquipment;
 class IEquipmentInterface;
 class APickup;
-enum EEquipReply;
+enum EEquipReply : uint8;
 
 
 /**

@@ -13,6 +13,10 @@
 #include "EnhancedInputComponent.h"
 #include "Kismet/GameplayStatics.h"
 
+#ifdef PC_DEBUG_LOGS
+	// #define LOCAL_DEBUG_LOGS
+#endif
+
 
 // Sets default values
 AEquipment::AEquipment()
@@ -32,6 +36,10 @@ EEquipReply AEquipment::Equip_Internal(AActor* OwningActor)
 {
 	EEquipReply Response = EEquipReply::FAILED_DEFAULT;
 	CHECK_NULLPTR_RETVAL(OwningActor, LogEquipment, "Equipment:: No OwningActor!", Response);
+
+#ifdef LOCAL_DEBUG_LOGS
+	UE_LOG(LogTemp, Display, TEXT("%s: Attempting to equip to %s..."), *GetActorNameOrLabel(), *(OwningActor->GetActorNameOrLabel()));
+#endif // DEBUG
 
 	SetOwner(OwningActor);
 
@@ -67,10 +75,17 @@ void AEquipment::Unequip()
 
 void AEquipment::SetupPlayerControls()
 {
+#ifdef LOCAL_DEBUG_LOGS
+			UE_LOG(LogEquipment, Display, TEXT("%s: Setting up player controls..."), *GetActorNameOrLabel());
+#endif // DEBUG
+
 	if (EquipmentMappingContext != nullptr)
 	{
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = PCPlayerStatics::GetEnhancedInputLocalPlayerSubsystem(this))
 		{
+#ifdef LOCAL_DEBUG_LOGS
+			UE_LOG(LogEquipment, Display, TEXT("%s: Adding Equipment IMC..."), *GetActorNameOrLabel());
+#endif // DEBUG
 			Subsystem->AddMappingContext(EquipmentMappingContext, 1);
 		}
 	}
@@ -78,9 +93,11 @@ void AEquipment::SetupPlayerControls()
 	if (EquipmentPrimaryAction != nullptr)
 	{
 		if (UEnhancedInputComponent* EnhancedInputComponent = PCPlayerStatics::GetEnhancedInputComponent(this))
-		{		
-			PrimaryInputStartBinding = &(EnhancedInputComponent->BindAction(EquipmentPrimaryAction, ETriggerEvent::Started, this, &AEquipment::PrimaryAction));
-			PrimaryInputCompletedBinding = &(EnhancedInputComponent->BindAction(EquipmentPrimaryAction, ETriggerEvent::Completed, this, &AEquipment::PrimaryAction));
+		{
+#ifdef LOCAL_DEBUG_LOGS
+			UE_LOG(LogEquipment, Display, TEXT("%s: Binding Primary Input Action..."), *GetActorNameOrLabel());
+#endif // DEBUG
+			PrimaryInputStartBinding = &(EnhancedInputComponent->BindAction(EquipmentPrimaryAction, ETriggerEvent::Triggered, this, &AEquipment::PrimaryAction));
 		}
 	}
 
@@ -88,14 +105,19 @@ void AEquipment::SetupPlayerControls()
 	{
 		if (UEnhancedInputComponent* EnhancedInputComponent = PCPlayerStatics::GetEnhancedInputComponent(this))
 		{
-			SecondaryInputStartBinding = &(EnhancedInputComponent->BindAction(EquipmentSecondaryAction, ETriggerEvent::Started, this, &AEquipment::SecondaryAction));
-			SecondaryInputCompletedBinding = &(EnhancedInputComponent->BindAction(EquipmentSecondaryAction, ETriggerEvent::Completed, this, &AEquipment::SecondaryAction));
+#ifdef LOCAL_DEBUG_LOGS
+			UE_LOG(LogEquipment, Display, TEXT("%s: Binding Secondary Input Action..."), *GetActorNameOrLabel());
+#endif // DEBUG
+			SecondaryInputStartBinding = &(EnhancedInputComponent->BindAction(EquipmentSecondaryAction, ETriggerEvent::Triggered, this, &AEquipment::SecondaryAction));
 		}
 	}
 }
 
 void AEquipment::ResetPlayerControls()
 {
+#ifdef LOCAL_DEBUG_LOGS
+			UE_LOG(LogEquipment, Display, TEXT("%s: Resetting Player Controls..."), *GetActorNameOrLabel());
+#endif // DEBUG
 	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = PCPlayerStatics::GetEnhancedInputLocalPlayerSubsystem(this))
 	{
 		if (EquipmentMappingContext != nullptr) {Subsystem->RemoveMappingContext(EquipmentMappingContext);}

@@ -107,16 +107,25 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
     // START ISPAWNREGIONINTERFACE IMPLEMENTATION
-    FVector GetSize() const override {return Size;};
-    FVector GetRegionLocation() const override {return GetActorLocation();};
-    FRotator GetRegionRotation() const override {return GetActorRotation();};
+    virtual FVector GetSize() const override {return Size;};
+    virtual FVector GetRegionLocation() const override {return GetActorLocation();};
+    virtual FRotator GetRegionRotation() const override {return GetActorRotation();};
 	virtual void SetSize(FVector InSize) override {Size = InSize;};
 	virtual void SetRegionLocation(FVector InLocation) override {SetActorLocation(InLocation);};
 	virtual void SetRegionRotation(FRotator InRotation) override {SetActorRotation(InRotation);};
     // END ISPAWNREGIONINTERFACE IMPLEMENTATION
 
-#if WITH_EDITORONLY_DATA
-DEFINE_VISUALIZER
-#endif
+private:
+    class USpawnRegionVisualizerComponent* SpawnRegionVisComp;
 
+#if WITH_EDITOR
+    void UpdateVisualizerComponentProperties();
+
+public:
+    virtual void EditorApplyTranslation(const FVector& DeltaTranslation, bool bAltDown, bool bShiftDown, bool bCtrlDown) override;
+    virtual void EditorApplyRotation(const FRotator& DeltaRotation, bool bAltDown, bool bShiftDown, bool bCtrlDown) override;
+    virtual void EditorApplyScale(const FVector& DeltaScale, const FVector* PivotLocation, bool bAltDown, bool bShiftDown, bool bCtrlDown) override;
+    virtual void PostEditChangeChainProperty(FPropertyChangedChainEvent& EditEvent) override;
+    virtual void PostEditUndo() override;
+#endif
 };

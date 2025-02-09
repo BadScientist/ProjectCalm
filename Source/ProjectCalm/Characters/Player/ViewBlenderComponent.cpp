@@ -3,6 +3,7 @@
 
 #include "ViewBlenderComponent.h"
 #include "PlayerCharacter.h"
+#include "ProjectCalm/Utilities/LogMacros.h"
 
 #include "Camera/CameraComponent.h"
 #include "Components/SceneCaptureComponent2D.h"
@@ -11,6 +12,11 @@
 #include "GameFramework/GameUserSettings.h"
 
 #define BLEND_ALPHA_PARAM TEXT("BlendAlpha")
+
+#ifdef PC_DEBUG_LOGS
+	#define LOCAL_DEBUG_LOGS
+#endif
+
 
 // Sets default values for this component's properties
 UViewBlenderComponent::UViewBlenderComponent()
@@ -23,9 +29,10 @@ void UViewBlenderComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (BlendParametersAsset != nullptr)
+	UWorld* World = GetWorld();
+	if (BlendParametersAsset != nullptr && World != nullptr)
 	{
-		BlendParameters = GetWorld()->GetParameterCollectionInstance(BlendParametersAsset);
+		BlendParameters = World->GetParameterCollectionInstance(BlendParametersAsset);
 	}
 }
 
@@ -49,6 +56,10 @@ void UViewBlenderComponent::SetCharacterEyes(UCameraComponent *CameraComp)
 
 float UViewBlenderComponent::BlendToNewView(USceneCaptureComponent2D *SceneCaptureComponent)
 {
+#ifdef LOCAL_DEBUG_LOGS
+	UE_LOG(LogActorComponent, Display, TEXT("%s: Blending to Camera View"), *GetName());
+#endif // DEBUG
+
 	TargetSceneCaptureComponent = SceneCaptureComponent;
 
 	if (TargetSceneCaptureComponent != nullptr && GEngine != nullptr)
@@ -77,16 +88,12 @@ void UViewBlenderComponent::SetEyePOV()
 
 void UViewBlenderComponent::SetViewToSceneCapture(USceneCaptureComponent2D* SceneCaptureComponent)
 {
-	if (CharacterEyes == nullptr) 
-	{
-		UE_LOG(LogTemp, Error, TEXT("ViewBlender: NO CHARACTER EYE CAMERA"));
-		return;
-	}
-	if (SceneCaptureComponent == nullptr)
-	{
-		UE_LOG(LogTemp, Error, TEXT("ViewBlender: NO SCENECAPTURECOMPONENT"));
-		return;
-	}
+	CHECK_NULLPTR_RET(CharacterEyes, LogActorComponent, "ViewBlender: NO CHARACTER EYE CAMERA");
+	CHECK_NULLPTR_RET(SceneCaptureComponent, LogActorComponent, "ViewBlender: NO SCENE CAPTURE COMPONENT");
+
+#ifdef LOCAL_DEBUG_LOGS
+	UE_LOG(LogActorComponent, Display, TEXT("%s: Setting view to scene capture component..."), *GetName());
+#endif // DEBUG
 	
 	FTransform NewTransform = SceneCaptureComponent->GetComponentTransform();
 	FTransform EyesTransform = CharacterEyes->GetComponentTransform();
@@ -101,6 +108,10 @@ void UViewBlenderComponent::SetViewToSceneCapture(USceneCaptureComponent2D* Scen
 
 void UViewBlenderComponent::ResetView()
 {
+#ifdef LOCAL_DEBUG_LOGS
+	UE_LOG(LogActorComponent, Display, TEXT("%s: Resetting view..."), *GetName());
+#endif // DEBUG
+
 	if (CharacterEyes == nullptr) {return;}
 
 	CharacterEyes->ClearAdditiveOffset();
@@ -120,18 +131,28 @@ float UViewBlenderComponent::GetScalarBlendParam()
 
 void UViewBlenderComponent::SetScalarBlendParam(float Alpha)
 {
+#ifdef LOCAL_DEBUG_LOGS
+	UE_LOG(LogActorComponent, Display, TEXT("%s: Setting blend alpha: %f"), *GetName(), Alpha);
+#endif // DEBUG
+
 	if (BlendParameters == nullptr) {return;}
 	BlendParameters->SetScalarParameterValue(BLEND_ALPHA_PARAM, Alpha);
 }
 
 float UViewBlenderComponent::StartBlend(float TargetAlpha)
 {
+#ifdef LOCAL_DEBUG_LOGS
+	UE_LOG(LogActorComponent, Display, TEXT("%s: Blending to alpha: %f"), *GetName(), TargetAlpha);
+#endif // DEBUG
+
+	if (bBlending && FMath::IsNearlyEqual(TargetAlpha, TargetBlendAlpha)) {return ViewBlendTime;}
+
 	TargetBlendAlpha = TargetAlpha;
 	ViewBlendTime = DefaultBlendTime * FMath::Abs(TargetAlpha - CurrentBlendAlpha);
 
 	if (TargetSceneCaptureComponent != nullptr)
 	{
-		TargetSceneCaptureComponent->CaptureScene();
+		// TargetSceneCaptureComponent->CaptureScene();  // Do I need this??
 		TargetSceneCaptureComponent->bCaptureEveryFrame = true;
 	}
 
@@ -153,7 +174,7 @@ void UViewBlenderComponent::UpdateCurrentBlendAlpha(float DeltaTime)
 	ViewBlendTime -= DeltaTime;
 	float NewBlendAlpha = FMath::Clamp(FMath::Square(DefaultBlendTime - ViewBlendTime) / FMath::Square(DefaultBlendTime), 0.0f, 1.0f);
 	
-	if (!TargetBlendAlpha) {NewBlendAlpha = 1 - NewBlendAlpha;}  // For blending OUT postprocess material
+	if (FMath::IsNearlyZero(TargetBlendAlpha)) {NewBlendAlpha = 1 - NewBlendAlpha;}  // For blending OUT postprocess material
 	CurrentBlendAlpha = NewBlendAlpha;
 
 	SetScalarBlendParam(CurrentBlendAlpha);

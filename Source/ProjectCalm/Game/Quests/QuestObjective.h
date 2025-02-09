@@ -10,7 +10,7 @@
 class AInteractableActor;
 class USphereComponent;
 class UItemData;
-enum EObjectiveType;
+enum EObjectiveType : uint8;
 struct FPhotoData;
 struct FObjectiveDetails;
 struct FSubjectBehaviorPair;

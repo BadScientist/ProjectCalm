@@ -23,7 +23,8 @@ bool UDeathScreen::Initialize()
     QuitButton->OnClicked.AddDynamic(this, &UDeathScreen::QuitToMainMenu);
     QuitButton->OnHovered.AddDynamic(this, &UMenu::PlayButtonHoverSound);
 
-    InitTimeStamp = GetWorld()->GetTimeSeconds();
+    UWorld* World = GetWorld();
+    InitTimeStamp = World == nullptr ? 0.0f : World->GetTimeSeconds();
 
     return true;
 }
@@ -31,7 +32,8 @@ bool UDeathScreen::Initialize()
 void UDeathScreen::NativeTick(const FGeometry &MyGeometry, float InDeltaTime)
 {
     float CheckpointTime = BackgroundFadeTime;
-    float CurrentTime = GetWorld()->GetTimeSeconds();
+    UWorld* World = GetWorld();
+    float CurrentTime = World == nullptr ? CheckpointTime + InitTimeStamp : World->GetTimeSeconds();
 
     float BackgroundAlpha = FMath::Min((CurrentTime - InitTimeStamp) / CheckpointTime, 1.0f);
     if (Background != nullptr) {Background->SetRenderOpacity(FMath::Lerp(0.0f, 1.0f, BackgroundAlpha));}
@@ -68,7 +70,7 @@ void UDeathScreen::Setup(bool bIsInteractiveIn)
     APlayerController* PlayerController = GetOwningPlayer();
     CHECK_NULLPTR_RET(PlayerController, LogUserWidget, "Menu:: PlayerController is NULL!");
 
-    bIsFocusable = true;
+    SetIsFocusable(true);
     FInputModeUIOnly InputModeData;
     InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::LockInFullscreen);
     InputModeData.SetWidgetToFocus(TakeWidget());

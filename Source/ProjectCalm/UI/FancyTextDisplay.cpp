@@ -11,10 +11,6 @@
 #define WORD_DELIMITER	' '
 #define NEWLINE_CHAR	'\n'
 
-/*@todo: 
-	- Call to ProjectCalmGameInstance from Proprietor
-	- TEST
-*/
 
 UFancyTextDisplay::UFancyTextDisplay(const FObjectInitializer &ObjectInitializer) : UMenu(ObjectInitializer)
 {
@@ -50,7 +46,10 @@ FReply UFancyTextDisplay::NativeOnKeyDown(const FGeometry &InGeometry, const FKe
 		if (!bInputOnCooldown)
 		{
 			bInputOnCooldown = true;
-			GetWorld()->GetTimerManager().SetTimer(CooldownTimerHandle, this, &UFancyTextDisplay::ClearCooldown, InputCooldown);
+
+			UWorld* World = GetWorld();
+			CHECK_NULLPTR_RETVAL(World, LogUserWidget, "FancyTextDisplay:: Could not get World!", Reply);
+			World->GetTimerManager().SetTimer(CooldownTimerHandle, this, &UFancyTextDisplay::ClearCooldown, InputCooldown);
 
 			if (bPrinting) {CompleteCurrentString();}
 			else {DisplayNextString();}
@@ -266,13 +265,15 @@ void UFancyTextDisplay::CompleteCurrentString()
 
 void UFancyTextDisplay::PrintNextCharacter()
 {	
-	float TimeSinceLastChar = GetWorld()->GetTimeSeconds() - LastCharacterTimeStamp;	
+	UWorld* World = GetWorld();
+	float CurrentTime = World == nullptr ? LastCharacterTimeStamp + DelayPerCharacter : World->GetTimeSeconds();
+	float TimeSinceLastChar = CurrentTime - LastCharacterTimeStamp;	
 	if (TimeSinceLastChar < DelayPerCharacter) {return;}
 
 	if (UFancyText* FancyText = Cast<UFancyText>(WrapBox->GetChildAt(PrintIdx)))
 	{
 		PrintCharacter(FancyText);
-		LastCharacterTimeStamp = GetWorld()->GetTimeSeconds();
+		LastCharacterTimeStamp = CurrentTime;
 	}
 	else {EndPrint();}
 }

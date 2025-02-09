@@ -3,6 +3,7 @@
 
 #include "SpawnerComponent.h"
 #include "ProjectCalm/Characters/PhotoSubjects/PhotoSubjectSpawnRegion.h"
+#include "ProjectCalm/Utilities/LogMacros.h"
 
 #include "Kismet/GameplayStatics.h"
 
@@ -46,7 +47,10 @@ void USpawnerComponent::BeginPlay()
 
 void USpawnerComponent::StartSpawnTimer()
 {
-    GetWorld()->GetTimerManager().SetTimer(
+    UWorld* World = GetWorld();
+    CHECK_NULLPTR_RET(World, LogActorComponent, "SpawnerComponent:: Could not get World!");
+
+    World->GetTimerManager().SetTimer(
 		SpawnTimerHandle,
 		this,
 		&USpawnerComponent::SpawnPhotoSubject,

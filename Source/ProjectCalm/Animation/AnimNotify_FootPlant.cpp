@@ -66,8 +66,11 @@ void UAnimNotify_FootPlant::PrepareFootstepSound()
     DrawDebugLine(Owner->GetWorld(), TraceStart, TraceEnd, FColor::Red, true, 100.0f, ESceneDepthPriorityGroup::SDPG_Foreground, 10.0);
 #endif
 
+    UWorld* World = Owner->GetWorld();
+    CHECK_NULLPTR_RET(World, LogAnimation, "AnimNotify_FootPlant:: Could not get World!");
+    
     FHitResult OutHit;
-    bool bHit = Owner->GetWorld()->LineTraceSingleByChannel(OutHit, TraceStart, TraceEnd, ECollisionChannel::ECC_Visibility, Params);
+    bool bHit = World->LineTraceSingleByChannel(OutHit, TraceStart, TraceEnd, ECollisionChannel::ECC_Visibility, Params);
     
     EPhysicalSurface SurfaceType = EPhysicalSurface::SurfaceType_Default;
     if (bHit)

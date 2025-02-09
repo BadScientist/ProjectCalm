@@ -2,6 +2,7 @@
 
 
 #include "BTDecorator_RandomLoop.h"
+#include "ProjectCalm/Utilities/LogMacros.h"
 
 #include "Engine/World.h"
 #include "BehaviorTree/BTCompositeNode.h"
@@ -12,6 +13,8 @@
 
 void UBTDecorator_RandomLoop::OnNodeActivation(FBehaviorTreeSearchData& SearchData)
 {
+    UWorld* World = GetWorld();
+	float CurrentTime = World == nullptr ? 0.0f : World->GetTimeSeconds();
 	FBTRandomLoopDecoratorMemory* DecoratorMemory = GetNodeMemory<FBTRandomLoopDecoratorMemory>(SearchData);
 	FBTCompositeMemory* ParentMemory = GetParentNode()->GetNodeMemory<FBTCompositeMemory>(SearchData);
 	const bool bIsSpecialNode = GetParentNode()->IsA(UBTComposite_SimpleParallel::StaticClass());
@@ -20,9 +23,11 @@ void UBTDecorator_RandomLoop::OnNodeActivation(FBehaviorTreeSearchData& SearchDa
 		(!bIsSpecialNode && ParentMemory->CurrentChild != ChildIndex))
 	{
 		// initialize counter if it's first activation
-		DecoratorMemory->RemainingExecutions = FMath::Max(1, NumLoops + FMath::RandRange(-NumLoopsDeviation, NumLoopsDeviation));
-        DecoratorMemory->TimeStarted = GetWorld()->GetTimeSeconds();
-        DecoratorMemory->EndTime = DecoratorMemory->TimeStarted + FMath::RandRange(InfiniteLoopTimeoutTime - TimeoutTimeDeviation, InfiniteLoopTimeoutTime + TimeoutTimeDeviation);
+		DecoratorMemory->RemainingExecutions = FMath::Max(1, NumLoops.GetValue(SearchData.OwnerComp) + FMath::RandRange(-NumLoopsDeviation, NumLoopsDeviation));
+        if (World != nullptr) {DecoratorMemory->TimeStarted = CurrentTime;}
+        DecoratorMemory->EndTime = DecoratorMemory->TimeStarted + FMath::RandRange(
+			InfiniteLoopTimeoutTime.GetValue(SearchData.OwnerComp) - TimeoutTimeDeviation,
+			InfiniteLoopTimeoutTime.GetValue(SearchData.OwnerComp) + TimeoutTimeDeviation);
 	}
 
 	bool bShouldLoop = false;
@@ -31,7 +36,7 @@ void UBTDecorator_RandomLoop::OnNodeActivation(FBehaviorTreeSearchData& SearchDa
 		// protect from truly infinite loop within single search
 		if (SearchData.SearchId != DecoratorMemory->SearchId)
 		{
-			if ((InfiniteLoopTimeoutTime < 0.f) || (DecoratorMemory->EndTime > GetWorld()->GetTimeSeconds()))
+			if ((InfiniteLoopTimeoutTime.GetValue(SearchData.OwnerComp) < 0.f) || (World != nullptr && DecoratorMemory->EndTime > CurrentTime))
 			{
 				bShouldLoop = true;
 			}
@@ -70,11 +75,13 @@ void UBTDecorator_RandomLoop::DescribeRuntimeValues(const UBehaviorTreeComponent
 		FBTRandomLoopDecoratorMemory* DecoratorMemory = (FBTRandomLoopDecoratorMemory*)NodeMemory;
 		Values.Add(FString::Printf(TEXT("loops remaining: %d"), DecoratorMemory->RemainingExecutions));
 	}
-	else if (InfiniteLoopTimeoutTime > 0.f)
+	else if (InfiniteLoopTimeoutTime.GetValue(OwnerComp) > 0.f)
 	{
 		FBTRandomLoopDecoratorMemory* DecoratorMemory = (FBTRandomLoopDecoratorMemory*)NodeMemory;
 
-		const float TimeRemaining = FMath::Max(DecoratorMemory->EndTime - GetWorld()->GetTimeSeconds(), 0.f);
+		UWorld* World = GetWorld();
+		float CurrentTime = World == nullptr ? DecoratorMemory->EndTime : World->GetTimeSeconds();
+		const float TimeRemaining = FMath::Max(DecoratorMemory->EndTime - CurrentTime, 0.f);
 		Values.Add(FString::Printf(TEXT("time remaining: %s"), *FString::SanitizeFloat(TimeRemaining)));
 	}
 }
@@ -84,25 +91,25 @@ FString UBTDecorator_RandomLoop::GetStaticDescription() const
 	// basic info: infinite / num loops
 	if (bInfiniteLoop)
 	{
-		if (InfiniteLoopTimeoutTime < 0.f)
+		if (InfiniteLoopTimeoutTime.GetKey().IsNone() && InfiniteLoopTimeoutTime.GetValue(static_cast<const UBehaviorTreeComponent*>(nullptr)) <= 0.f)
 		{
-			return FString::Printf(TEXT("%s: infinite"), *Super::GetStaticDescription());
+			return FString::Printf(TEXT("%s: infinite"), *UBTDecorator::GetStaticDescription());
 		}
 		else
 		{
 			return FString::Printf(
                 TEXT("%s: loop for %s - %s seconds"),
-                *Super::GetStaticDescription(),
-                *FString::SanitizeFloat(InfiniteLoopTimeoutTime - TimeoutTimeDeviation),
-                *FString::SanitizeFloat(InfiniteLoopTimeoutTime + TimeoutTimeDeviation));
+                *UBTDecorator::GetStaticDescription(),
+                *FString::SanitizeFloat(InfiniteLoopTimeoutTime.GetValue(static_cast<const UBehaviorTreeComponent*>(nullptr)) - TimeoutTimeDeviation),
+                *FString::SanitizeFloat(InfiniteLoopTimeoutTime.GetValue(static_cast<const UBehaviorTreeComponent*>(nullptr)) + TimeoutTimeDeviation));
 		}
 	}
 	else
 	{
 		return FString::Printf(
             TEXT("%s: %d - %d loops"),
-            *Super::GetStaticDescription(),
-            NumLoops - NumLoopsDeviation,
-            NumLoops + NumLoopsDeviation);
+            *UBTDecorator::GetStaticDescription(),
+            NumLoops.GetValue(static_cast<const UBehaviorTreeComponent*>(nullptr)) - NumLoopsDeviation,
+            NumLoops.GetValue(static_cast<const UBehaviorTreeComponent*>(nullptr)) + NumLoopsDeviation);
 	}
 }

@@ -40,8 +40,10 @@ APickup* UItemManager::SpawnPickup(int32 ItemID, FVector InLocation, FRotator In
 
 APickup* UItemManager::SpawnPickup(UItemData* ItemData, FVector InLocation, FRotator InRotation)
 {
+    UWorld* World = GetWorld();
+    CHECK_NULLPTR_RETVAL(World, LogLevel, "ItemManager:: Could not get World!", nullptr);
 	CHECK_NULLPTR_RETVAL(ItemData, LogItemData, "ItemManager:: SpawnPickup was not passed valid ItemData!", nullptr);
-	APickup* Pickup = GetWorld()->SpawnActor<APickup>(InLocation, InRotation);
+	APickup* Pickup = World->SpawnActor<APickup>(InLocation, InRotation);
 
 	CHECK_NULLPTR_RETVAL(Pickup, LogInteractable, "ItemManager:: SpawnActor failed!", nullptr);
 	Pickup->Setup(ItemData);

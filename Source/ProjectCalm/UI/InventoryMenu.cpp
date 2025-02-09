@@ -24,7 +24,6 @@ UInventorySlot* UInventoryMenu::GetSelectedSlot()
 
 void UInventoryMenu::UpdateContents()
 {
-    UE_LOG(LogTemp, Display, TEXT("InventoryMenu:: UpdateContents()"));
     int32 i = 0;
     for (UInventorySlot* InventorySlot : Slots)
     {

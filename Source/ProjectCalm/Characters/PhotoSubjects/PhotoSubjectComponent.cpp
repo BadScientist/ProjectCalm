@@ -1,5 +1,6 @@
 #include "PhotoSubjectComponent.h"
 #include "ProjectCalm/AI/PhotoSubjectAIController.h"
+#include "ProjectCalm/Utilities/LogMacros.h"
 
 #include "PhysicalMaterials/PhysicalMaterial.h"
 #include "Kismet/GameplayStatics.h"
@@ -24,7 +25,10 @@ bool UPhotoSubjectComponent::Spawn(float RegionHeight)
     Params.AddIgnoredActor(GetOwner());
     Params.bReturnPhysicalMaterial = true;
 
-    bool Hit = GetWorld()->LineTraceSingleByChannel(OutHit, TraceStart, TraceEnd, ECollisionChannel::ECC_WorldStatic, Params);
+    UWorld* World = GetWorld();
+    CHECK_NULLPTR_RETVAL(World, LogActorComponent, "PhotoSubjectComponent:: Could not get World!", false);
+
+    bool Hit = World->LineTraceSingleByChannel(OutHit, TraceStart, TraceEnd, ECollisionChannel::ECC_WorldStatic, Params);
     if (Hit && OutHit.PhysMaterial.IsValid() && ValidSurfaces.Contains(OutHit.PhysMaterial->SurfaceType))
     {
         GetOwner()->SetActorLocation(OutHit.Location);
@@ -45,13 +49,16 @@ bool UPhotoSubjectComponent::Despawn(AActor* Player)
     double Angle = FMath::RadiansToDegrees(FMath::Acos(FVector::DotProduct(Direction, Player->GetActorForwardVector())));
     bool bInVisionCone = Angle <= 45;
     
+    UWorld* World = GetWorld();
+    CHECK_NULLPTR_RETVAL(World, LogActorComponent, "PhotoSubjectComponent:: Could not get World!", false);
+
     FHitResult OutHit;
     FCollisionQueryParams Params;
     TArray<AActor*> AttachedActors;
     Player->GetAttachedActors(AttachedActors, true, true);
     Params.AddIgnoredActor(Player);
     Params.AddIgnoredActors(AttachedActors);
-    bool Hit = GetWorld()->LineTraceSingleByChannel(OutHit, Player->GetActorLocation(), SubjectLocation, ECollisionChannel::ECC_Visibility);
+    bool Hit = World->LineTraceSingleByChannel(OutHit, Player->GetActorLocation(), SubjectLocation, ECollisionChannel::ECC_Visibility);
     bool bInLineOfSight = Hit && OutHit.GetActor() == GetOwner();
     if (bInVisionCone && bInLineOfSight) {return false;}
 

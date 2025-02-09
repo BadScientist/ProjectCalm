@@ -27,7 +27,7 @@ class USpawnerComponent;
 class UHealthComponent;
 class UInventoryComponent;
 class UItemData;
-enum EEquipReply;
+enum EEquipReply : uint8;
 
 
 UCLASS(config = game)

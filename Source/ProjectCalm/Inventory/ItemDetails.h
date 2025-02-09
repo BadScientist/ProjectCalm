@@ -23,7 +23,7 @@ struct FItemDetails
     FString ItemDescription{FString()};
 
     bool IsValid() {
-        UE_LOG(LogTemp, Display, TEXT("%x, %s, %s"), ItemImage, *ItemName, *ItemDescription);
+        // UE_LOG(LogTemp, Display, TEXT("%x, %s, %s"), ItemImage, *ItemName, *ItemDescription);
         return (ItemImage != nullptr && ItemName != FString() && ItemDescription != FString());};
 
 };

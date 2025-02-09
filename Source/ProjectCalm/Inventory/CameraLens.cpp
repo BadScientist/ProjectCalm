@@ -10,6 +10,7 @@
 #include "ProjectCalm/Characters/Player/PlayerCharacter.h"
 #include "ProjectCalm/Characters/Player/InfoFlagNameDefinitions.h"
 #include "ProjectCalm/Utilities/PCPlayerStatics.h"
+#include "ProjectCalm/Utilities/LogMacros.h"
 
 #include "Camera/CameraComponent.h"
 #include "Components/SceneCaptureComponent2D.h"
@@ -58,7 +59,10 @@ EEquipReply ACameraLens::Equip_Internal(AActor* OwningActor)
 
 EEquipReply ACameraLens::Equip(APlayerCharacter* OwningCharacter)
 {
-    AActor* EquippedItem = Cast<AActor>(OwningCharacter->GetEquippedItem()->_getUObject());
+    IEquipmentInterface* EquippedItemInterface = OwningCharacter->GetEquippedItem();
+    CHECK_NULLPTR_RETVAL(EquippedItemInterface, LogEquipment, "CameraLens:: Player has no equipped item!", EEquipReply::FAILED_NO_CAMERA);
+
+    AActor* EquippedItem = Cast<AActor>(EquippedItemInterface->_getUObject());
     OwningPlayerCharacter = OwningCharacter;
     return Equip_Internal(EquippedItem);
 }
@@ -88,9 +92,11 @@ UTextureRenderTarget2D* ACameraLens::CopyRenderTarget(UTextureRenderTarget2D *In
     return Result;
 }
 
-ULocalPlayer *ACameraLens::GetLocalPlayer()
+ULocalPlayer* ACameraLens::GetLocalPlayer()
 {
-    return GetWorld()->GetFirstLocalPlayerFromController();
+    UWorld* World = GetWorld();
+    CHECK_NULLPTR_RETVAL(World, LogEquipment, "CameraLens:: Could not get World!", nullptr);
+    return World->GetFirstLocalPlayerFromController();
 }
 
 TObjectPtr<UGameViewportClient> ACameraLens::GetViewportClient(ULocalPlayer *LocalPlayer)
@@ -110,15 +116,17 @@ FConvexVolume ACameraLens::GetViewFrustum()
     ULocalPlayer* LocalPlayer = GetLocalPlayer();
     TObjectPtr<UGameViewportClient> ViewportClient = GetViewportClient(LocalPlayer);
     FViewport* Viewport = GetViewport(ViewportClient);
-    if (Viewport == nullptr) {return FConvexVolume();}
+    CHECK_NULLPTR_RETVAL(Viewport, LogEquipment, "CameraLens:: Could not get Viewport!", FConvexVolume());    
     
-    FSceneInterface* SceneInterface = GetWorld()->Scene;
+    UWorld* World = GetWorld();
+    CHECK_NULLPTR_RETVAL(World, LogEquipment, "CameraLens:: Could not get World!", FConvexVolume());
+    FSceneInterface* SceneInterface = World->Scene;
     FSceneViewFamilyContext ViewFamilyContext = FSceneViewFamily::ConstructionValues(Viewport, SceneInterface, ViewportClient->EngineShowFlags).SetRealtimeUpdate(true);
     
     FVector ViewLocation;
     FRotator ViewRotation;
     FSceneView* SceneView = LocalPlayer->CalcSceneView(&ViewFamilyContext, ViewLocation, ViewRotation, Viewport);
-    if (SceneView == nullptr) {return FConvexVolume();}
+    CHECK_NULLPTR_RETVAL(SceneView, LogEquipment, "CameraLens:: Could not get SceneView!", FConvexVolume());
 
     return SceneView->ViewFrustum;
 }
@@ -155,7 +163,9 @@ void ACameraLens::ZoomAction(const FInputActionValue& Value)
     // Only alter FOV when camera is fully raised
     if (!GetPlayerFlag(FLAG_CAMERA_VIEW_ACTIVE)) {return;}
 
-    TargetFOV -= Value.Get<float>() * GetWorld()->GetDeltaSeconds() * ZoomRate;
+    UWorld* World = GetWorld();
+    float DeltaSeconds = World == nullptr ? 0.01f : World->GetDeltaSeconds();
+    TargetFOV -= Value.Get<float>() * DeltaSeconds * ZoomRate;
     TargetFOV = FMath::Clamp(TargetFOV, MinFOV, MaxFOV);
 }
 

@@ -8,7 +8,7 @@
 UFancyText::UFancyText(const FObjectInitializer &ObjectInitializer) : UUserWidget(ObjectInitializer)
 {
     SetVisibility(ESlateVisibility::Hidden);
-    bIsFocusable = false;
+    SetIsFocusable(false);
 }
 
 void UFancyText::SetText(FString InString)

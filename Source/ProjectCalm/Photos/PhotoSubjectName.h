@@ -4,7 +4,7 @@
 
 
 UENUM(BlueprintType)
-enum ESubjectName
+enum ESubjectName : uint8
 {
     NO_NAME UMETA(DisplayName = "Default"),
     DOE UMETA(DisplayName = "Doe"),
@@ -34,6 +34,5 @@ public:
         default:
             return FString();
         }
-        return FString();
     }
 };

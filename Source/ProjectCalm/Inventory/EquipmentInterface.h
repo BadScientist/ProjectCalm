@@ -7,7 +7,7 @@
 #include "EquipmentInterface.generated.h"
 
 class APlayerCharacter;
-enum EEquipReply;
+enum EEquipReply : uint8;
 
 UINTERFACE(MinimalAPI)
 class UEquipmentInterface : public UInterface

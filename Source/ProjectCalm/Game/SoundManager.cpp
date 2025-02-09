@@ -93,6 +93,18 @@ void USoundManager::PlayMusicOrAmbientSound(FName SoundName, UObject* WorldConte
     }
 }
 
+void USoundManager::StopMusic(FName SoundName, float FadeDuration)
+{
+    if (UAudioComponent** MapValue = ActiveMusic.Find(SoundName))
+    {
+        if (*MapValue != nullptr)
+        {
+            if (FadeDuration > 0) {(*MapValue)->FadeOut(FadeDuration, 0.0f);}
+            else {(*MapValue)->Stop();}
+        }
+    }
+}
+
 UAudioComponent* USoundManager::CreateAudioComponent(FName SoundName, UObject* WorldContextObject)
 {
     UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::ReturnNull);

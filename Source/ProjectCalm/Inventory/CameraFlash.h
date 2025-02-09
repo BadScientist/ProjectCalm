@@ -9,7 +9,7 @@
 
 
 class USpotLightComponent;
-enum EEquipReply;
+enum EEquipReply : uint8;
 
 /**
  * 

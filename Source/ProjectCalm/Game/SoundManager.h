@@ -59,6 +59,7 @@ public:
     void PlayDiageticSound(FName SoundName, UObject* WorldContextObject, FVector SourceLocation, float VolumeMultiplier);
     void PlayUISound(FName SoundName, UObject* WorldContextObject, bool bPersistOnLevelLoad = false);
     void PlayMusicOrAmbientSound(FName SoundName, UObject* WorldContextObject, bool bIsMusic = false, bool bPersistOnLevelLoad = false);
+	void StopMusic(FName SoundName, float FadeDuration = -1.0f);
 
 private:
 	UAudioComponent* CreateAudioComponent(FName SoundName, UObject* WorldContextObject);

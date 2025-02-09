@@ -38,7 +38,7 @@ EBTNodeResult::Type UBTTask_LookAt::ExecuteTask(UBehaviorTreeComponent &OwnerCom
     UBlackboardComponent* BlackboardComponent = OwnerComp.GetBlackboardComponent();
     CHECK_NULLPTR_RETVAL(BlackboardComponent, LogBehaviorTree, "BTTask::LookAt:: BLACKBOARD COMPONENT NOT FOUND!", EBTNodeResult::Failed);
 
-    FVector FocusLocation;
+    FVector FocusLocation{FVector::ZeroVector};
     if (BlackboardKey.SelectedKeyType.Get() == UBlackboardKeyType_Object::StaticClass())
     {
         AActor* ReferenceActor = Cast<AActor>(BlackboardComponent->GetValueAsObject(BlackboardKey.SelectedKeyName));

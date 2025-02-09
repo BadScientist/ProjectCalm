@@ -60,7 +60,9 @@ bool UBTTask_GetLocation::ProjectLocationToSurface(FVector InLocation, FVector& 
         return false;
     }
 
-    const UNavigationSystemBase* NavSystem = GetWorld()->GetNavigationSystem();
+    UWorld* World = GetWorld();
+    CHECK_NULLPTR_RETVAL(World, LogPhotoSubjectAI, "BTTask_GetLocation:: Failed to get World!", false);
+    const UNavigationSystemBase* NavSystem = World->GetNavigationSystem();
     const UNavigationSystemV1* NavSystemV1 = Cast<UNavigationSystemV1>(NavSystem);
     if (!NavSystem)
     {

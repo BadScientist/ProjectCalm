@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WixLocalization Culture="en-us" xmlns="http://schemas.microsoft.com/wix/2006/localization">
+
+	<String Id="ProductName">Project Calm</String>
+	<String Id="ProductFolderName">ProjectCalm</String>
+	<String Id="ProductName_x86">Project Calm (32-bit)</String>
+	<String Id="ProductName_x64">Project Calm (64-bit)</String>
+	<String Id="Manufacturer">Joseph D Tong</String>
+	<String Id="Description">A prototype wildlife photography game made in Unreal Engine 5.</String>
+	
+</WixLocalization>

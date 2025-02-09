@@ -1,10 +1,11 @@
 #include "PhotoSubjectSpawnRegion.h"
 #include "PhotoSubjectComponent.h"
+#include "ProjectCalm/Utilities/LogMacros.h"
 
 
 APhotoSubjectSpawnRegion::APhotoSubjectSpawnRegion()
 {
-#if WITH_EDITORONLY_DATA
+#if WITH_EDITOR
     SpawnRegionVisComp = CreateDefaultSubobject<USpawnRegionVisualizerComponent>(TEXT("VisualizerComponent"));
     if (SpawnRegionVisComp != nullptr) {SetRootComponent(SpawnRegionVisComp);}
 #endif
@@ -72,9 +73,12 @@ bool APhotoSubjectSpawnRegion::SpawnPhotoSubject(FVector SpawnLocation)
     int32 SubjectIdx = PickSubject();
     if (SubjectIdx < 0) {return false;}
 
+    UWorld* World = GetWorld();
+    CHECK_NULLPTR_RETVAL(World, LogActor, "PhotoSubjectSpawnRegion:: Could not get World!", false);
+
     // Construct BP Actor at the upper plane of the SpawnRegion
     FVector SafeSpawnLocation = FVector(SpawnLocation.X, SpawnLocation.Y, GetActorLocation().Z);
-    AActor* SpawnedSubject = GetWorld()->SpawnActor<AActor>(
+    AActor* SpawnedSubject = World->SpawnActor<AActor>(
         SpawnableSubjects[SubjectIdx].SubjectClass.Get(),
         SafeSpawnLocation,
         FRotator(0,0,0));
@@ -126,6 +130,64 @@ int32 APhotoSubjectSpawnRegion::CleanupSpawns(AActor* Player)
     return DespawnedActorCount;
 }
 
-#if WITH_EDITORONLY_DATA
-IMPLEMENT_VISUALIZER(APhotoSubjectSpawnRegion, Size);
+#if WITH_EDITOR
+void APhotoSubjectSpawnRegion::UpdateVisualizerComponentProperties() 
+{
+    SetActorRotation(FRotator(0, GetActorRotation().Yaw, 0));
+    if (SpawnRegionVisComp == nullptr) {return;}
+    SpawnRegionVisComp->UpdateProperties(GetActorLocation(), GetActorRotation(), Size);
+}
+
+void APhotoSubjectSpawnRegion::EditorApplyTranslation(const FVector& DeltaTranslation, bool bAltDown, bool bShiftDown, bool bCtrlDown)
+{
+    Super::EditorApplyTranslation(DeltaTranslation, bAltDown, bShiftDown, bCtrlDown);
+    UpdateVisualizerComponentProperties();
+}
+
+void APhotoSubjectSpawnRegion::EditorApplyRotation(const FRotator& DeltaRotation, bool bAltDown, bool bShiftDown, bool bCtrlDown)
+{
+    Super::EditorApplyRotation(DeltaRotation, bAltDown, bShiftDown, bCtrlDown);
+    UpdateVisualizerComponentProperties();
+}
+
+void APhotoSubjectSpawnRegion::EditorApplyScale(const FVector& DeltaScale, const FVector* PivotLocation, bool bAltDown, bool bShiftDown, bool bCtrlDown)
+{
+    const FVector CurrentScale = GetRootComponent()->GetRelativeScale3D();
+    FVector SafeDeltaScale = FVector(FMath::Clamp(DeltaScale.X, -1.0f, 1.0f), FMath::Clamp(DeltaScale.Y, -1.0f, 1.0f), FMath::Clamp(DeltaScale.Z, -1.0f, 1.0f));
+    FVector ScalingVector = FVector(1.0f) + SafeDeltaScale;
+    Size *= ScalingVector;
+
+    if (PivotLocation)
+    {
+        const FRotator ActorRotation = GetActorRotation();
+        const FVector WorldDelta = GetActorLocation() - (*PivotLocation);
+        const FVector LocalDelta = (ActorRotation.GetInverse()).RotateVector(WorldDelta);
+        const FVector LocalScaledDelta = LocalDelta * (ScalingVector / FVector(1.0f));
+        const FVector WorldScaledDelta = ActorRotation.RotateVector(LocalScaledDelta);
+        SetActorLocation(WorldScaledDelta + (*PivotLocation));
+    }
+
+    UpdateVisualizerComponentProperties();
+}
+
+void APhotoSubjectSpawnRegion::PostEditChangeChainProperty(FPropertyChangedChainEvent &EditEvent)
+{
+    Super::PostEditChangeChainProperty(EditEvent);
+    if (!EditEvent.PropertyChain.IsEmpty() && EditEvent.PropertyChain.GetHead() != nullptr)
+    {
+        if (FProperty* EditedProperty = EditEvent.PropertyChain.GetHead()->GetValue())
+        {
+            if (EditedProperty->GetNameCPP() == "RelativeLocation" || EditedProperty->GetNameCPP() == "RelativeRotation" || EditedProperty->GetNameCPP() == "Size")
+            {
+                UpdateVisualizerComponentProperties();
+            }
+        }
+    }
+}
+
+void APhotoSubjectSpawnRegion::PostEditUndo()
+{
+    Super::PostEditUndo();
+    UpdateVisualizerComponentProperties();
+}
 #endif

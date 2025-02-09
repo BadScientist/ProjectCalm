@@ -10,6 +10,10 @@
 
 #include "InputActionValue.h"
 
+#ifdef PC_DEBUG_LOGS
+	#define LOCAL_DEBUG_LOGS
+#endif
+
 
 ACompass::ACompass()
 {
@@ -18,6 +22,12 @@ ACompass::ACompass()
 
 void ACompass::SecondaryAction(const FInputActionValue &Value)
 {
+	bool bValue = Value.Get<bool>();
+
+#ifdef LOCAL_DEBUG_LOGS
+	UE_LOG(LogEquipment, Display, TEXT("%s: SecondaryAction called with Value: %s"), *GetActorNameOrLabel(), *(bValue ? FString("true") : FString("false")));
+#endif // DEBUG
+
 	if (OwningPlayerCharacter != nullptr) {OwningPlayerCharacter->RestrictMovement(Value.Get<bool>());}
 
     SetPlayerFlag(FLAG_EQUIPMENT_RAISED, Value.Get<bool>());

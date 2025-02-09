@@ -6,6 +6,8 @@
 #include "Equipment.h"
 #include "Compass.generated.h"
 
+enum EEquipReply : uint8;
+
 
 /**
  * 

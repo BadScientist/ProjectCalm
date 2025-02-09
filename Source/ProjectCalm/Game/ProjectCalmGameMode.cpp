@@ -47,7 +47,9 @@ void AProjectCalmGameMode::CheckIsLandscapeReady()
     FCollisionQueryParams Params;
     Params.bReturnPhysicalMaterial = true;
 
-    bool Hit = GetWorld()->LineTraceSingleByChannel(OutHit, TraceStart, TraceEnd, ECollisionChannel::ECC_Visibility, Params);
+    UWorld* World = GetWorld();
+    CHECK_NULLPTR_RET(World, LogGameMode, "ProjectCalmGameMode:: Could not get World!");
+    bool Hit = World->LineTraceSingleByChannel(OutHit, TraceStart, TraceEnd, ECollisionChannel::ECC_Visibility, Params);
     if (Hit && OutHit.PhysMaterial.IsValid())
 	{
 #ifdef LOCAL_DEBUG_LOGS

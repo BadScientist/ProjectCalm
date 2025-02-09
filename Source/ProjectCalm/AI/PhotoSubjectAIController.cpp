@@ -154,7 +154,9 @@ void APhotoSubjectAIController::UpdateMoods(float DeltaSeconds)
 
 void APhotoSubjectAIController::UpdateBehavior()
 {
-    LastBehaviorUpdateTime = GetWorld()->GetTimeSeconds();
+    UWorld* World = GetWorld();
+    CHECK_NULLPTR_RET(World, LogPhotoSubjectAI, "PhotoSubjectAIController:: Failed to get World!");
+    LastBehaviorUpdateTime = World->GetTimeSeconds();
 
     EAlertLevel NewAlertLevel{EAlertLevel::CALM};
 
@@ -183,7 +185,10 @@ void APhotoSubjectAIController::UpdateBehavior()
 
 void APhotoSubjectAIController::TryUpdateBehavior()
 {
-    float CurrentTimeSeconds = GetWorld()->GetTimeSeconds();
+    UWorld* World = GetWorld();
+    CHECK_NULLPTR_RET(World, LogPhotoSubjectAI, "PhotoSubjectAIController:: Failed to get World!");
+
+    float CurrentTimeSeconds = World->GetTimeSeconds();
     if (!CheckCurrentBehavior() || CurrentTimeSeconds - LastBehaviorUpdateTime >= BehaviorUpdateFrequency)
     {
         UpdateBehavior();
@@ -247,12 +252,17 @@ AActor* APhotoSubjectAIController::GetCurrentTarget() const
 
 bool APhotoSubjectAIController::CanAttack() const
 {
-    return AttackCooldown >= 0 && GetWorld()->GetTimeSeconds() - LastAttackTime >= AttackCooldown && !IsTargetDead(LastSeenPrey);
+    UWorld* World = GetWorld();
+    CHECK_NULLPTR_RETVAL(World, LogPhotoSubjectAI, "PhotoSubjectAIController:: Failed to get World!", false);
+
+    return AttackCooldown >= 0 && World->GetTimeSeconds() - LastAttackTime >= AttackCooldown && !IsTargetDead(LastSeenPrey);
 }
 
 void APhotoSubjectAIController::ActivateAttackCooldown()
 {
-    LastAttackTime = GetWorld()->GetTimeSeconds();
+    UWorld* World = GetWorld();
+    CHECK_NULLPTR_RET(World, LogPhotoSubjectAI, "PhotoSubjectAIController:: Failed to get World!");
+    LastAttackTime = World->GetTimeSeconds();
 }
 
 void APhotoSubjectAIController::SetAlertLevelKeyValue(const FName &KeyName, EAlertLevel InAlertLevel)

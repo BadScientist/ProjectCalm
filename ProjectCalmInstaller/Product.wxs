@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+	
+	<?if $(var.Platform) = x64?>
+	<?define ProductCode = "{ACFB39D5-B1B2-495D-B051-4B0F3F0F3F5D}"?>
+	<?else?>
+	<?define ProductCode = "{D14577F1-E86F-4CFE-8D19-AE87E701F403}"?>
+	<?endif?>
+	<?define UpgradeCode = "{DD94228A-B7E2-44DC-B13F-7FDE2E0ED6CE}"?>
+	
+	<Product Id="$(var.ProductCode)"
+			 Name="!(loc.ProductName_$(var.Platform))"
+			 Language="1033"
+			 Version="$(var.BuildVersion)"
+			 Manufacturer="!(loc.Manufacturer)"
+			 UpgradeCode="$(var.UpgradeCode)">
+		
+		<Package InstallerVersion="200"
+				 Compressed="yes"
+				 InstallScope="perMachine"
+				 Platform="$(var.Platform)"
+				 Manufacturer="!(loc.Manufacturer)"
+				 Description ="!(loc.Description)"/>
+
+		<MajorUpgrade DowngradeErrorMessage="A newer version of !(loc.ProductName_$(var.Platform)) is already installed." />
+		
+		<MediaTemplate EmbedCab="yes"/>
+
+		<Icon Id="Icon" SourceFile="$(var.ProjectDir)\ProjectCalmIcon.ico"/>
+
+		<Property Id="ARPPRODUCTICON">Icon</Property>
+		<Property Id="ARPURLINFOABOUT">https://github.com/BadScientist/ProjectCalm</Property>
+
+		<UIRef Id="WixUI_Minimal"/>
+		<WixVariable Id="WixUIDialogBmp" Value="$(var.ProjectDir)\Assets\SideBanner.bmp"/>
+		<WixVariable Id="WixUIBannerBmp" Value="$(var.ProjectDir)\Assets\TopBanner.bmp"/>
+		<WixVariable Id="WixUILicenseRtf" Value="$(var.ProjectDir)\License.rtf"/>
+
+		<Feature Id="ProductFeature" Title="!(loc.ProductName)" Level="1">
+			<ComponentGroupRef Id="InstallComponents" />
+		</Feature>
+	</Product>
+
+	<!-- DIRECTORIES -->
+	<Fragment>
+		<Directory Id="TARGETDIR" Name="SourceDir">
+			
+			<?if $(var.Platform) = x64?>
+			<Directory Id="ProgramFiles64Folder">
+				<Directory Id="INSTALLFOLDER" Name="!(loc.ProductFolderName)" />
+			</Directory>
+			
+			<?else?>
+			<Directory Id="ProgramFilesFolder">
+				<Directory Id="INSTALLFOLDER" Name="!(loc.ProductFolderName)" />
+			</Directory>			
+			<?endif?>
+					
+		</Directory>
+	</Fragment>
+
+	<Fragment>
+		<DirectoryRef Id="INSTALLFOLDER" FileSource="..\Build\Windows\ProjectCalm"/>
+	</Fragment>
+</Wix>

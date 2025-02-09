@@ -8,7 +8,7 @@
 
 UMenu::UMenu(const FObjectInitializer& ObjectInitializer) : UUserWidget(ObjectInitializer)
 {
-    bIsFocusable = true;
+    SetIsFocusable(true);
 }
 
 void UMenu::SetMenuInterface(IMenuInterface* NewMenuInterface)

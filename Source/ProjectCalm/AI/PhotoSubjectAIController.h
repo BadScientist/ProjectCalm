@@ -16,7 +16,7 @@
 #define BBKEY_REACTION_TARGET 	TEXT("ReactionTarget")
 #define BBKEY_IS_DEAD		 	TEXT("bIsDead")
 
-enum ESubjectName;
+enum ESubjectName : uint8;
 struct FActorPerceptionUpdateInfo;
 
 

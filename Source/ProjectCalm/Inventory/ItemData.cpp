@@ -8,6 +8,11 @@
 #include "ProjectCalm/Utilities/PCPlayerStatics.h"
 #include "ProjectCalm/Utilities/LogMacros.h"
 
+#ifdef PC_DEBUG_LOGS
+	#define LOCAL_DEBUG_LOGS
+#endif
+
+
 UItemData::UItemData(const FObjectInitializer &ObjectInitializer)
 {
     

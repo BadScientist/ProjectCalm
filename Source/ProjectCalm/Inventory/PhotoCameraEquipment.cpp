@@ -25,7 +25,7 @@
 #include "Kismet/GameplayStatics.h"
 
 #ifdef PC_DEBUG_LOGS
-	// #define LOCAL_DEBUG_LOGS
+	#define LOCAL_DEBUG_LOGS
 #endif
 
 
@@ -97,12 +97,6 @@ void APhotoCameraEquipment::RemoveEquipment(IEquipmentInterface *Equipment)
 
 void APhotoCameraEquipment::OnSecondaryButtonDown()
 {
-	if (OwningPlayerCharacter != nullptr)
-	{
-		OwningPlayerCharacter->HideHUD();
-		OwningPlayerCharacter->RestrictMovement(true);
-	}
-
 	GetWorldTimerManager().PauseTimer(BlendViewTimerHandle);
 
 	switch (CameraState)
@@ -235,11 +229,6 @@ void APhotoCameraEquipment::LowerCamera()
 
 void APhotoCameraEquipment::EnterDefaultState()
 {
-	if (OwningPlayerCharacter != nullptr)
-	{
-		OwningPlayerCharacter->ShowHUD();
-		OwningPlayerCharacter->RestrictMovement(false);
-	}
 	SetCameraState(ECameraState::DEFAULT);
 }
 
@@ -251,6 +240,22 @@ void APhotoCameraEquipment::SetCameraState(ECameraState InState)
 		InState == ECameraState::BLENDING_IN ||
 		InState == ECameraState::READY);
 	CameraState = InState;
+
+	if (OwningPlayerCharacter != nullptr)
+	{
+		if (InState == ECameraState::RAISING)
+		{
+			OwningPlayerCharacter->HideHUD();
+			OwningPlayerCharacter->RestrictMovement(true);
+		}
+
+		if (InState == ECameraState::DEFAULT)
+		{
+			OwningPlayerCharacter->ShowHUD();
+			OwningPlayerCharacter->RestrictMovement(false);
+		}
+	}
+
 }
 
 float APhotoCameraEquipment::ActivateCameraFlash()
@@ -302,6 +307,10 @@ void APhotoCameraEquipment::SecondaryAction(const FInputActionValue& Value)
 {
 	bool bValue = Value.Get<bool>();
 
+#ifdef LOCAL_DEBUG_LOGS
+	UE_LOG(LogEquipment, Display, TEXT("%s: SecondaryAction called with Value: %s"), *GetActorNameOrLabel(), *(bValue ? FString("true") : FString("false")));
+#endif // DEBUG
+
 	if (bValue) {OnSecondaryButtonDown();}
 	else {OnSecondaryButtonUp();}
 }
@@ -316,6 +325,10 @@ FPhotoData APhotoCameraEquipment::GetLastPhoto()
 
 float APhotoCameraEquipment::BlendViewToPhotoCamera()
 {
+#ifdef LOCAL_DEBUG_LOGS
+	UE_LOG(LogEquipment, Display, TEXT("%s: Blending to Camera View"), *GetActorNameOrLabel());
+#endif // DEBUG
+
 	SetCameraState(ECameraState::BLENDING_IN);
 	if (AttachedCameraLens == nullptr)
 	{

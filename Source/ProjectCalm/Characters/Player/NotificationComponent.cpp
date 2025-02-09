@@ -14,7 +14,8 @@ void UNotificationComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 {
     if (ActiveWidget == nullptr) {return;}
 
-    float TimeActive = GetWorld()->GetTimeSeconds() - StartTimeStamp;
+    UWorld* World = GetWorld();
+    float TimeActive = World == nullptr ? DisplayTime : World->GetTimeSeconds() - StartTimeStamp;
     ActiveWidget->SetAlpha(FMath::Clamp(1 - (TimeActive - DisplayTime)/FadeTime, 0, 1));
 }
 
@@ -24,5 +25,7 @@ void UNotificationComponent::DisplayString(FString InString)
     {
 	    ActiveWidget->DisplayString(InString);
     }
-    StartTimeStamp = GetWorld()->GetTimeSeconds();
+
+    UWorld* World = GetWorld();
+    StartTimeStamp = World == nullptr ? 0.0f : World->GetTimeSeconds();
 }

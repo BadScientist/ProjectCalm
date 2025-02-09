@@ -68,7 +68,7 @@ void UMainGameMenu::Setup(bool bIsInteractiveIn)
     APlayerController* PlayerController = GetOwningPlayer();
     CHECK_NULLPTR_RET(PlayerController, LogUserWidget, "Menu:: PlayerController is NULL!");
 
-    bIsFocusable = true;
+    SetIsFocusable(true);
     FInputModeUIOnly InputModeData;
     InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::LockInFullscreen);
     InputModeData.SetWidgetToFocus(TakeWidget());
