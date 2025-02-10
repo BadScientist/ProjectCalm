@@ -10,7 +10,7 @@
 
 #if WITH_EDITORONLY_DATA
     // #define PC_DEBUG_DRAW_SHAPES
-    #define PC_DEBUG_LOGS
+    // #define PC_DEBUG_LOGS
 #endif
 
 DECLARE_LOG_CATEGORY_EXTERN(LogPlayerCharacter, All, All)

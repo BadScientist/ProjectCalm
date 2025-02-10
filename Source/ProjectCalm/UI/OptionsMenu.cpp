@@ -10,7 +10,13 @@
 #include "Components/Slider.h"
 #include "Components/ComboBoxString.h"
 #include "Components/WidgetSwitcher.h"
+#include "Components/VerticalBox.h"
+#include "Components/TextBlock.h"
 #include "GameFramework/GameUserSettings.h"
+
+#ifdef PC_DEBUG_LOGS
+    #define LOCAL_DEBUG_LOGS
+#endif // DEBUG
 
 
 bool UOptionsMenu::Initialize()
@@ -21,6 +27,14 @@ bool UOptionsMenu::Initialize()
     CHECK_NULLPTR_RETVAL(BackButton, LogUserWidget, "OptionsMenu:: No BackButton in Widget Blueprint!", false);
     BackButton->OnClicked.AddDynamic(this, &UOptionsMenu::Back);
     BackButton->OnHovered.AddDynamic(this, &UMenu::PlayButtonHoverSound);
+
+    CHECK_NULLPTR_RETVAL(ConfirmButton, LogUserWidget, "OptionsMenu:: No ConfirmButton in Widget Blueprint!", false);
+    ConfirmButton->OnClicked.AddDynamic(this, &UOptionsMenu::Confirm);
+    ConfirmButton->OnHovered.AddDynamic(this, &UMenu::PlayButtonHoverSound);
+
+    CHECK_NULLPTR_RETVAL(CancelButton, LogUserWidget, "OptionsMenu:: No CancelButton in Widget Blueprint!", false);
+    CancelButton->OnClicked.AddDynamic(this, &UOptionsMenu::Cancel);
+    CancelButton->OnHovered.AddDynamic(this, &UMenu::PlayButtonHoverSound);
 
     CHECK_NULLPTR_RETVAL(VolumeSliderMaster, LogUserWidget, "OptionsMenu:: No VolumeSliderMaster in Widget Blueprint!", false);
     VolumeSliderMaster->OnValueChanged.AddDynamic(this, &UOptionsMenu::OnMasterVolumeChanged);
@@ -42,8 +56,28 @@ bool UOptionsMenu::Initialize()
 
     CHECK_NULLPTR_RETVAL(ResolutionDropdown, LogUserWidget, "OptionsMenu:: No ResolutionDropdown in Widget Blueprint!", false);
     ResolutionDropdown->OnSelectionChanged.AddDynamic(this, &UOptionsMenu::OnResolutionChanged);    
+    ResolutionDropdown->OnOpening.AddDynamic(this, &UOptionsMenu::OnResolutionOpened);
 
     return true;
+}
+
+void UOptionsMenu::NativeTick(const FGeometry &MyGeometry, float InDeltaTime)
+{
+    Super::NativeTick(MyGeometry, InDeltaTime);
+
+    CurrentTime += InDeltaTime;
+
+#ifdef LOCAL_DEBUG_LOGS
+    UE_LOG(LogUserWidget, Display, TEXT("OptionsMenu:: Tick: bAwaitingConfirmation: %i"), bAwaitingConfirmation);
+#endif // DEBUG
+
+    if (!bAwaitingConfirmation) {return;}
+
+    float TimeRemaining = 15.0f - (CurrentTime - ConfirmationStartTime);
+
+    if (TimerText != nullptr) {TimerText->SetText(FText::FromString(FString::FromInt(FMath::CeilToInt32(TimeRemaining))));}
+
+    if (TimeRemaining <= 0.0f) {EndConfirmation(false);}
 }
 
 void UOptionsMenu::Setup(bool bIsInteractiveIn)
@@ -90,6 +124,16 @@ void UOptionsMenu::Back()
     WidgetSwitcher->SetActiveWidgetIndex(Idx > 0 ? Idx - 1 : 0);
 }
 
+void UOptionsMenu::Confirm()
+{
+    EndConfirmation(true);
+}
+
+void UOptionsMenu::Cancel()
+{
+    EndConfirmation(false);
+}
+
 void UOptionsMenu::OnMasterVolumeChanged(float NewValue)
 {
     float Volume = FMath::Clamp(NewValue / 100, 0, 1);
@@ -134,12 +178,39 @@ void UOptionsMenu::OnWindowModeChanged(FString SelectedItem, ESelectInfo::Type S
 
 void UOptionsMenu::OnResolutionChanged(FString SelectedItem, ESelectInfo::Type SelectionType)
 {
-    if (SelectionType == ESelectInfo::Direct) {return;}
+    if (SelectionType == ESelectInfo::Direct && SelectedItem != PreviousSetting) {return;}
     CHECK_NULLPTR_RET(GEngine, LogUserWidget, "OptionsMenu:: GEngine is NULL!");
     
     UGameUserSettings* Settings = GEngine->GetGameUserSettings();
     CHECK_NULLPTR_RET(Settings, LogUserWidget, "OptionsMenu:: Could not retrieve Game User Settings!");
-
+    
     Settings->SetScreenResolution(SelectedItem == FString("2560 x 1440") ? FIntPoint(2560, 1440) : SelectedItem == FString("1920 x 1080") ? FIntPoint(1920, 1080) : FIntPoint(800, 600));
     Settings->ApplySettings(false);
+
+    if (SelectionType != ESelectInfo::Direct) {StartConfirmation();}
+}
+
+void UOptionsMenu::OnResolutionOpened()
+{
+    CHECK_NULLPTR_RET(ResolutionDropdown, LogUserWidget, "OptionsMenu:: No ResolutionDropdown!");
+    PreviousSetting = ResolutionDropdown->GetSelectedOption();
+}
+
+void UOptionsMenu::StartConfirmation()
+{
+    if (OptionsContainer != nullptr) {OptionsContainer->SetVisibility(ESlateVisibility::Hidden);}
+    if (ConfirmationBox != nullptr) {ConfirmationBox->SetVisibility(ESlateVisibility::Visible);}
+
+    ConfirmationStartTime = CurrentTime;
+    bAwaitingConfirmation = true;
+}
+
+void UOptionsMenu::EndConfirmation(bool bConfirmed)
+{
+    if (!bConfirmed) {if (ResolutionDropdown != nullptr) {ResolutionDropdown->SetSelectedOption(PreviousSetting);}}
+
+    if (OptionsContainer != nullptr) {OptionsContainer->SetVisibility(ESlateVisibility::Visible);}
+    if (ConfirmationBox != nullptr) {ConfirmationBox->SetVisibility(ESlateVisibility::Hidden);}
+
+    bAwaitingConfirmation = false;
 }

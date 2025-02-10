@@ -6,7 +6,7 @@
     <ProductVersion>3.10</ProductVersion>
     <ProjectGuid>fbe8f097-4480-4e1a-ab6c-85ea8d906a3f</ProjectGuid>
     <SchemaVersion>2.0</SchemaVersion>
-    <OutputName>ProjectCalm_$(Configuration)_$(Platform)</OutputName>
+    <OutputName>UntitledPhotographyGame_$(Configuration)_$(Platform)</OutputName>
     <OutputType>Package</OutputType>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">

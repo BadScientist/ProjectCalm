@@ -38,6 +38,7 @@
 
 		<Feature Id="ProductFeature" Title="!(loc.ProductName)" Level="1">
 			<ComponentGroupRef Id="InstallComponents" />
+			<ComponentGroupRef Id="ShortcutComponents" />
 		</Feature>
 	</Product>
 
@@ -46,20 +47,45 @@
 		<Directory Id="TARGETDIR" Name="SourceDir">
 			
 			<?if $(var.Platform) = x64?>
+			
 			<Directory Id="ProgramFiles64Folder">
 				<Directory Id="INSTALLFOLDER" Name="!(loc.ProductFolderName)" />
 			</Directory>
 			
 			<?else?>
+			
 			<Directory Id="ProgramFilesFolder">
 				<Directory Id="INSTALLFOLDER" Name="!(loc.ProductFolderName)" />
-			</Directory>			
+			</Directory>
+			
 			<?endif?>
-					
+
+			<Directory Id="ProgramMenuFolder">
+				<Directory Id="ApplicationProgramsFolder" Name="!(loc.ProductName)" />
+			</Directory>
+			
 		</Directory>
+		
 	</Fragment>
 
+	<!-- Components -->
 	<Fragment>
-		<DirectoryRef Id="INSTALLFOLDER" FileSource="..\Build\Windows\ProjectCalm"/>
+		<ComponentGroup Id="ShortcutComponents">
+			<ComponentRef Id="ExecutableShortcutComponent"/>
+		</ComponentGroup>
+
+		<DirectoryRef Id="INSTALLFOLDER" FileSource="..\Build\Windows\ProjectCalm" />
+		
+		<DirectoryRef Id="ApplicationProgramsFolder">
+			<Component Id="ExecutableShortcutComponent" Guid="{1F7BDEB7-7DBA-4C7A-B4B3-2D882D7CC223}">
+				<Shortcut Id="ExecutableShortcut"
+						  Name="!(loc.ProductName)"
+						  Target="[INSTALLFOLDER]!(loc.ProductName).exe"
+						  WorkingDirectory="INSTALLFOLDER"
+						  Icon="Icon" />
+				<RemoveFolder Id="CleanUpShortCut" Directory="ApplicationProgramsFolder" On="uninstall"/>
+				<RegistryValue Id="RegShortcutKey" Root="HKCU" Key="SOFTWARE\!(loc.ProductFolderName)" Name="Shortcut" Value="1" Type="integer" KeyPath="yes"/>
+			</Component>
+		</DirectoryRef>
 	</Fragment>
 </Wix>

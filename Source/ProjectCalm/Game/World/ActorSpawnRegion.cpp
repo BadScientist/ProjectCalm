@@ -3,6 +3,10 @@
 #include "ProjectCalm/Utilities/PCPlayerStatics.h"
 #include "ProjectCalm/Utilities/PCGameStatics.h"
 
+// #if WITH_EDITOR
+// #include "ProjectCalm/EditorOnly/SpawnRegionVisualizerComponent.h"
+// #endif
+
 #include "PhysicalMaterials/PhysicalMaterial.h"
 
 #ifdef PC_DEBUG_LOGS
@@ -18,10 +22,10 @@ AActorSpawnRegion::AActorSpawnRegion()
 {
     PrimaryActorTick.bCanEverTick = true;
 
-#if WITH_EDITOR
-    SpawnRegionVisComp = CreateDefaultSubobject<USpawnRegionVisualizerComponent>(TEXT("VisualizerComponent"));
-    if (SpawnRegionVisComp != nullptr) {SetRootComponent(SpawnRegionVisComp);}
-#endif
+// #if WITH_EDITOR
+//     SpawnRegionVisComp = CreateDefaultSubobject<USpawnRegionVisualizerComponent>(TEXT("VisualizerComponent"));
+//     if (SpawnRegionVisComp != nullptr) {SetRootComponent(SpawnRegionVisComp);}
+// #endif
 }
 
 void AActorSpawnRegion::BeginPlay()
@@ -161,64 +165,64 @@ void AActorSpawnRegion::Tick(float DeltaTime)
     else if (DistanceToPlayer >= UnrenderDistance) {SetActorsActive(false);}
 }
 
-#if WITH_EDITOR
-void AActorSpawnRegion::UpdateVisualizerComponentProperties() 
-{
-    SetActorRotation(FRotator(0, GetActorRotation().Yaw, 0));
-    if (SpawnRegionVisComp == nullptr) {return;}
-    SpawnRegionVisComp->UpdateProperties(GetActorLocation(), GetActorRotation(), Size);
-}
+// #if WITH_EDITOR
+// void AActorSpawnRegion::UpdateVisualizerComponentProperties() 
+// {
+//     SetActorRotation(FRotator(0, GetActorRotation().Yaw, 0));
+//     if (SpawnRegionVisComp == nullptr) {return;}
+//     SpawnRegionVisComp->UpdateProperties(GetActorLocation(), GetActorRotation(), Size);
+// }
 
-void AActorSpawnRegion::EditorApplyTranslation(const FVector& DeltaTranslation, bool bAltDown, bool bShiftDown, bool bCtrlDown)
-{
-    Super::EditorApplyTranslation(DeltaTranslation, bAltDown, bShiftDown, bCtrlDown);
-    UpdateVisualizerComponentProperties();
-}
+// void AActorSpawnRegion::EditorApplyTranslation(const FVector& DeltaTranslation, bool bAltDown, bool bShiftDown, bool bCtrlDown)
+// {
+//     Super::EditorApplyTranslation(DeltaTranslation, bAltDown, bShiftDown, bCtrlDown);
+//     UpdateVisualizerComponentProperties();
+// }
 
-void AActorSpawnRegion::EditorApplyRotation(const FRotator& DeltaRotation, bool bAltDown, bool bShiftDown, bool bCtrlDown)
-{
-    Super::EditorApplyRotation(DeltaRotation, bAltDown, bShiftDown, bCtrlDown);
-    UpdateVisualizerComponentProperties();
-}
+// void AActorSpawnRegion::EditorApplyRotation(const FRotator& DeltaRotation, bool bAltDown, bool bShiftDown, bool bCtrlDown)
+// {
+//     Super::EditorApplyRotation(DeltaRotation, bAltDown, bShiftDown, bCtrlDown);
+//     UpdateVisualizerComponentProperties();
+// }
 
-void AActorSpawnRegion::EditorApplyScale(const FVector& DeltaScale, const FVector* PivotLocation, bool bAltDown, bool bShiftDown, bool bCtrlDown)
-{
-    const FVector CurrentScale = GetRootComponent()->GetRelativeScale3D();
-    FVector SafeDeltaScale = FVector(FMath::Clamp(DeltaScale.X, -1.0f, 1.0f), FMath::Clamp(DeltaScale.Y, -1.0f, 1.0f), FMath::Clamp(DeltaScale.Z, -1.0f, 1.0f));
-    FVector ScalingVector = FVector(1.0f) + SafeDeltaScale;
-    Size *= ScalingVector;
+// void AActorSpawnRegion::EditorApplyScale(const FVector& DeltaScale, const FVector* PivotLocation, bool bAltDown, bool bShiftDown, bool bCtrlDown)
+// {
+//     const FVector CurrentScale = GetRootComponent()->GetRelativeScale3D();
+//     FVector SafeDeltaScale = FVector(FMath::Clamp(DeltaScale.X, -1.0f, 1.0f), FMath::Clamp(DeltaScale.Y, -1.0f, 1.0f), FMath::Clamp(DeltaScale.Z, -1.0f, 1.0f));
+//     FVector ScalingVector = FVector(1.0f) + SafeDeltaScale;
+//     Size *= ScalingVector;
 
-    if (PivotLocation)
-    {
-        const FRotator ActorRotation = GetActorRotation();
-        const FVector WorldDelta = GetActorLocation() - (*PivotLocation);
-        const FVector LocalDelta = (ActorRotation.GetInverse()).RotateVector(WorldDelta);
-        const FVector LocalScaledDelta = LocalDelta * (ScalingVector / FVector(1.0f));
-        const FVector WorldScaledDelta = ActorRotation.RotateVector(LocalScaledDelta);
-        SetActorLocation(WorldScaledDelta + (*PivotLocation));
-    }
+//     if (PivotLocation)
+//     {
+//         const FRotator ActorRotation = GetActorRotation();
+//         const FVector WorldDelta = GetActorLocation() - (*PivotLocation);
+//         const FVector LocalDelta = (ActorRotation.GetInverse()).RotateVector(WorldDelta);
+//         const FVector LocalScaledDelta = LocalDelta * (ScalingVector / FVector(1.0f));
+//         const FVector WorldScaledDelta = ActorRotation.RotateVector(LocalScaledDelta);
+//         SetActorLocation(WorldScaledDelta + (*PivotLocation));
+//     }
 
-    UpdateVisualizerComponentProperties();
-}
+//     UpdateVisualizerComponentProperties();
+// }
 
-void AActorSpawnRegion::PostEditChangeChainProperty(FPropertyChangedChainEvent &EditEvent)
-{
-    Super::PostEditChangeChainProperty(EditEvent);
-    if (!EditEvent.PropertyChain.IsEmpty() && EditEvent.PropertyChain.GetHead() != nullptr)
-    {
-        if (FProperty* EditedProperty = EditEvent.PropertyChain.GetHead()->GetValue())
-        {
-            if (EditedProperty->GetNameCPP() == "RelativeLocation" || EditedProperty->GetNameCPP() == "RelativeRotation" || EditedProperty->GetNameCPP() == "Size")
-            {
-                UpdateVisualizerComponentProperties();
-            }
-        }
-    }
-}
+// void AActorSpawnRegion::PostEditChangeChainProperty(FPropertyChangedChainEvent &EditEvent)
+// {
+//     Super::PostEditChangeChainProperty(EditEvent);
+//     if (!EditEvent.PropertyChain.IsEmpty() && EditEvent.PropertyChain.GetHead() != nullptr)
+//     {
+//         if (FProperty* EditedProperty = EditEvent.PropertyChain.GetHead()->GetValue())
+//         {
+//             if (EditedProperty->GetNameCPP() == "RelativeLocation" || EditedProperty->GetNameCPP() == "RelativeRotation" || EditedProperty->GetNameCPP() == "Size")
+//             {
+//                 UpdateVisualizerComponentProperties();
+//             }
+//         }
+//     }
+// }
 
-void AActorSpawnRegion::PostEditUndo()
-{
-    Super::PostEditUndo();
-    UpdateVisualizerComponentProperties();
-}
-#endif
+// void AActorSpawnRegion::PostEditUndo()
+// {
+//     Super::PostEditUndo();
+//     UpdateVisualizerComponentProperties();
+// }
+// #endif

@@ -32,6 +32,8 @@ AProjectCalmGameMode::AProjectCalmGameMode() : Super()
 
 void AProjectCalmGameMode::Tick(float DeltaTime)
 {
+	Super::Tick(DeltaTime);
+	
 	CheckIsLandscapeReady();
 }
 

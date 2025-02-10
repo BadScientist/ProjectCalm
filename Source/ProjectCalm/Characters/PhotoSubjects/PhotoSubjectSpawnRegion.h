@@ -5,10 +5,6 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 
-#if WITH_EDITORONLY_DATA
-#include "ProjectCalm/EditorOnly/SpawnRegionVisualizerComponent.h"
-#endif
-
 #include "ProjectCalm/Game/World/SpawnRegionInterface.h"
 #include "PhotoSubjectSpawnRegion.generated.h"
 
@@ -74,17 +70,17 @@ public:
     bool SpawnPhotoSubject(FVector SpawnLocation);
     int32 CleanupSpawns(AActor* Player);
 
-private:
-    class USpawnRegionVisualizerComponent* SpawnRegionVisComp;
+// private:
+//     class USpawnRegionVisualizerComponent* SpawnRegionVisComp{nullptr};
 
-#if WITH_EDITOR
-    void UpdateVisualizerComponentProperties();
+// #if WITH_EDITOR
+//     void UpdateVisualizerComponentProperties();
 
-public:
-    virtual void EditorApplyTranslation(const FVector& DeltaTranslation, bool bAltDown, bool bShiftDown, bool bCtrlDown) override;
-    virtual void EditorApplyRotation(const FRotator& DeltaRotation, bool bAltDown, bool bShiftDown, bool bCtrlDown) override;
-    virtual void EditorApplyScale(const FVector& DeltaScale, const FVector* PivotLocation, bool bAltDown, bool bShiftDown, bool bCtrlDown) override;
-    virtual void PostEditChangeChainProperty(FPropertyChangedChainEvent& EditEvent) override;
-    virtual void PostEditUndo() override;
-#endif
+// public:
+//     virtual void EditorApplyTranslation(const FVector& DeltaTranslation, bool bAltDown, bool bShiftDown, bool bCtrlDown) override;
+//     virtual void EditorApplyRotation(const FRotator& DeltaRotation, bool bAltDown, bool bShiftDown, bool bCtrlDown) override;
+//     virtual void EditorApplyScale(const FVector& DeltaScale, const FVector* PivotLocation, bool bAltDown, bool bShiftDown, bool bCtrlDown) override;
+//     virtual void PostEditChangeChainProperty(FPropertyChangedChainEvent& EditEvent) override;
+//     virtual void PostEditUndo() override;
+// #endif
 };

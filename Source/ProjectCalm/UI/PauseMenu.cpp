@@ -48,6 +48,7 @@ void UPauseMenu::SwitchToOptionsMenu()
 
 void UPauseMenu::OnCloseButtonClicked()
 {
+    if (OptionsMenu != nullptr && OptionsMenu->IsAwaitingConfirmation()) {return;}
     Super::OnCloseButtonClicked();
 }
 

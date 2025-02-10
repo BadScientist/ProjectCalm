@@ -10,6 +10,8 @@
 class USlider;
 class UComboBoxString;
 class UWidgetSwitcher;
+class UVerticalBox;
+class UTextBlock;
 
 /**
  * 
@@ -21,6 +23,17 @@ class PROJECTCALM_API UOptionsMenu : public UMenu
 
 	UPROPERTY(meta = (BindWidget))
 	UButton* BackButton;
+
+	UPROPERTY(meta = (BindWidget))
+	UButton* ConfirmButton;
+	UPROPERTY(meta = (BindWidget))
+	UButton* CancelButton;
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* TimerText;
+	UPROPERTY(meta = (BindWidget))
+	UVerticalBox* OptionsContainer;
+	UPROPERTY(meta = (BindWidget))
+	UVerticalBox* ConfirmationBox;
 
 	UPROPERTY(meta = (BindWidget))
 	USlider* VolumeSliderMaster;
@@ -40,15 +53,27 @@ class PROJECTCALM_API UOptionsMenu : public UMenu
 
 	UWidgetSwitcher* WidgetSwitcher;
 
+	bool bAwaitingConfirmation{false};
+	FTimerHandle ConfirmationTimerHandle;
+	FString PreviousSetting;
+	float CurrentTime{0.0f};
+	float ConfirmationStartTime{0.0f};
+
 protected:
 	virtual bool Initialize() override;
+	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
 public:
 	virtual void Setup(bool bIsInteractiveIn) override;
 	void SetWidgetSwitcher(UWidgetSwitcher* InWidgetSwitcher) {WidgetSwitcher = InWidgetSwitcher;};
+	bool IsAwaitingConfirmation() {return bAwaitingConfirmation;}
 
 	UFUNCTION()
 	void Back();
+	UFUNCTION()
+	void Confirm();
+	UFUNCTION()
+	void Cancel();
 
 private:
 	UFUNCTION()
@@ -65,5 +90,10 @@ private:
 	void OnWindowModeChanged(FString SelectedItem, ESelectInfo::Type SelectionType);
 	UFUNCTION()
 	void OnResolutionChanged(FString SelectedItem, ESelectInfo::Type SelectionType);
+	UFUNCTION()
+	void OnResolutionOpened();
+
+	void StartConfirmation();
+	void EndConfirmation(bool bConfirmed);
 	
 };
