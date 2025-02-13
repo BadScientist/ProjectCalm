@@ -26,6 +26,8 @@ class PROJECTCALM_API UPlayerHUD : public UUserWidget
 	UNotificationWidget* NotificationWidget;
 
 public:
+	UPlayerHUD(const FObjectInitializer& ObjectInitializer);
+
 	void Hide();
 	void Show();
 	void SetInteractionLabelText(FString InString);

@@ -8,6 +8,11 @@
 #include "Components/Image.h"
 
 
+UPlayerHUD::UPlayerHUD(const FObjectInitializer& ObjectInitializer) : UUserWidget(ObjectInitializer)
+{
+    SetIsFocusable(false);
+}
+
 void UPlayerHUD::Hide()
 {
     if (Reticle != nullptr) {Reticle->SetVisibility(ESlateVisibility::Hidden);}

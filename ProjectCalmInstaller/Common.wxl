@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <WixLocalization Culture="en-us" xmlns="http://schemas.microsoft.com/wix/2006/localization">
 
+	<String Id="ProjectName">ProjectCalm</String>
 	<String Id="ProductName">Untitled Photography Game</String>
 	<String Id="ProductFolderName">UntitledPhotographyGame</String>
 	<String Id="ProductName_x86">Untitled Photography Game (32-bit)</String>

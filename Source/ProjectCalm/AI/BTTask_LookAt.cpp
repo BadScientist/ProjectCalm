@@ -19,6 +19,8 @@ void UBTTask_LookAt::InitializeMemory(UBehaviorTreeComponent &OwnerComp, uint8 *
 {
     Super::InitializeMemory(OwnerComp, NodeMemory, InitType);
 
+    CHECK_NULLPTR_RET(NodeMemory, LogBehaviorTree, "BTTask_LookAt:: Null NodeMemory pointer was passed to IntializeMemory!");
+
     FBTLookAtTaskMemory* LookAtMemory = (FBTLookAtTaskMemory*)NodeMemory;
     LookAtMemory->RotationSpeed = -1.0f;
 }
@@ -31,6 +33,8 @@ UBTTask_LookAt::UBTTask_LookAt()
 EBTNodeResult::Type UBTTask_LookAt::ExecuteTask(UBehaviorTreeComponent &OwnerComp, uint8 *NodeMemory)
 {
     bNotifyTaskFinished = true;
+
+    CHECK_NULLPTR_RETVAL(NodeMemory, LogBehaviorTree, "BTTask::LookAt:: Null NodeMemory pointer passed to ExecuteTask!", EBTNodeResult::Failed);
 
     AAIController* AIController = OwnerComp.GetAIOwner();
     CHECK_NULLPTR_RETVAL(AIController, LogBehaviorTree, "BTTask::LookAt:: AI CONTROLLER NOT FOUND!", EBTNodeResult::Failed);

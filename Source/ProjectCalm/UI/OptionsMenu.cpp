@@ -110,9 +110,10 @@ void UOptionsMenu::Setup(bool bIsInteractiveIn)
     CHECK_NULLPTR_RET(WindowModeDropdown, LogUserWidget, "OptionsMenu:: No WindowModeDropdown in Widget Blueprint!");
     WindowModeDropdown->SetSelectedOption(WindowMode == EWindowMode::Fullscreen ? FString("Fullscreen") : WindowMode == EWindowMode::Windowed ? FString("Windowed") : FString("Borderless"));
 
-    int32 ScreenWidth = Settings->GetScreenResolution().X;
-    CHECK_NULLPTR_RET(ResolutionDropdown, LogUserWidget, "OptionsMenu:: No ResolutionDropdown in Widget Blueprint!");
-    ResolutionDropdown->SetSelectedOption(ScreenWidth == 2560 ? FString("2560 x 1440") : ScreenWidth == 1920 ? FString("1920 x 1080") : FString("800 x 600"));
+    FIntPoint ScreenWidth = Settings->GetScreenResolution();
+    CHECK_NULLPTR_RET(ResolutionDropdown, LogUserWidget, "OptionsMenu:: No ResolutionDropdown in Widget Blueprint!");    
+    FString SelectedOption(FString::FromInt(ScreenWidth.X) + " x " + FString::FromInt(ScreenWidth.Y));
+    ResolutionDropdown->SetSelectedOption(SelectedOption);
 }
 
 void UOptionsMenu::Back()
@@ -172,7 +173,11 @@ void UOptionsMenu::OnWindowModeChanged(FString SelectedItem, ESelectInfo::Type S
     UGameUserSettings* Settings = GEngine->GetGameUserSettings();
     CHECK_NULLPTR_RET(Settings, LogUserWidget, "OptionsMenu:: Could not retrieve Game User Settings!");
 
-    Settings->SetFullscreenMode(SelectedItem == FString("Fullscreen") ? EWindowMode::Fullscreen : SelectedItem == FString("Windowed") ? EWindowMode::Windowed : EWindowMode::WindowedFullscreen);
+    EWindowMode::Type WindowType;
+    if (SelectedItem == FString("Fullscreen")) {WindowType = EWindowMode::Fullscreen;}
+    else if (SelectedItem == FString("Windowed")) {WindowType = EWindowMode::Windowed;}
+    else {WindowType = EWindowMode::WindowedFullscreen;}
+    Settings->SetFullscreenMode(WindowType);
     Settings->ApplySettings(false);
 }
 
@@ -184,7 +189,13 @@ void UOptionsMenu::OnResolutionChanged(FString SelectedItem, ESelectInfo::Type S
     UGameUserSettings* Settings = GEngine->GetGameUserSettings();
     CHECK_NULLPTR_RET(Settings, LogUserWidget, "OptionsMenu:: Could not retrieve Game User Settings!");
     
-    Settings->SetScreenResolution(SelectedItem == FString("2560 x 1440") ? FIntPoint(2560, 1440) : SelectedItem == FString("1920 x 1080") ? FIntPoint(1920, 1080) : FIntPoint(800, 600));
+    FIntPoint NewRes(0);
+    if (SelectedItem == FString("3840 x 2160")) {NewRes.X = 3840; NewRes.Y = 2160;}
+    else if (SelectedItem == FString("2560 x 1440")) {NewRes.X = 2560; NewRes.Y = 1440;}
+    else if (SelectedItem == FString("1920 x 1080")) {NewRes.X = 1920; NewRes.Y = 1080;}
+    else {NewRes.X = 800; NewRes.Y = 600;}
+
+    Settings->SetScreenResolution(NewRes);
     Settings->ApplySettings(false);
 
     if (SelectionType != ESelectInfo::Direct) {StartConfirmation();}

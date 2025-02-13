@@ -52,7 +52,7 @@ public:
 	UFUNCTION(BlueprintPure)
 	float GetCurrentHealth() const {return CurrentHealth;}
 
-	bool IsDead() const {return FMath::IsNearlyZero(CurrentHealth);}
+	bool IsDead() const;
 
 	float ReceiveDamage(float Damage, UObject* DamageSource = nullptr, FString DamageMessage = FString());
 

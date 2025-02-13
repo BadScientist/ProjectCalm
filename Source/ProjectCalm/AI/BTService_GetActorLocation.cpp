@@ -3,6 +3,7 @@
 
 #include "BTService_GetActorLocation.h"
 #include "PhotoSubjectAIController.h"
+#include "ProjectCalm/Utilities/LogMacros.h"
 
 #include "BehaviorTree/BlackboardComponent.h"
 #include "BehaviorTree/Blackboard/BlackboardKeyType_Object.h"
@@ -35,37 +36,25 @@ void UBTService_GetActorLocation::TickNode(UBehaviorTreeComponent &OwnerComp, ui
 void UBTService_GetActorLocation::StoreTargetActorLocation(UBehaviorTreeComponent& OwnerComp)
 {
     APhotoSubjectAIController* AIController = Cast<APhotoSubjectAIController>(OwnerComp.GetAIOwner());
-    if (AIController == nullptr) 
-    {
-        UE_LOG(LogBehaviorTree, Error, TEXT("BTService::GetActorLocation:: AI CONTROLLER NOT FOUND!"));
-        return;
-    }
+    CHECK_NULLPTR_RET(AIController, LogBehaviorTree, "BTService_GetActorLocation:: Could not get AI Controller!");
 
     UBlackboardComponent* BlackboardComponent = OwnerComp.GetBlackboardComponent();
-    if (BlackboardComponent == nullptr)
-    {
-        UE_LOG(LogBehaviorTree, Error, TEXT("BTTask::GetActorLocation:: BLACKBOARD COMPONENT NOT FOUND!"));
-        return;
-    }
+    CHECK_NULLPTR_RET(BlackboardComponent, LogBehaviorTree, "BTService_GetActorLocation:: Could not get Blackboard Component!");
 
     if (TargetLocationKey.SelectedKeyType.Get() != UBlackboardKeyType_Vector::StaticClass())
     {
-        UE_LOG(LogBehaviorTree, Error, TEXT("BTTask::GetActorLocation:: INVALID TARGETLOCATIONKEY TYPE!"));
+        UE_LOG(LogBehaviorTree, Error, TEXT("BTService_GetActorLocation:: INVALID TARGETLOCATIONKEY TYPE!"));
         return;
     }
 
-    if (TargetActorKey.SelectedKeyType.Get() == UBlackboardKeyType_Object::StaticClass())
+    if (TargetActorKey.SelectedKeyType.Get() != UBlackboardKeyType_Object::StaticClass())
     {
-        AActor* TargetActor = Cast<AActor>(BlackboardComponent->GetValueAsObject(TargetActorKey.SelectedKeyName));
-        if (TargetActor == nullptr)
-        {
-            UE_LOG(LogBehaviorTree, Error, TEXT("BTTask::GetActorLocation:: REFERENCE OBJECT NOT AN ACTOR!"));
-            return;
-        }
-
-        AIController->SetVectorKeyValue(TargetLocationKey.SelectedKeyName, TargetActor->GetActorLocation());
+        UE_LOG(LogBehaviorTree, Error, TEXT("BTTask::GetActorLocation:: INVALID TARGETACTORKEY TYPE!"));
         return;
     }
-    
-    UE_LOG(LogBehaviorTree, Error, TEXT("BTTask::GetActorLocation:: INVALID TARGETACTORKEY TYPE!"));
+
+    AActor* TargetActor = Cast<AActor>(BlackboardComponent->GetValueAsObject(TargetActorKey.SelectedKeyName));
+    CHECK_NULLPTR_RET(TargetActor, LogBehaviorTree, "BTService_GetActorLocation:: REFERENCE OBJECT NOT AN ACTOR!");
+
+    AIController->SetVectorKeyValue(TargetLocationKey.SelectedKeyName, TargetActor->GetActorLocation());    
 }

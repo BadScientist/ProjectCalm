@@ -74,7 +74,22 @@ void APhotoSubjectAIController::BeginPlay()
     SetBehaviorKeyValue(BBKEY_ACTIVE_BEHAVIOR, EPhotoSubjectBehavior::IDLE);
 }
 
-void APhotoSubjectAIController::HandleHearingStimulus(const FActorPerceptionUpdateInfo& UpdateInfo)
+void APhotoSubjectAIController::SetAlertness(float InAlertness)
+{
+    Alertness = FMath::Max(0, InAlertness);
+}
+
+void APhotoSubjectAIController::SetAlarm(float InAlarm)
+{
+    Alarm = FMath::Max(0, InAlarm);
+}
+
+void APhotoSubjectAIController::SetAggression(float InAggression)
+{
+    Aggression = FMath::Max(0, InAggression);
+}
+
+void APhotoSubjectAIController::HandleHearingStimulus(const FActorPerceptionUpdateInfo &UpdateInfo)
 {
     if (GetTargetSpecies(UpdateInfo) == SelfSpecies){return;}
     if (UpdateInfo.Stimulus.IsExpired()) {ActiveAlertStimulus = false;}
@@ -106,23 +121,24 @@ void APhotoSubjectAIController::HandleSightStimulus(const FActorPerceptionUpdate
 {
     bool bIsActiveStimulus = UpdateInfo.Stimulus.IsActive() && !UpdateInfo.Stimulus.IsExpired();
 
-    if (UpdateInfo.Target.Get() != nullptr)
-    {
-        ESubjectName TargetSpecies = GetTargetSpecies(UpdateInfo);
-        if (TargetSpecies == SelfSpecies) {return;}
+    AActor* SourceActor = UpdateInfo.Target.Get();
+    CHECK_NULLPTR_RET(SourceActor, LogPhotoSubjectAI, "PhotoSubjectAIController:: Stimulus Target is null!");
+    
+    ESubjectName TargetSpecies = GetTargetSpecies(UpdateInfo);
+    if (TargetSpecies == SelfSpecies) {return;}
 
-        APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(UpdateInfo.Target);
-        if (Predators.Contains(TargetSpecies) || (PlayerCharacter != nullptr && ReactionToPlayer == EAlertLevel::ALARMED))
-        {
-            ActiveAlarmStimulus = bIsActiveStimulus && !IsTargetDead(UpdateInfo.Target.Get());
-            if (ActiveAlarmStimulus) {LastSeenPredator = UpdateInfo.Target.Get();}
-        }
-        else if (Prey.Contains(TargetSpecies) || (PlayerCharacter != nullptr && ReactionToPlayer == EAlertLevel::AGGRO))
-        {
-            ActiveAggressionStimulus = bIsActiveStimulus && !IsTargetDead(UpdateInfo.Target.Get());
-            if (ActiveAggressionStimulus) {LastSeenPrey = UpdateInfo.Target.Get();}
-        }
+    APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(SourceActor);
+    if (Predators.Contains(TargetSpecies) || (PlayerCharacter != nullptr && ReactionToPlayer == EAlertLevel::ALARMED))
+    {
+        ActiveAlarmStimulus = bIsActiveStimulus && !IsTargetDead(SourceActor);
+        if (ActiveAlarmStimulus) {LastSeenPredator = SourceActor;}
     }
+    else if (Prey.Contains(TargetSpecies) || (PlayerCharacter != nullptr && ReactionToPlayer == EAlertLevel::AGGRO))
+    {
+        ActiveAggressionStimulus = bIsActiveStimulus && !IsTargetDead(SourceActor);
+        if (ActiveAggressionStimulus) {LastSeenPrey = SourceActor;}
+    }
+        
 }
 
 void APhotoSubjectAIController::UpdateMoods(float DeltaSeconds)
@@ -177,7 +193,9 @@ void APhotoSubjectAIController::UpdateBehavior()
     }
     else
     {
-        GetBlackboardComponent()->ClearValue(BBKEY_REACTION_TARGET);
+        UBlackboardComponent* BlackboardComp = GetBlackboardComponent();
+        CHECK_NULLPTR_RET(BlackboardComp, LogPhotoSubjectAI, "PhotoSubjectAIController:: Could not get Blackboard Component!");
+        BlackboardComp->ClearValue(BBKEY_REACTION_TARGET);
     }
 
     SetAlertLevelKeyValue(BBKEY_ALERT_LEVEL, NewAlertLevel);
@@ -198,12 +216,17 @@ void APhotoSubjectAIController::TryUpdateBehavior()
 bool APhotoSubjectAIController::CheckCurrentBehavior()
 {
     bool bResult{true};
-    AActor* ReactionTarget = Cast<AActor>(GetBlackboardComponent()->GetValueAsObject(BBKEY_REACTION_TARGET));
-    if (ReactionTarget != nullptr && !ReactionTarget->IsValidLowLevel())
+
+    UBlackboardComponent* BlackboardComp = GetBlackboardComponent();
+    CHECK_NULLPTR_RETVAL(BlackboardComp, LogPhotoSubjectAI, "PhotoSubjectAIController:: Could not get Blackboard Component!", false);
+    
+    AActor* ReactionTarget = Cast<AActor>(BlackboardComp->GetValueAsObject(BBKEY_REACTION_TARGET));
+    if ((AlertLevel == EAlertLevel::AGGRO || AlertLevel == EAlertLevel::ALARMED) && (ReactionTarget == nullptr || !ReactionTarget->IsValidLowLevel()))
     {
-        GetBlackboardComponent()->ClearValue(BBKEY_REACTION_TARGET);
-        if (AlertLevel == EAlertLevel::AGGRO || AlertLevel == EAlertLevel::ALARMED) {bResult = false;}
+        BlackboardComp->ClearValue(BBKEY_REACTION_TARGET);
+        bResult = false;
     }
+
     return bResult;
 }
 
@@ -245,7 +268,7 @@ void APhotoSubjectAIController::HandleDeath(FString DamageMessage)
 AActor* APhotoSubjectAIController::GetCurrentTarget() const
 {
     const UBlackboardComponent* BlackboardComponent = GetBlackboardComponent();
-    CHECK_NULLPTR_RETVAL(BlackboardComponent, LogController, "PhotoSubjectAIController:: No BlackboardComp found!", nullptr);
+    CHECK_NULLPTR_RETVAL(BlackboardComponent, LogPhotoSubjectAI, "PhotoSubjectAIController:: No BlackboardComp found!", nullptr);
 
     return Cast<AActor>(BlackboardComponent->GetValueAsObject(BBKEY_REACTION_TARGET));
 }
@@ -272,7 +295,9 @@ void APhotoSubjectAIController::SetAlertLevelKeyValue(const FName &KeyName, EAle
         if (InAlertLevel == AlertLevel) {LastBehavior = ActiveBehavior;}
         else {AlertLevel = InAlertLevel;}
     }
-    GetBlackboardComponent()->SetValueAsEnum(KeyName, InAlertLevel);
+    UBlackboardComponent* BlackboardComp = GetBlackboardComponent();
+    CHECK_NULLPTR_RET(BlackboardComp, LogPhotoSubjectAI, "PhotoSubjectAIController:: Could not get Blackboard Component!");
+    BlackboardComp->SetValueAsEnum(KeyName, InAlertLevel);
 }
 
 void APhotoSubjectAIController::SetBehaviorKeyValue(const FName& KeyName, EPhotoSubjectBehavior InBehavior)
@@ -280,29 +305,38 @@ void APhotoSubjectAIController::SetBehaviorKeyValue(const FName& KeyName, EPhoto
     EPhotoSubjectBehavior NewBehavior = InBehavior;
     if (KeyName == BBKEY_ACTIVE_BEHAVIOR) {ActiveBehavior = NewBehavior;}
 
-    GetBlackboardComponent()->SetValueAsEnum(KeyName, NewBehavior);
+    UBlackboardComponent* BlackboardComp = GetBlackboardComponent();
+    CHECK_NULLPTR_RET(BlackboardComp, LogPhotoSubjectAI, "PhotoSubjectAIController:: Could not get Blackboard Component!");
+    BlackboardComp->SetValueAsEnum(KeyName, NewBehavior);
 }
 
 void APhotoSubjectAIController::SetVectorKeyValue(const FName& KeyName, FVector InVector)
 {
     if (KeyName == BBKEY_HOME_LOCATION) {HomeLocation = InVector;}
     if (KeyName == BBKEY_TARGET_LOCATION) {TargetLocation = InVector;}
-    GetBlackboardComponent()->SetValueAsVector(KeyName, InVector);
+    
+    UBlackboardComponent* BlackboardComp = GetBlackboardComponent();
+    CHECK_NULLPTR_RET(BlackboardComp, LogPhotoSubjectAI, "PhotoSubjectAIController:: Could not get Blackboard Component!");
+    BlackboardComp->SetValueAsVector(KeyName, InVector);
 }
 
 void APhotoSubjectAIController::SetBoolKeyValue(const FName &KeyName, bool bInValue)
 {
-    GetBlackboardComponent()->SetValueAsBool(KeyName, bInValue);
+    UBlackboardComponent* BlackboardComp = GetBlackboardComponent();
+    CHECK_NULLPTR_RET(BlackboardComp, LogPhotoSubjectAI, "PhotoSubjectAIController:: Could not get Blackboard Component!");
+    BlackboardComp->SetValueAsBool(KeyName, bInValue);
 }
 
 void APhotoSubjectAIController::SetObjectKeyValue(const FName &KeyName, UObject *InObject)
 {
-    GetBlackboardComponent()->SetValueAsObject(KeyName, InObject);
+    UBlackboardComponent* BlackboardComp = GetBlackboardComponent();
+    CHECK_NULLPTR_RET(BlackboardComp, LogPhotoSubjectAI, "PhotoSubjectAIController:: Could not get Blackboard Component!");
+    BlackboardComp->SetValueAsObject(KeyName, InObject);
 }
 
 void APhotoSubjectAIController::OnPerceptionInfoUpdated(const FActorPerceptionUpdateInfo& UpdateInfo)
 {
-    UAIPerceptionSystem* PerceptionSystem = UAIPerceptionSystem::GetCurrent(GetWorld());
+    UAIPerceptionSystem* PerceptionSystem = UAIPerceptionSystem::GetCurrent(this);
     CHECK_NULLPTR_RET(PerceptionSystem, LogAIPerception, "PhotoSubjectAIController:: AIPerceptionSystem not found!");
 
     TSubclassOf<UAISense> StimulusSenseClass = PerceptionSystem->GetSenseClassForStimulus(this, UpdateInfo.Stimulus);

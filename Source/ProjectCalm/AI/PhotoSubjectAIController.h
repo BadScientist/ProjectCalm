@@ -91,9 +91,9 @@ private:
 	FVector HomeLocation{FVector::ZeroVector};
 	FVector TargetLocation{FVector::ZeroVector};
 
-	void SetAlertness(float InAlertness) {Alertness = FMath::Max(0, InAlertness);}
-	void SetAlarm(float InAlarm) {Alarm = FMath::Max(0, InAlarm);}
-	void SetAggression(float InAggression) {Aggression = FMath::Max(0, InAggression);}
+	void SetAlertness(float InAlertness);
+	void SetAlarm(float InAlarm);
+	void SetAggression(float InAggression);
 
 	void HandleHearingStimulus(const FActorPerceptionUpdateInfo& UpdateInfo);
 	void HandleSightStimulus(const FActorPerceptionUpdateInfo& UpdateInfo);

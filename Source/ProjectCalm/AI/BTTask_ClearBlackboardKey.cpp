@@ -2,6 +2,8 @@
 
 
 #include "BTTask_ClearBlackboardKey.h"
+#include "ProjectCalm/Utilities/LogMacros.h"
+
 #include "BehaviorTree/BlackboardComponent.h"
 
 
@@ -14,7 +16,10 @@ EBTNodeResult::Type UBTTask_ClearBlackboardKey::ExecuteTask(UBehaviorTreeCompone
 {
     Super::ExecuteTask(OwnerComp, NodeMemory);
 
-    OwnerComp.GetBlackboardComponent()->ClearValue(GetSelectedBlackboardKey());
+    UBlackboardComponent* BlackboardComp = OwnerComp.GetBlackboardComponent();
+    CHECK_NULLPTR_RETVAL(BlackboardComp, LogBehaviorTree, "BTTask_ClearBlackboardKey:: Could not get Blackboard Component!", EBTNodeResult::Failed);
+
+    BlackboardComp->ClearValue(GetSelectedBlackboardKey());
 
     return EBTNodeResult::Succeeded;
 }

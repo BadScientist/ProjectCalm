@@ -16,7 +16,11 @@ void UBTDecorator_RandomLoop::OnNodeActivation(FBehaviorTreeSearchData& SearchDa
     UWorld* World = GetWorld();
 	float CurrentTime = World == nullptr ? 0.0f : World->GetTimeSeconds();
 	FBTRandomLoopDecoratorMemory* DecoratorMemory = GetNodeMemory<FBTRandomLoopDecoratorMemory>(SearchData);
+	CHECK_NULLPTR_RET(DecoratorMemory, LogBehaviorTree, "BTDecorator_RandomLoop:: Could not get Decorator Memory!");
+
 	FBTCompositeMemory* ParentMemory = GetParentNode()->GetNodeMemory<FBTCompositeMemory>(SearchData);
+	CHECK_NULLPTR_RET(ParentMemory, LogBehaviorTree, "BTDecorator_RandomLoop:: Could not get Parent Memory!");
+
 	const bool bIsSpecialNode = GetParentNode()->IsA(UBTComposite_SimpleParallel::StaticClass());
 
 	if ((bIsSpecialNode && ParentMemory->CurrentChild == BTSpecialChild::NotInitialized) ||
@@ -57,7 +61,8 @@ void UBTDecorator_RandomLoop::OnNodeActivation(FBehaviorTreeSearchData& SearchDa
 	// set child selection overrides
 	if (bShouldLoop)
 	{
-		GetParentNode()->SetChildOverride(SearchData, ChildIndex);
+		UBTCompositeNode* ParentCompositeNode = GetParentNode();
+		if (ParentCompositeNode != nullptr) {ParentCompositeNode->SetChildOverride(SearchData, ChildIndex);}
 	}
 }
 
@@ -70,15 +75,15 @@ void UBTDecorator_RandomLoop::DescribeRuntimeValues(const UBehaviorTreeComponent
 {
 	Super::DescribeRuntimeValues(OwnerComp, NodeMemory, Verbosity, Values);
 
+	CHECK_NULLPTR_RET(NodeMemory, LogBehaviorTree, "BTDecorator_RandomLoop:: Null Node Memory passed to DescribeRuntimeValues!");
+	FBTRandomLoopDecoratorMemory* DecoratorMemory = (FBTRandomLoopDecoratorMemory*)NodeMemory;
+
 	if (!bInfiniteLoop)
 	{
-		FBTRandomLoopDecoratorMemory* DecoratorMemory = (FBTRandomLoopDecoratorMemory*)NodeMemory;
 		Values.Add(FString::Printf(TEXT("loops remaining: %d"), DecoratorMemory->RemainingExecutions));
 	}
 	else if (InfiniteLoopTimeoutTime.GetValue(OwnerComp) > 0.f)
 	{
-		FBTRandomLoopDecoratorMemory* DecoratorMemory = (FBTRandomLoopDecoratorMemory*)NodeMemory;
-
 		UWorld* World = GetWorld();
 		float CurrentTime = World == nullptr ? DecoratorMemory->EndTime : World->GetTimeSeconds();
 		const float TimeRemaining = FMath::Max(DecoratorMemory->EndTime - CurrentTime, 0.f);

@@ -3,6 +3,7 @@
 
 #include "Menu.h"
 #include "MenuInterface.h"
+#include "ProjectCalm/Characters/Player/PCPlayerController.h"
 #include "ProjectCalm/Utilities/LogMacros.h"
 
 
@@ -16,7 +17,7 @@ void UMenu::SetMenuInterface(IMenuInterface* NewMenuInterface)
     MenuInterface = NewMenuInterface;
 }
 
-void UMenu::Setup(bool bIsInteractiveIn)  // TODO: UPDATE FOR NEW INPUT SYSTEM
+void UMenu::Setup(bool bIsInteractiveIn)
 {
     bIsInteractive = bIsInteractiveIn;
     
@@ -37,11 +38,10 @@ void UMenu::NativeDestruct()
 
 void UMenu::SetGameOnlyControls()
 {
-    APlayerController* PlayerController = GetOwningPlayer();
-    CHECK_NULLPTR_RET(PlayerController, LogUserWidget, "Menu:: PlayerController is NULL!");
+    APCPlayerController* PlayerController = Cast<APCPlayerController>(GetOwningPlayer());
+    CHECK_NULLPTR_RET(PlayerController, LogUserWidget, "Menu:: Could not get PCPlayerController!");
 
-    FInputModeGameOnly InputModeData;
-    InputModeData.SetConsumeCaptureMouseDown(false);
+    FInputModePCGameOnly InputModeData;
     PlayerController->SetInputMode(InputModeData);
     PlayerController->bShowMouseCursor = false;
 }

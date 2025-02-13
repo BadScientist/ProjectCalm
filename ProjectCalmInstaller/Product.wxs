@@ -80,7 +80,7 @@
 			<Component Id="ExecutableShortcutComponent" Guid="{1F7BDEB7-7DBA-4C7A-B4B3-2D882D7CC223}">
 				<Shortcut Id="ExecutableShortcut"
 						  Name="!(loc.ProductName)"
-						  Target="[INSTALLFOLDER]!(loc.ProductName).exe"
+						  Target="[INSTALLFOLDER]!(loc.ProjectName).exe"
 						  WorkingDirectory="INSTALLFOLDER"
 						  Icon="Icon" />
 				<RemoveFolder Id="CleanUpShortCut" Directory="ApplicationProgramsFolder" On="uninstall"/>

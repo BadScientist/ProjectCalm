@@ -3,6 +3,7 @@
 
 #include "BTTask_MoveToAtSpeed.h"
 #include "AIController.h"
+#include "ProjectCalm/Utilities/LogMacros.h"
 
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -23,13 +24,13 @@ EBTNodeResult::Type UBTTask_MoveToAtSpeed::ExecuteTask(UBehaviorTreeComponent &O
 void UBTTask_MoveToAtSpeed::SetMovementModeAndSpeed(UBehaviorTreeComponent &OwnerComp)
 {
     AAIController* AIController = OwnerComp.GetAIOwner();
-    if (AIController == nullptr) {return;}
+    CHECK_NULLPTR_RET(AIController, LogBehaviorTree, "UBTTask_MoveToAtSpeed:: Could not get AI Owner!");
 
     ACharacter* AICharacter = Cast<ACharacter>(AIController->GetPawn());
-    if (AICharacter == nullptr) {return;}
+    CHECK_NULLPTR_RET(AIController, LogBehaviorTree, "UBTTask_MoveToAtSpeed:: Could not get controlled Character!");
 
     UCharacterMovementComponent* AIMovement = Cast<UCharacterMovementComponent>(AICharacter->GetMovementComponent());
-    if (AIMovement == nullptr) {return;}
+    CHECK_NULLPTR_RET(AIController, LogBehaviorTree, "UBTTask_MoveToAtSpeed:: Could not get Character Movement Component!");
 
     AIMovement->SetMovementMode(MovementMode);
 

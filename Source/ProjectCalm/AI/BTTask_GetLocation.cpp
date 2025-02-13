@@ -54,35 +54,19 @@ bool UBTTask_GetLocation::ProjectLocationToSurface(FVector InLocation, FVector& 
     bool bHit = FindGround(InLocation, OutHit);
     if (!bHit) 
     {
-#ifdef LOCAL_DEBUG_LOGS
-        UE_LOG(LogTemp, Warning, TEXT("UBTTask_GetLocation:: Could not find ground!"));
-#endif
+        UE_LOG(LogBehaviorTree, Warning, TEXT("UBTTask_GetLocation:: Could not find ground!"));
         return false;
     }
 
     UWorld* World = GetWorld();
-    CHECK_NULLPTR_RETVAL(World, LogPhotoSubjectAI, "BTTask_GetLocation:: Failed to get World!", false);
-    const UNavigationSystemBase* NavSystem = World->GetNavigationSystem();
-    const UNavigationSystemV1* NavSystemV1 = Cast<UNavigationSystemV1>(NavSystem);
-    if (!NavSystem)
-    {
-#ifdef LOCAL_DEBUG_LOGS
-        UE_LOG(LogTemp, Warning, TEXT("UBTTask_GetLocation:: Could not find Nav System!"));
-#endif
-        return false;
-    }
+    CHECK_NULLPTR_RETVAL(World, LogBehaviorTree, "BTTask_GetLocation:: Failed to get World!", false);
+
+    const UNavigationSystemV1* NavSystemV1 = Cast<UNavigationSystemV1>(World->GetNavigationSystem());
+    CHECK_NULLPTR_RETVAL(NavSystemV1, LogBehaviorTree, "UBTTask_GetLocation:: Could not find Nav System!", false);
     
     FNavLocation Result;
     bool bSucceeded = NavSystemV1->ProjectPointToNavigation(OutHit.Location, Result);
-        if(!bSucceeded)
-        {
-#ifdef LOCAL_DEBUG_LOGS
-            UE_LOG(LogTemp, Warning, TEXT("UBTTask_GetLocation:: Failed to project point to navigation!"));
-#endif
-#ifdef LOCAL_DEBUG_DRAW_SHAPES
-            DrawDebugPoint(GetWorld(), OutHit.Location, 50, FColor::Blue, false, 4);
-#endif
-        }
+    if(!bSucceeded) {UE_LOG(LogBehaviorTree, Warning, TEXT("UBTTask_GetLocation:: Failed to project point to navigation!"));}
 
     OutLocation = Result.Location;
     return bSucceeded;

@@ -43,7 +43,12 @@ void UHealthComponent::Die()
 	if (OnDeath.IsBound()) {OnDeath.Broadcast(LastDamageMessage);}
 }
 
-float UHealthComponent::ReceiveDamage(float Damage, UObject* DamageSource, FString DamageMessage)
+bool UHealthComponent::IsDead() const
+{
+	return CurrentHealth < 0.001;
+}
+
+float UHealthComponent::ReceiveDamage(float Damage, UObject *DamageSource, FString DamageMessage)
 {
 	if (IsDead()) {return 0.0f;}
 
