@@ -1,5 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
+// Copyright 2025 Joseph D Tong aka "BadScientist"
 
 #include "PauseMenu.h"
 #include "MenuInterface.h"
@@ -68,12 +67,12 @@ void UPauseMenu::Setup(bool bIsInteractiveIn)
     OptionsMenu->SetWidgetSwitcher(MenuSwitcher);
     OptionsMenu->Setup(bIsInteractiveIn);
 
-    UGameplayStatics::SetGamePaused(this, true);
+    PCGameStatics::PauseGame(this);
 }
 
 void UPauseMenu::Teardown()
 {
-    UGameplayStatics::SetGamePaused(this, false);
+    PCGameStatics::UnpauseGame(this);
 
     Super::Teardown();
 }

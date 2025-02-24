@@ -7,9 +7,9 @@
 #include "ProjectCalm/Characters/HealthComponent.h"
 #include "ProjectCalm/Characters/Player/PlayerCharacter.h"
 #include "ProjectCalm/Photos/PhotoSubjectName.h"
+#include "ProjectCalm/Utilities/PCGameStatics.h"
 #include "ProjectCalm/Utilities/LogMacros.h"
 
-#include "Kismet/GameplayStatics.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Perception/AISense_Hearing.h"
 #include "Perception/AISense_Sight.h"
@@ -69,6 +69,12 @@ void APhotoSubjectAIController::BeginPlay()
             HealthComponent->OnDeath.AddDynamic(this, &APhotoSubjectAIController::HandleDeath);
         }
     }
+
+	if (AProjectCalmGameMode* GameMode = PCGameStatics::GetPCGameMode(this))
+	{
+		GameMode->OnGamePaused.AddDynamic(this, &APhotoSubjectAIController::OnGamePaused);
+		GameMode->OnGameUnpaused.AddDynamic(this, &APhotoSubjectAIController::OnGameUnpaused);
+	}
 
     SetAlertLevelKeyValue(BBKEY_ALERT_LEVEL, EAlertLevel::CALM);
     SetBehaviorKeyValue(BBKEY_ACTIVE_BEHAVIOR, EPhotoSubjectBehavior::IDLE);
@@ -263,6 +269,16 @@ bool APhotoSubjectAIController::IsTargetDead(AActor* TargetActor) const
 void APhotoSubjectAIController::HandleDeath(FString DamageMessage)
 {
     SetBoolKeyValue(BBKEY_IS_DEAD, true);
+}
+
+void APhotoSubjectAIController::OnGamePaused(float InTimeDilation)
+{
+	CustomTimeDilation = InTimeDilation;
+}
+
+void APhotoSubjectAIController::OnGameUnpaused(float InTimeDilation)
+{
+	CustomTimeDilation = InTimeDilation;
 }
 
 AActor* APhotoSubjectAIController::GetCurrentTarget() const

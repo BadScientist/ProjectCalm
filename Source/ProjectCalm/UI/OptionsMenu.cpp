@@ -1,5 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
+// Copyright 2025 Joseph D Tong aka "BadScientist"
 
 #include "OptionsMenu.h"
 #include "MenuInterface.h"

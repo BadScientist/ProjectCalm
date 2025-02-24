@@ -7,6 +7,7 @@
 
 #include "AlertLevel.h"
 #include "PhotoSubjectBehavior.h"
+#include "ProjectCalm/Game/PausableInterface.h"
 #include "PhotoSubjectAIController.generated.h"
 
 #define BBKEY_HOME_LOCATION     TEXT("HomeLocation")
@@ -21,7 +22,7 @@ struct FActorPerceptionUpdateInfo;
 
 
 UCLASS()
-class PROJECTCALM_API APhotoSubjectAIController : public AAIController
+class PROJECTCALM_API APhotoSubjectAIController : public AAIController, public IPausableInterface
 {
 	GENERATED_BODY()
 
@@ -109,6 +110,13 @@ private:
 protected:
 	UFUNCTION()
 	virtual void HandleDeath(FString DamageMessage);
+
+	// START IPAUSABLEINTERFACE
+	UFUNCTION()
+	virtual void OnGamePaused(float InTimeDilation) override;
+	UFUNCTION()
+	virtual void OnGameUnpaused(float InTimeDilation) override;
+	// END IPAUSABLEINTERFACE
 
 public:
 	UFUNCTION(BlueprintPure)

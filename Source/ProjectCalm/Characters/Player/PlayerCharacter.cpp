@@ -1,5 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
+// Copyright 2025 Joseph D Tong aka "BadScientist"
 
 #include "PlayerCharacter.h"
 #include "InteractionComponent.h"
@@ -31,7 +30,7 @@
 	// #define LOCAL_DEBUG_LOGS
 #endif
 
-#define EYE_VERTICAL_DEPTH 36.0f
+#define EYE_VERTICAL_DEPTH 34.0f
 
 
 // Sets default values
@@ -376,7 +375,12 @@ void APlayerCharacter::AdjustViewToHalfHeight(float DeltaTime)
 	}
 }
 
-void APlayerCharacter::GetInventory(TArray<UItemData*>& OutInventory)
+UObject *APlayerCharacter::GetEquippedItemObject() const
+{
+	return EquippedItem->_getUObject();
+}
+
+void APlayerCharacter::GetInventory(TArray<UItemData *> &OutInventory)
 {
 	CHECK_NULLPTR_RET(InventoryComponent, LogPlayerCharacter, "PlayerCharacter:: No InventoryComponent!");
 	InventoryComponent->GetInventory(OutInventory);

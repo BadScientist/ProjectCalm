@@ -1,3 +1,5 @@
+// Copyright 2025 Joseph D Tong aka "BadScientist"
+
 #include "FancyTextDisplay.h"
 #include "TextStyleData.h"
 #include "ProjectCalm/Utilities/LogMacros.h"

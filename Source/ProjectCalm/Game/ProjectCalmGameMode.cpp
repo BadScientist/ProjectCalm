@@ -1,4 +1,4 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+// Copyright 2025 Joseph D Tong aka "BadScientist"
 
 #include "ProjectCalmGameMode.h"
 #include "ItemManager.h"
@@ -170,4 +170,14 @@ void AProjectCalmGameMode::ClearAllPhotos(int32 CameraID)
 {
 	CHECK_NULLPTR_RET(PhotoManager, LogGameMode, "ProjectCalmGameMode:: No PhotoManager found!");
 	return PhotoManager->ClearAllPhotos(CameraID);
+}
+
+void AProjectCalmGameMode::PauseGame()
+{
+	OnGamePaused.Broadcast(0.00001f);
+}
+
+void AProjectCalmGameMode::UnpauseGame()
+{
+	OnGameUnpaused.Broadcast(1.0f);
 }

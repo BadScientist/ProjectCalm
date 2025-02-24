@@ -186,7 +186,9 @@ FPhotoData ACameraLens::CapturePhoto()
         FVector ViewLocation = SceneCaptureComponent->GetComponentLocation();
         PhotoData = PhotoDataCollector->CollectPhotoData(ViewFrustum, ViewLocation, GetActorForwardVector());
     }
+
     PhotoData.Image = TempRenderTarget;
+    if (!PhotoData.Image->IsRooted()) {PhotoData.Image->AddToRoot();}
 
     return PhotoData;
 }

@@ -90,9 +90,13 @@ public:
 	void SecondaryAction(const FInputActionValue& Value) override;
 	void SetAttachedCameraFlash(ACameraFlash* CameraFlash) {AttachedCameraFlash = CameraFlash;};
 	void SetAttachedCameraLens(ACameraLens* CameraLens) {AttachedCameraLens = CameraLens;};
+
+	UFUNCTION(BlueprintCallable)
 	void OnAnimationEnded();
 
 	FPhotoData GetLastPhoto();
+
+	virtual void BeginDestroy() override;
 
 private:
 	float BlendViewToPhotoCamera();

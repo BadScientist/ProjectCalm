@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright 2025 Joseph D Tong aka "BadScientist"
 
 #pragma once
 
@@ -44,5 +44,5 @@ protected:
 public:
 	virtual void SetMenuInterface(IMenuInterface* NewMenuInterface) override;
 	virtual void Setup(bool bIsInteractiveIn) override;
-	virtual void Teardown() override;	
+	virtual void Teardown() override;
 };

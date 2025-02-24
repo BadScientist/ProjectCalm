@@ -323,6 +323,14 @@ FPhotoData APhotoCameraEquipment::GetLastPhoto()
 	return GameMode->GetPhoto(GetInstanceID(), PhotoIdx);
 }
 
+void APhotoCameraEquipment::BeginDestroy()
+{
+	AProjectCalmGameMode* GameMode = PCGameStatics::GetPCGameMode(this);
+	if (GameMode != nullptr) {GameMode->ClearAllPhotos(GetInstanceID());}
+
+	Super::BeginDestroy();
+}
+
 float APhotoCameraEquipment::BlendViewToPhotoCamera()
 {
 #ifdef LOCAL_DEBUG_LOGS

@@ -1,5 +1,8 @@
+// Copyright 2025 Joseph D Tong aka "BadScientist"
+
 #include "DialogueBox.h"
 #include "Dialogue.h"
+#include "ProjectCalm/Utilities/PCGameStatics.h"
 
 #include "Components/Image.h"
 
@@ -18,4 +21,18 @@ void UDialogueBox::SetDialogue(FDialogue InDialogue)
     }
 
     SetStringsToDisplay(ConstructedStrings);
+}
+
+void UDialogueBox::Setup(bool bIsInteractiveIn)
+{
+    Super::Setup(bIsInteractiveIn);
+
+    PCGameStatics::PauseGame(this);
+}
+
+void UDialogueBox::Teardown()
+{
+    PCGameStatics::UnpauseGame(this);
+
+    Super::Teardown();
 }

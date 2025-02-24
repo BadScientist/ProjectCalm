@@ -56,6 +56,8 @@ bool UPhotoManager::RemovePhoto(int32 CameraID, int32 PhotoIdx)
 	if (!Photos.Contains(CameraID)) {return false;}
 	if (PhotoIdx < Photos[CameraID].Array.Num())
 	{
+		FPhotoData& Photo = Photos[CameraID].Array[PhotoIdx];
+		if (Photo.Image != nullptr && Photo.Image->IsRooted()) {Photo.Image->RemoveFromRoot();}
 		Photos[CameraID].Array.RemoveAt(PhotoIdx);
 		return true;
 	}
@@ -64,5 +66,12 @@ bool UPhotoManager::RemovePhoto(int32 CameraID, int32 PhotoIdx)
 
 void UPhotoManager::ClearAllPhotos(int32 CameraID)
 {
-	if (Photos.Contains(CameraID)) {Photos[CameraID].Array.Empty();}
+	if (!Photos.Contains(CameraID)) {return;}
+
+	for (int32 i = 0; i < Photos[CameraID].Array.Num(); i++)
+	{
+		RemovePhoto(CameraID, i);
+	}
+
+	Photos.Remove(CameraID);
 }

@@ -1,4 +1,4 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+// Copyright 2025 Joseph D Tong aka "BadScientist"
 
 #pragma once
 
@@ -25,6 +25,8 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnQuestUpdatedDelegate, FQuestDetai
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSpecialRockMoved, FVector, Location);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerRespawnDelegate);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLandscapeReadyDelegate);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGamePausedDelegate, float, TimeDilation);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGameUnpausedDelegate, float, TimeDilation);
 
 
 UCLASS(minimalapi)
@@ -62,6 +64,8 @@ public:
 	FOnQuestUpdatedDelegate OnQuestUpdated;
 	FOnSpecialRockMoved OnSpecialRockMoved;
 	FOnPlayerRespawnDelegate OnPlayerRespawn;
+	FOnGamePausedDelegate OnGamePaused;
+	FOnGameUnpausedDelegate OnGameUnpaused;
 
 	UPROPERTY(BlueprintAssignable)
 	FOnLandscapeReadyDelegate OnLandscapeReady;
@@ -89,6 +93,9 @@ public:
 	void AddPhoto(int32 CameraID, FPhotoData Photo);
 	bool RemovePhoto(int32 CameraID, uint32 PhotoIdx);
 	void ClearAllPhotos(int32 CameraID);
+
+	void PauseGame();
+	void UnpauseGame();
 };
 
 

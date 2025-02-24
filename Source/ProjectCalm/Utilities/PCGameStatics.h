@@ -1,3 +1,5 @@
+// Copyright 2025 Joseph D Tong aka "BadScientist"
+
 #pragma once
 
 #include "CoreMinimal.h"
@@ -18,5 +20,17 @@ public:
     static AProjectCalmGameMode* GetPCGameMode(const UObject* WorldContextObject)
     {
         return Cast<AProjectCalmGameMode>(UGameplayStatics::GetGameMode(WorldContextObject));
+    }
+
+    static void PauseGame(const UObject* WorldContextObject)
+    {
+        AProjectCalmGameMode* GameMode = GetPCGameMode(WorldContextObject);
+        if (GameMode != nullptr) {GameMode->PauseGame();}
+    }
+
+    static void UnpauseGame(const UObject* WorldContextObject)
+    {
+        AProjectCalmGameMode* GameMode = GetPCGameMode(WorldContextObject);
+        if (GameMode != nullptr) {GameMode->UnpauseGame();}
     }
 };

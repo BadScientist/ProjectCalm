@@ -7,8 +7,17 @@
 
 #include "Kismet/GameplayStatics.h"
 
-void UAnimNotify_CameraAnimationEnded::Notify(USkeletalMeshComponent *MeshComp, UAnimSequenceBase *Animation, const FAnimNotifyEventReference &EventReference)
+#ifdef PC_DEBUG_LOGS
+	#define LOCAL_DEBUG_LOGS
+#endif
+
+
+void UAnimNotify_CameraAnimationEnded::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)
 {
+    #ifdef LOCAL_DEBUG_LOGS
+        UE_LOG(LogAnimation, Warning, TEXT("UAnimNotify_CameraAnimationEnded:: Notify called"));
+    #endif
+
     AActor* OwnerActor = MeshComp->GetOwner();
     CHECK_NULLPTR_RET(OwnerActor,LogAnimation , "AnimNotify_CameraAnimationEnded:: No Owning Actor found!");
 
@@ -23,5 +32,6 @@ void UAnimNotify_CameraAnimationEnded::Notify(USkeletalMeshComponent *MeshComp, 
     }
 
     CHECK_NULLPTR_RET(PhotoCamera, LogAnimation, "AnimNotify_CameraAnimationEnded:: No PhotoCamera found!");
+
     PhotoCamera->OnAnimationEnded();
 }

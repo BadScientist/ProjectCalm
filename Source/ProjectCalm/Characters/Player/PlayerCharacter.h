@@ -1,9 +1,9 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright 2025 Joseph D Tong aka "BadScientist"
 
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Character.h"
+#include "ProjectCalm/Characters/PausableCharacter.h"
 #include "InputActionValue.h"
 
 #include "ProjectCalm/Inventory/EquipperInterface.h"
@@ -31,7 +31,7 @@ enum EEquipReply : uint8;
 
 
 UCLASS(config = game)
-class PROJECTCALM_API APlayerCharacter : public ACharacter, public IEquipperInterface
+class PROJECTCALM_API APlayerCharacter : public APausableCharacter, public IEquipperInterface
 {
 	GENERATED_BODY()
 
@@ -148,7 +148,12 @@ public:
 	UCameraComponent* GetCameraComponent() {return FirstPersonCamera;};
 
 	UInventoryComponent* GetInventoryComponent() {return InventoryComponent;};
+
 	IEquipmentInterface* GetEquippedItem() {return EquippedItem;};
+
+	UFUNCTION(BlueprintPure)
+	UObject* GetEquippedItemObject() const;
+
 	void GetInventory(TArray<UItemData*>& OutInventory);
 	int32 GetInventorySlotsRemaining();
 	bool AddItem(UItemData* Item);

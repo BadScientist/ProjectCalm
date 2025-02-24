@@ -1,3 +1,5 @@
+// Copyright 2025 Joseph D Tong aka "BadScientist"
+
 #include "MainGameMenu.h"
 #include "MenuInterface.h"
 #include "OptionsMenu.h"
